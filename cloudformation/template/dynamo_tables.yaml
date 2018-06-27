@@ -1,0 +1,74 @@
+# This template provides an example of two(2) regular tables and one(1) index table
+# For example: user, role, user_role
+# TODO: Replace instances of {env} with the environment name (for example: dev, prod)
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  # TODO: Replace TableName1 with the name of the table (for example: User)
+  DynamoDB{TableName1}:
+    DeletionPolicy: Delete
+    Properties:
+      # TODO: Replace tablename1 with the name of the table (for example: user)
+      TableName: caring-fred-{env}-(tablename1}
+      AttributeDefinitions:
+      - AttributeName: id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 1
+    Type: AWS::DynamoDB::Table
+  # TODO: Replace TableName2 with the name of the table (for example: Role)
+  DynamoDB{TableName2}:
+    DeletionPolicy: Delete
+    Properties:
+      # TODO: Replace tablename2 with the name of the table (for example: role)
+      TableName: caring-fred-{env}-{tablename2}
+      AttributeDefinitions:
+      - AttributeName: id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+    Type: AWS::DynamoDB::Table
+  # TODO: Replace TableName3 with the name of the table (for example: UserRole)
+  DynamoDB{TableName3}:
+    DeletionPolicy: Delete
+    Properties:
+      # TODO: Replace tablename3 with the name of the table (for example: user-role)
+      TableName: caring-fred-{env}-{tablename3}
+      AttributeDefinitions:
+      - AttributeName: {tablename1}_id
+        AttributeType: S
+      - AttributeName: {tablename2}_id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: {tablename1}_id
+        KeyType: HASH
+      - AttributeName: {tablename2}_id
+        KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+    Type: AWS::DynamoDB::Table
+Outputs:
+  DynamoDBUser:
+    Value:
+      Ref: DynamoDB{TableName1}
+    Export:
+      Name: caring-fred-{env}-DynamoDBUser
+  DynamoDBRole:
+    Value:
+      Ref: DynamoDB{TableName2}
+    Export:
+      Name: caring-fred-{env}-DynamoDBRole
+  DynamoDBUserRole:
+    Value:
+      Ref: DynamoDB{TableName3}
+    Export:
+      Name: caring-fred-{env}-DynamoDBUserRole

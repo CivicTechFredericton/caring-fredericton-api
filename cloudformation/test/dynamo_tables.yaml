@@ -1,0 +1,65 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  DynamoDBUser:
+    DeletionPolicy: Delete
+    Properties:
+      TableName: caring-fred-test-user
+      AttributeDefinitions:
+      - AttributeName: id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 1
+    Type: AWS::DynamoDB::Table
+  DynamoDBTodos:
+    DeletionPolicy: Delete
+    Properties:
+      TableName: caring-fred-test-todos
+      AttributeDefinitions:
+      - AttributeName: id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+    Type: AWS::DynamoDB::Table
+  DynamoDBUserTodo:
+    DeletionPolicy: Delete
+    Properties:
+      TableName: caring-fred-test-user-todo
+      AttributeDefinitions:
+      - AttributeName: user_id
+        AttributeType: S
+      - AttributeName: todo_id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: user_id
+        KeyType: HASH
+      - AttributeName: todo_id
+        KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+    Type: AWS::DynamoDB::Table
+Outputs:
+  DynamoDBUser:
+    Value:
+      Ref: DynamoDBUser
+    Export:
+      Name: caring-fred-test-DynamoDBUser
+  DynamoDBTodos:
+    Value:
+      Ref: DynamoDBTodos
+    Export:
+      Name: caring-fred-test-DynamoDBTodos
+  DynamoDBUserTodo:
+    Value:
+      Ref: DynamoDBUserTodo
+    Export:
+      Name: caring-fred-test-DynamoDBUserTodo

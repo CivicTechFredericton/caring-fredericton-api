@@ -1,0 +1,71 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Mappings:
+  HostedZoneIds:
+    us-east-1:
+      elasticbeanstalk: Z117KPS5GTRQ2G
+      elb: Z35SXDOTRQ7X7K
+      s3: Z3AQBSTGFYJSTF
+    us-east-2:
+      elasticbeanstalk: Z14LCN19Q5QHIC
+      elb: Z3AADJGX6KTTL2
+      s3: Z2O1EMRO9K5GLX
+    us-west-1:
+      elasticbeanstalk: Z1LQECGX5PH1X
+      elb: Z368ELLRRE2KJ0
+      s3: Z2F56UZL2M1ACD
+    us-west-2:
+      elasticbeanstalk: Z1LQECGX5PH1X
+      elb: Z1H1FL5HABSF5
+      s3: Z3BJ6K6RIION7M
+    ca-central-1:
+      elasticbeanstalk: ZJFCZL7SSZB5I
+      elb: ZQSVJUPU6J1EY
+      s3: Z1QDHH18159H29
+    ap-south-1:
+      elasticbeanstalk: Z18NTBI3Y7N9TZ
+      elb: ZP97RAFLXTNZK
+      s3: Z11RGJOFQNVJUP
+    ap-southeast-1:
+      elasticbeanstalk: Z16FZ9L249IFLT
+      elb: Z1LMS91P8CMLE5
+      s3: Z3O0J2DXBE1FTB
+    ap-southeast-2:
+      elasticbeanstalk: Z2PCDNR3VC2G1N
+      elb: Z1GM3OXH4ZPM65
+      s3: Z1WCIGYICN2BYD
+    ap-northeast-1:
+      elasticbeanstalk: Z1R25G3KIG2GBW
+      elb: Z14GRHDCWA56QT
+      s3: Z2M4EHUR26P7ZW
+    ap-northeast-2:
+      elasticbeanstalk: Z3JE5OI70TWKCP
+      elb: ZWKZPGTI48KDX
+      s3: Z3W03O7B5YMIYP
+    eu-central-1:
+      elasticbeanstalk: Z1FRNW7UH4DEZJ
+      elb: Z215JYRZR1TBD5
+      s3: Z21DNDUVLTQW6Q
+    eu-west-1:
+      elasticbeanstalk: Z1FRNW7UH4DEZJ
+      elb: Z32O12XQLNTSW2
+      s3: Z1BKCTXD74EZPE
+    eu-west-2:
+      elasticbeanstalk: Z1GKAAAUGATPF1
+      elb: ZHURV8PSTC4K8
+      s3: Z3GKZC51ZF0DB4
+    sa-east-1:
+      elasticbeanstalk: Z10X7K2B4QSOFV
+      elb: Z2P70J7HTTTPLU
+      s3: Z7KQH4QJS55SO
+Resources:
+  Route53RecordSet8a4b25ff1c630f3585a33ab48abd9317:
+    Properties:
+      AliasTarget:
+        DNSName:
+          Fn::ImportValue: caring-fred-dev-apidocs-CloudFront-DomainName
+        HostedZoneId: Z2FDTNDATAQYW2
+      Name: dev-swagger.caringfredericton.com
+      Type: A
+      HostedZoneName: caringfredericton.com.
+    Type: AWS::Route53::RecordSet

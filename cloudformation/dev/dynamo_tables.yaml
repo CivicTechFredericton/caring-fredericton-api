@@ -1,0 +1,65 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  DynamoDBUser:
+    DeletionPolicy: Delete
+    Properties:
+      TableName: caring-fred-dev-user
+      AttributeDefinitions:
+      - AttributeName: id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 5
+        WriteCapacityUnits: 1
+    Type: AWS::DynamoDB::Table
+  DynamoDBRole:
+    DeletionPolicy: Delete
+    Properties:
+      TableName: caring-fred-dev-role
+      AttributeDefinitions:
+      - AttributeName: id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: id
+        KeyType: HASH
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+    Type: AWS::DynamoDB::Table
+  DynamoDBUserRole:
+    DeletionPolicy: Delete
+    Properties:
+      TableName: caring-fred-dev-user-role
+      AttributeDefinitions:
+      - AttributeName: user_id
+        AttributeType: S
+      - AttributeName: role_id
+        AttributeType: S
+      KeySchema:
+      - AttributeName: user_id
+        KeyType: HASH
+      - AttributeName: role_id
+        KeyType: RANGE
+      ProvisionedThroughput:
+        ReadCapacityUnits: 1
+        WriteCapacityUnits: 1
+    Type: AWS::DynamoDB::Table
+Outputs:
+  DynamoDBUser:
+    Value:
+      Ref: DynamoDBUser
+    Export:
+      Name: caring-fred-dev-DynamoDBUser
+  DynamoDBRole:
+    Value:
+      Ref: DynamoDBRole
+    Export:
+      Name: caring-fred-dev-DynamoDBRole
+  DynamoDBUserRole:
+    Value:
+      Ref: DynamoDBUserRole
+    Export:
+      Name: caring-fred-dev-DynamoDBUserRole

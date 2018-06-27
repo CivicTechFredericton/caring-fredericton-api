@@ -1,0 +1,27 @@
+account_id: 260286112360
+user_pool_arn: arn:aws:cognito-idp:us-east-1:260286112360:userpool/us-east-1_xJ3AOjNyO
+user_pool_id: us-east-1_xJ3AOjNyO
+dynamo_host: null  # You can specify localhost:port if you are running Dynalite locally
+
+logging:
+  version: 1
+  formatters:
+    default:
+      format: '[%(asctime)s][%(name)s][%(levelname)s]: %(message)s'
+
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: default
+      stream: ext://sys.stdout
+
+  loggers:
+    core:
+      level: DEBUG
+    services:
+      level: DEBUG
+
+  root:
+    level: DEBUG
+    handlers:
+      - console

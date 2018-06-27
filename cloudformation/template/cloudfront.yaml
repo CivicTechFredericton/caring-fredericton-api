@@ -1,0 +1,45 @@
+# Replace instances of {env} with the environment name (for example: dev, prod)
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  CloudFront:
+    Properties:
+      DistributionConfig:
+        Aliases:
+        - {env}-swagger.caringfredericton.com
+        CacheBehaviors: []
+        Comment: caring-fred-{env}-apidocs
+        CustomErrorResponses: []
+        DefaultCacheBehavior:
+          DefaultTTL: 60
+          ForwardedValues:
+            Cookies:
+              Forward: none
+            QueryString: false
+          TargetOriginId: DefaultOrigin
+          ViewerProtocolPolicy: redirect-to-https
+        Enabled: true
+        Origins:
+        - Id: DefaultOrigin
+          DomainName: caring-fred-{env}-swagger.s3.amazonaws.com
+          S3OriginConfig:
+            OriginAccessIdentity: origin-access-identity/cloudfront/E3FSWRC7TBE1XS
+        PriceClass: PriceClass_100
+        ViewerCertificate:
+          AcmCertificateArn: arn:aws:acm:us-east-1:260286112360:certificate/b7dfce25-c007-4aa7-a20b-d56218dac01b
+          SslSupportMethod: sni-only
+        DefaultRootObject: index.html
+    Type: AWS::CloudFront::Distribution
+Outputs:
+  CloudFront:
+    Value:
+      Ref: CloudFront
+    Export:
+      Name: caring-fred-{env}-apidocs-CloudFront
+  DomainName:
+    Value:
+      Fn::GetAtt:
+      - CloudFront
+      - DomainName
+    Export:
+      Name: caring-fred-{env}-apidocs-CloudFront-DomainName

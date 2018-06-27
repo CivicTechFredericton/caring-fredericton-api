@@ -1,0 +1,52 @@
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  CaringFredSwagger:
+    DependsOn: []
+    Properties:
+      BucketName: caring-fred-dev-swagger
+      NotificationConfiguration:
+        QueueConfigurations: []
+        TopicConfigurations: []
+    Type: AWS::S3::Bucket
+  CaringFredSwaggerBucketPolicy:
+    DependsOn:
+    - CaringFredSwagger
+    Properties:
+      Bucket: caring-fred-dev-swagger
+      PolicyDocument:
+        Statement:
+        - Action:
+          - s3:GetObject
+          Effect: Allow
+          Resource: arn:aws:s3:::caring-fred-dev-swagger/*
+          Principal:
+            AWS: arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E3FSWRC7TBE1XS
+    Type: AWS::S3::BucketPolicy
+  CaringFredOverflow:
+    DependsOn: []
+    Properties:
+      BucketName: caring-fred-dev-overflow
+      LifecycleConfiguration:
+        Rules:
+        - ExpirationInDays: 10
+          Status: Enabled
+      NotificationConfiguration:
+        QueueConfigurations: []
+        TopicConfigurations: []
+    Type: AWS::S3::Bucket
+Outputs:
+  CaringFredSwaggerArn:
+    Value:
+      Fn::GetAtt:
+      - CaringFredSwagger
+      - Arn
+    Export:
+      Name: caring-fred-dev-CaringFredSwaggerArn
+  CaringFredOverflowArn:
+    Value:
+      Fn::GetAtt:
+      - CaringFredOverflow
+      - Arn
+    Export:
+      Name: caring-fred-dev-CaringFredOverflowArn

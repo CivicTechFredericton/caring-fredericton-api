@@ -1,0 +1,144 @@
+service: caring-fred
+
+provider:
+  account_id: ${self:custom.env.account_id}
+  # The role referenced by cfnRole is created by CloudFormation in
+  # advance as; account is used to execute deployments.
+  cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
+
+  # Add additional environment variables if necessary
+  environment:
+    SERVICE_NAME: ${self:service}
+    STAGE: ${self:provider.stage}
+
+  # IAM role permissions given to the Lambda function.  Update as
+  # needed.  More information about IAM permissions can be found here:
+  #
+  # https://goo.gl/6jZuHu
+  # https://goo.gl/EWuaSm
+  # https://goo.gl/ki8hXT
+  iamRoleStatements:
+    - Effect: Allow
+      Action:
+        - logs:CreateLogGroup
+        - logs:CreateLogStream
+        - logs:PutLogEvents
+        - xray:PutTelemetryRecords
+        - xray:PutTraceSegments
+      Resource: '*'
+    - Effect: Allow
+      Action:
+        - dynamodb:GetItem
+        - dynamodb:DescribeTable
+        - dynamodb:PutItem
+        - dynamodb:Query
+        - dynamodb:Scan
+      Resource: arn:aws:dynamodb:*:*:table/${self:service}-${self:provider.stage}*
+  # How much memory to grant to the Lambda function.  Allocated memory
+  # drives compute capabilities.  The lowest value is 128 MB.  Unless
+  # large amounts of memory are required, you should work with the
+  # lowest value.  If you require more resources consider if you are
+  # building your application correctly with efficient code.
+  #
+  # More information about memory/compute can be found here:
+  # https://goo.gl/g8YjqY
+  memorySize: 128
+  name: aws
+  region: us-east-1
+  runtime: python3.6
+  stage: ${opt:stage}
+  # The default is 6 seconds. Note: API Gateway current maximum is 30 seconds
+  timeout: 6
+  # Allow for cf "AWS::" variables
+  # See https://goo.gl/atHr7z
+  variableSyntax: "\\${(?!AWS::)([ :a-zA-Z0-9._,\\-\\/\\(\\)]+?)}"
+
+package:
+  exclude:
+    - node_modules/**
+    - npm-debug.log
+    - package.json
+    - package-lock.json
+    - requirements.txt
+    - venv/**
+
+plugins:
+  - serverless-plugin-bind-deployment-id
+  - serverless-python-requirements
+  - serverless-wsgi
+
+custom:
+  env: ${file(configs/${self:provider.stage}.yaml)}
+  default_acm_cert_arn: arn:aws:acm:us-east-1:260286112360:certificate/b7dfce25-c007-4aa7-a20b-d56218dac01b
+  default_hosted_zone_name: caringfredericton.com.
+  default_record_set_name: ${self:provider.stage}-api.caringfredericton.com
+  wsgi:
+    app: api.app
+    packRequirements: false
+
+functions:
+  api:
+    name: ${self:service}-${self:provider.stage}-api
+    handler: wsgi.handler
+    # These environment variables are local and will apply only to this
+    # specific Lambda function.  Uncomment if needed.
+    # environment:
+      # KEY: VALUE
+    events:
+      - http:
+          method: any
+          path: /
+          cors: true
+          authorizer:
+            arn: ${self:custom.env.user_pool_arn}
+      - http:
+          method: any
+          path: /{proxy+}
+          cors: true
+          authorizer:
+            arn: ${self:custom.env.user_pool_arn}
+
+resources:
+  Resources:
+    # This resource is here so we can specifically define methods other
+    # than the default / and /{proxy+} so that they show up in
+    # CloudWatch separately for monitoring purposes.
+    Stage:
+      Type: AWS::ApiGateway::Stage
+      Properties:
+        DeploymentId:
+          Ref: __deployment__
+
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        StageName: ${self:provider.stage}
+
+    DomainName:
+      Type: AWS::ApiGateway::DomainName
+      Properties:
+        # CertificateArn: ${self:custom.env.cert_arn, self:custom.default_acm_cert_arn}
+        CertificateArn: ${self:custom.default_acm_cert_arn}
+        # DomainName: ${self:custom.env.record_set_name, self:custom.default_record_set_name}
+        DomainName: ${self:custom.default_record_set_name}
+
+    DomainNameMapping:
+      Type: AWS::ApiGateway::BasePathMapping
+      Properties:
+        DomainName:
+          Ref: DomainName
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        Stage: ${self:provider.stage}
+
+    Route53:
+      Properties:
+        AliasTarget:
+          DNSName:
+            Fn::GetAtt: [ DomainName , DistributionDomainName ]
+          HostedZoneId: Z2FDTNDATAQYW2
+        Name:
+          Ref: DomainName
+        Type: A
+        # HostedZoneName: ${self:custom.env.hosted_zone_name, self:custom.default_hosted_zone_name}
+        HostedZoneName: ${self:custom.default_hosted_zone_name}
+      Type: AWS::Route53::RecordSet

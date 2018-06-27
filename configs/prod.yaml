@@ -1,0 +1,27 @@
+account_id: TODO
+user_pool_arn: TODO
+user_pool_id: TODO
+dynamo_host: null
+
+logging:
+  version: 1
+  formatters:
+    default:
+      format: '[%(asctime)s][%(name)s][%(levelname)s]: %(message)s'
+
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: default
+      stream: ext://sys.stdout
+
+  loggers:
+    core:
+      level: INFO
+    services:
+      level: INFO
+
+  root:
+    level: INFO
+    handlers:
+      - console

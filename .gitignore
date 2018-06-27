@@ -1,0 +1,29 @@
+# Editor files
+.idea/
+.vscode/
+
+# Temp files
+__pycache__
+node_modules
+npm-debug.log
+*.pyc
+.serverless
+.test.py.swp
+
+# Temp files
+__pycache__
+venv*
+node_modules
+npm-debug.log
+*.pyc
+.serverless
+.test.py.swp
+
+# MAC stuff
+.DS_Store
+
+# cfndsl output
+cloudformation/output/
+cloudformation/playbook.*
+
+.requirements

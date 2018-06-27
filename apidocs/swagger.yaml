@@ -1,0 +1,216 @@
+# For the complete swagger spec, go here: https://goo.gl/ArFXhH
+# It is important to understand all of the components that go into a
+# swagger doc.  It is the documentation for your API.  A proper swagger
+# doc can be plugged into swagger-ui (https://goo.gl/UmNFcn) and give a
+# beautiful page describing your API.
+swagger: '2.0'
+info:
+  title: TODO API
+  description: |
+    # TODO REST API
+
+    TODO -> fill in a description here.  Markdown is supported.
+
+  version: "1.0.0"
+#TODO: update with domain once available
+host: api.example.com
+schemes:
+  - https
+basePath: /v1
+produces:
+  - application/json
+consumes:
+  - application/json
+paths:
+  # TODO: examples only.  Edit as needed for your various API endpoints.
+  # Every endpoint should be specified, including for each type of
+  # submission (GET, POST, PUT, PATCH, DELETE, OPTIONS) that is
+  # supported.
+  /:
+    get:
+      summary: TODO -> Enter a description for what the base URL returns
+  /users:
+    get:
+      summary: returns a page of all users active in the system.
+      parameters:
+          # Name of the parameter.  Parameter names should always be in
+          # camelCase format.
+        - name: id
+          # A parameter can be part of
+          #
+          #   - body  -> a field in the input json payload
+          #   - path  -> in the middle of the URL like /users/42
+          #   - query -> a query string parameter like ?parameterNameCamelCase=42
+          in: body|path|query
+          description: TODO -> Enter a description of the parameter
+          # TODO -> enter a type for the parameter.  Available types can
+          # be found here: https://goo.gl/UUGZ4j
+          type: integer
+          # TODO -> provide a format specification, though this is not
+          # directly supported by the swagger spec.  Examples include
+          # 'email', 'uuid', etc.  This is more or less a hint at the
+          # expected format of the field.
+          format: number
+      #TODO -> list response http codes and their description.
+      responses:
+        200:
+          description: Paged object of users
+          schema:
+            $ref: '#/definitions/PagedUser'
+
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+
+        403:
+          description: Authorization error
+          schema:
+            $ref: '#/definitions/AuthError'
+
+# TODO -> fill in the different definitions for schema references.
+# Examples given here, edit and replace as needed for your API.
+definitions:
+  AuthError:
+    description: >
+      Response received when an authorization error has occured. This can be
+      received when:
+      * a malformed or expired Authorization token is submitted
+      * the user is requesting an unauthorized route
+    type: object
+    properties:
+      code:
+        type: string
+        enum:
+          - error.jwt.expired
+          - error.jwt.invalid_signature
+      message:
+        type: string
+
+  User:
+    description: >
+      Represents a user for the SuTaxi system
+
+
+      When a user is first registered or modified with AWS Cognito, changes to the
+      user are copied to this user object. The Cognitio user ID (which is the `sub`
+      in the generated Cognito token) becomes the ID field in this user resource.
+
+
+      The following fields will be copied to the user resource from Cognito on modification:
+      * phone_number
+      * email
+      * iccid
+      * first_name
+
+    type: object
+    properties:
+      id:
+        type: integer
+        format: number
+        description: ID for user
+      phone_number:
+        type: string
+        description: Phone number
+      email:
+        type: string
+        format: email
+        description: Email address
+      first_name:
+        type: string
+        description: First name
+      last_name:
+        type: string
+        description: Last name
+      date_of_birth:
+        type: string
+        format: date
+        description: Date of birth
+      gender:
+        type: string
+        enum:
+          - male
+          - female
+      iccid:
+        type: string
+        description: ICCID identifying the SIM card
+      location:
+        $ref: '#/definitions/Location'
+      device_registration_token:
+        description: >
+          This token is issued by FCM on device registration.
+
+          #### Notes
+          * This field must be specified to receive push notifications from the system.
+        type: string
+      profile_image_url:
+        type: string
+        description: key for profile image in s3 bucket, exposed as a presigned url
+      license_image_url_front:
+        type: string
+        description: key for license(front) image in s3 bucket, exposed as a presigned url
+      license_image_url_back:
+        type: string
+        description: key for license(back) image in s3 bucket, exposed as a presigned url
+      license_info:
+        type: object
+        description: Driver's license info entered by admin
+        $ref: '#/definitions/DriverLicense'
+
+  PageLinks:
+    description: >
+      Links included in paged responses for navigation.
+    type: object
+    properties:
+      next_page:
+        type: string
+  PagedUser:
+    description: >
+      Page of user resources
+    type: object
+    properties:
+      objects:
+        type: array
+        description: User array for page
+        items:
+          $ref: '#/definitions/User'
+      page:
+        type: integer
+        description: Current page
+      size:
+        type: integer
+        description: Size of the page
+      _links:
+        $ref: '#/definitions/PageLinks'
+
+  DriverLicense:
+    description: >
+      Driver's license info entered by admin
+    properties:
+      license_number:
+        type: number
+        description: License number
+      license_expiration_date:
+        type: string
+        format: date
+        description: License expiration date
+      license_issuer:
+        type: string
+        description: License issuer
+      date_of_birth:
+        type: string
+        format: date
+      first_name:
+        type: string
+      last_name:
+        type: string
+
+  Location:
+    description: >
+      Resource for coordinate location
+    type: object
+    properties:
+      lng:
+        type: number
+      lat:
+        type: number

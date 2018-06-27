@@ -1,0 +1,55 @@
+Serverless API Gateway with Python Example
+
+API Gateway is connected up to Lambda in the serverless architecture.
+When deployed, the system looks for the routes you have defined in the ‘services’
+directory and creates endpoints that match the Flask blueprints with the help of the wsgi interface.
+Once the route is found, the serverless framework will create lambda functions to be called when that API endpoint is hit.
+In this document we will go over how to create a new API endpoint using the serverless starter kit.
+
+Step 1: Adding a new service
+
+Services in the serverless starter kit are points of contact for the framework to
+access your functions and endpoints. Inside the /core/init.py file, you will see
+that when the application is started, the init_app function is called and loops through the
+SERVICE_NAMES array to find which folders might have routes.
+In order to create a new category of endpoints (to keep the code readable) you will need to append your service
+folder name to the end of this SERVICE_NAMES array.
+
+In this example, I am going to be creating a simple ‘dogs’ endpoint where we can receive
+the names of a random dog, a specific dog in the array, or add a new dog to the array.
+I am going to be creating a new service folder called ‘dogs’ under /services and so
+I will append the ‘dogs’ service to the SERVICE_NAMES array. It should now look like:
+
+SERVICE_NAMES = ['error', 'root', 'dogs']
+
+Now, the necessary files will need to be added to the services folder.
+Each service will be parsed for a routes.py file to expose the routes the API will have access to. Add a
+new folder to the /services folder with the title you want (I used 'dogs') with an __init__.py file and a routes.py file.
+
+
+Once the files are in there, you can start coding the API! Flask is used to route the API
+through different pieces of your code and boto3 is the API used to access other AWS resources.
+If you need to use dynamo, cognito, or IAM, boto3 is going to be the tool to use.
+
+Step 2: The Code
+
+In the api_gateway_dogs.py file in this directory there is code for a simple API example to learn some of the basics of using an API in serverless.
+It can also be found as a finished example in the services directory.
+
+
+None of the imports in this file should surprise you. the RootSchema import is defined in the /services/root/resource.py
+file and I did import boto3 even though it is not used just as a future consideration.
+
+In Flask, you can define blueprints that allow different pieces of your app to use the same
+mold defined somewhere else in the application. The blueprint seen above all the API endpoints
+above is the same used in the /services/root and /services/error folders too. Adding it above your
+functions allows for fine grained access for the API to the functions defined.
+
+Step 3: Done! Deploy!
+
+There you have it! This is a simple API that allows you to add and receive Names
+of dogs from a list. To deploy it locally, try running npm run local -- --stage dev and hitting the local host endpoint given back by the terminal.
+As a challenge, why not try to add a method to delete a dog from the list?
+Or get more info other than just the names.
+Would pynamodb allow easy manipulation of a Dog object in a table?
+Feel free to play around in the starter kit. It’s here for your learning as much as your final project.

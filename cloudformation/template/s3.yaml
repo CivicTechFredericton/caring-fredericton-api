@@ -1,0 +1,53 @@
+# Replace instances of {env} with the environment name (for example: dev, prod)
+---
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  CaringFredSwagger:
+    DependsOn: []
+    Properties:
+      BucketName: caring-fred-{env}-swagger
+      NotificationConfiguration:
+        QueueConfigurations: []
+        TopicConfigurations: []
+    Type: AWS::S3::Bucket
+  CaringFredSwaggerBucketPolicy:
+    DependsOn:
+    - CaringFredSwagger
+    Properties:
+      Bucket: caring-fred-{env}-swagger
+      PolicyDocument:
+        Statement:
+        - Action:
+          - s3:GetObject
+          Effect: Allow
+          Resource: arn:aws:s3:::caring-fred-{env}-swagger/*
+          Principal:
+            AWS: arn:aws:iam::cloudfront:user/CloudFront Origin Access Identity E3FSWRC7TBE1XS
+    Type: AWS::S3::BucketPolicy
+  CaringFredOverflow:
+    DependsOn: []
+    Properties:
+      BucketName: caring-fred-{env}-overflow
+      LifecycleConfiguration:
+        Rules:
+        - ExpirationInDays: 10
+          Status: Enabled
+      NotificationConfiguration:
+        QueueConfigurations: []
+        TopicConfigurations: []
+    Type: AWS::S3::Bucket
+Outputs:
+  CaringFredSwaggerArn:
+    Value:
+      Fn::GetAtt:
+      - CaringFredSwagger
+      - Arn
+    Export:
+      Name: caring-fred-{env}-CaringFredSwaggerArn
+  CaringFredOverflowArn:
+    Value:
+      Fn::GetAtt:
+      - CaringFredOverflow
+      - Arn
+    Export:
+      Name: caring-fred-{env}-CaringFredOverflowArn

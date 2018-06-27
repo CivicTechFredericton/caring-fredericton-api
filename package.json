@@ -1,0 +1,14 @@
+{
+  "scripts": {
+    "deploy": "serverless deploy",
+    "local": "serverless wsgi serve",
+    "remove": "serverless remove"
+  },
+  "dependencies": {
+    "serverless": "1.27.3",
+    "serverless-plugin-bind-deployment-id": "1.0.1",
+    "serverless-python-requirements": "4.1.0",
+    "serverless-wsgi": "1.4.8"
+  },
+  "license": "ISC"
+}
