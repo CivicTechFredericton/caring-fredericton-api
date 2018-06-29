@@ -11,7 +11,7 @@ agnostic to the client interface being used (React, Angular, iOS, Android).
 
 ## Project Setup ##
 
-For the purpose of this project, NPM is used to install the serverless tools whereas pip is used to install runtime Python packages.
+NPM is used to install the serverless tools whereas pip is used to install runtime Python packages.
 
 ### NPM Dependencies ###
 
