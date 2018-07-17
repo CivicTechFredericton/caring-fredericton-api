@@ -292,8 +292,10 @@ To make sure this table is actually created, you will need to run the cloudforma
 
 5. Deploying
 
+Set the AWS_PROFILE environment variable (for example: AWS_PROFILE=caringcalendar)
+
 Deploying the serverless application is relatively easy. Just run
-npm run deploy -- --stage dev --profile caringcalendar
+npm run deploy -- --stage dev
 
 To deploy the services to the caring calendar account, or:
 
