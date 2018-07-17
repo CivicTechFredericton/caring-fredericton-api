@@ -313,7 +313,7 @@ When you deploy, you will be given a url that represents your API endpoint. Type
 7. Tear down
 If a mistake was made, or the services are no longer needed, the command:
 
-npm run remove
+npm run remove -- --stage dev
 
 Can be run to remove the services in your current working directory.
 
