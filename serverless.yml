@@ -117,7 +117,8 @@ resources:
       Type: AWS::ApiGateway::DomainName
       Properties:
         CertificateArn: ${self:custom.env.cert_arn, self:custom.default_acm_cert_arn}
-        DomainName: ${self:custom.env.record_set_name, self:custom.default_record_set_name}
+        # DomainName: ${self:custom.env.record_set_name, self:custom.default_record_set_name}
+        DomainName: ${self:custom.default_record_set_name}
 
     DomainNameMapping:
       Type: AWS::ApiGateway::BasePathMapping

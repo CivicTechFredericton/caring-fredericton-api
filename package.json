@@ -5,7 +5,7 @@
     "remove": "serverless remove"
   },
   "dependencies": {
-    "serverless": "1.26.1",
+    "serverless": "1.30.0",
     "serverless-plugin-bind-deployment-id": "1.0.1",
     "serverless-python-requirements": "4.1.1",
     "serverless-wsgi": "1.5.0"
