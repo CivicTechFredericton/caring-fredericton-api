@@ -1,6 +1,7 @@
 account_id: 260286112360
 user_pool_arn: arn:aws:cognito-idp:us-east-1:260286112360:userpool/us-east-1_xJ3AOjNyO
 user_pool_id: us-east-1_xJ3AOjNyO
+app_client_id: 1a1d0824ic06v7bi0oq430hl7m
 dynamo_host: null
 
 logging:

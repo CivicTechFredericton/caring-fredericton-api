@@ -26,14 +26,17 @@ provider:
         - xray:PutTelemetryRecords
         - xray:PutTraceSegments
       Resource: '*'
+
+    - Effect: Allow
+      Action:
+        - cognito-idp:AdminInitiateAuth
+      Resource: '*'
+
     - Effect: Allow
       Action:
         - dynamodb:GetItem
-        - dynamodb:DescribeTable
-        - dynamodb:PutItem
-        - dynamodb:Query
-        - dynamodb:Scan
       Resource: arn:aws:dynamodb:*:*:table/${self:service}-${self:provider.stage}*
+
   # How much memory to grant to the Lambda function.  Allocated memory
   # drives compute capabilities.  The lowest value is 128 MB.  Unless
   # large amounts of memory are required, you should work with the
@@ -77,20 +80,38 @@ custom:
     packRequirements: false
 
 functions:
+  login:
+    name: ${self:service}-${self:provider.stage}-api-login
+    handler: handlers/login.handler
+    environment:
+      COGNITO_USER_POOL_ID: ${self:custom.env.user_pool_id}
+      COGNITO_CLIENT_ID: ${self:custom.env.app_client_id}
+    events:
+      - http:
+          method: post
+          path: /api/login
+          cors: true
+
+  swagger:
+    name: ${self:service}-${self:provider.stage}-swagger
+    handler: handlers/swagger.handler
+    events:
+      - http:
+          method: GET
+          path: /
+      - http:
+          method: GET
+          path: /index.html
+      - http:
+          method: GET
+          path: /swagger.yaml
+
   api:
     name: ${self:service}-${self:provider.stage}-api
     handler: wsgi.handler
     # These environment variables are local and will apply only to this
     # specific Lambda function.  Uncomment if needed.
-    # environment:
-      # KEY: VALUE
     events:
-      - http:
-          method: any
-          path: /
-          cors: true
-          authorizer:
-            arn: ${self:custom.env.user_pool_arn}
       - http:
           method: any
           path: /{proxy+}
@@ -116,7 +137,8 @@ resources:
     DomainName:
       Type: AWS::ApiGateway::DomainName
       Properties:
-        CertificateArn: ${self:custom.env.cert_arn, self:custom.default_acm_cert_arn}
+        # CertificateArn: ${self:custom.env.cert_arn, self:custom.default_acm_cert_arn}
+        CertificateArn: ${self:custom.default_acm_cert_arn}
         # DomainName: ${self:custom.env.record_set_name, self:custom.default_record_set_name}
         DomainName: ${self:custom.default_record_set_name}
 
@@ -138,5 +160,6 @@ resources:
         Name:
           Ref: DomainName
         Type: A
-        HostedZoneName: ${self:custom.env.hosted_zone_name, self:custom.default_hosted_zone_name}
+        # HostedZoneName: ${self:custom.env.hosted_zone_name, self:custom.default_hosted_zone_name}
+        HostedZoneName: ${self:custom.default_hosted_zone_name}
       Type: AWS::Route53::RecordSet

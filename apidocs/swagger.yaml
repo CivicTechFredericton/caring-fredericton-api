@@ -5,15 +5,16 @@
 # beautiful page describing your API.
 swagger: '2.0'
 info:
-  title: TODO API
-  description: |
-    # TODO REST API
+  title: Caring Calendar API
+  description: >
+    # Caring Calendar REST API
 
-    TODO -> fill in a description here.  Markdown is supported.
+    These API are used for interacting with information used for the Caring Calendar in
+    complpiance with standard REST specifications.
 
   version: "1.0.0"
-#TODO: update with domain once available
-host: api.example.com
+
+host: api.caringfredericton.com
 schemes:
   - https
 basePath: /v1
@@ -22,6 +23,25 @@ produces:
 consumes:
   - application/json
 paths:
+  # API endpoint for retrieving an authentication token
+  /api/login:
+    post:
+      summary: Retrieve user token
+      parameters:
+        - name: username
+          in: body
+          required: true
+        - name: password
+          in: body
+          required: true
+      responses:
+        200:
+          description: Auth token for the API user
+          schema:
+            $ref: '#/definitions/AuthResponse'
+      tags:
+        - authentication
+
   # TODO: examples only.  Edit as needed for your various API endpoints.
   # Every endpoint should be specified, including for each type of
   # submission (GET, POST, PUT, PATCH, DELETE, OPTIONS) that is
@@ -68,9 +88,16 @@ paths:
           schema:
             $ref: '#/definitions/AuthError'
 
-# TODO -> fill in the different definitions for schema references.
-# Examples given here, edit and replace as needed for your API.
 definitions:
+  AuthResponse:
+    description: >
+      Response object that includes an auth token for the API user
+    type: object
+    properties:
+       authToken:
+          type: string
+          readOnly: true
+
   AuthError:
     description: >
       Response received when an authorization error has occured. This can be
@@ -89,73 +116,20 @@ definitions:
 
   User:
     description: >
-      Represents a user for the SuTaxi system
-
-
-      When a user is first registered or modified with AWS Cognito, changes to the
-      user are copied to this user object. The Cognitio user ID (which is the `sub`
-      in the generated Cognito token) becomes the ID field in this user resource.
-
-
-      The following fields will be copied to the user resource from Cognito on modification:
-      * phone_number
-      * email
-      * iccid
-      * first_name
-
+      Represents a user in the system
     type: object
     properties:
       id:
         type: integer
         format: number
-        description: ID for user
-      phone_number:
+        description: ID of the user
+      username:
         type: string
-        description: Phone number
+        description: User name of the user
       email:
         type: string
         format: email
-        description: Email address
-      first_name:
-        type: string
-        description: First name
-      last_name:
-        type: string
-        description: Last name
-      date_of_birth:
-        type: string
-        format: date
-        description: Date of birth
-      gender:
-        type: string
-        enum:
-          - male
-          - female
-      iccid:
-        type: string
-        description: ICCID identifying the SIM card
-      location:
-        $ref: '#/definitions/Location'
-      device_registration_token:
-        description: >
-          This token is issued by FCM on device registration.
-
-          #### Notes
-          * This field must be specified to receive push notifications from the system.
-        type: string
-      profile_image_url:
-        type: string
-        description: key for profile image in s3 bucket, exposed as a presigned url
-      license_image_url_front:
-        type: string
-        description: key for license(front) image in s3 bucket, exposed as a presigned url
-      license_image_url_back:
-        type: string
-        description: key for license(back) image in s3 bucket, exposed as a presigned url
-      license_info:
-        type: object
-        description: Driver's license info entered by admin
-        $ref: '#/definitions/DriverLicense'
+        description: Contact email address
 
   PageLinks:
     description: >
@@ -164,6 +138,7 @@ definitions:
     properties:
       next_page:
         type: string
+
   PagedUser:
     description: >
       Page of user resources
@@ -182,35 +157,3 @@ definitions:
         description: Size of the page
       _links:
         $ref: '#/definitions/PageLinks'
-
-  DriverLicense:
-    description: >
-      Driver's license info entered by admin
-    properties:
-      license_number:
-        type: number
-        description: License number
-      license_expiration_date:
-        type: string
-        format: date
-        description: License expiration date
-      license_issuer:
-        type: string
-        description: License issuer
-      date_of_birth:
-        type: string
-        format: date
-      first_name:
-        type: string
-      last_name:
-        type: string
-
-  Location:
-    description: >
-      Resource for coordinate location
-    type: object
-    properties:
-      lng:
-        type: number
-      lat:
-        type: number
