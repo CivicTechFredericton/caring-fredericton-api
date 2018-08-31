@@ -40,7 +40,10 @@ provider:
 
     - Effect: Allow
       Action:
+        - dynamodb:DescribeTable
         - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:Scan
       Resource: arn:aws:dynamodb:*:*:table/${self:service}-${self:provider.stage}*
 
   # How much memory to grant to the Lambda function.  Allocated memory
@@ -226,4 +229,22 @@ resources:
         AuthorizationType: COGNITO_USER_POOLS
         AuthorizerId:
           Ref: CognitoAuthorizer
+
+    #===================================================================
+    # DynamoDB
+    #===================================================================
+    TableOrganizations:
+      Type: AWS::DynamoDB::Table
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-organization
+        AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
 
