@@ -5,6 +5,12 @@ import boto3
 
 
 def handler(event, context):
+    """
+    This function authenticates user information against a user pool
+    :param event: The object containing the request details (query strings, body, etc.)
+    :param context: The object containing runtime information (request ID, CloudWatch log group, etc.)
+    :return: The authentication token of the user if verified
+    """
     data = json.loads(event['body'])
 
     if 'username' not in data:
@@ -24,8 +30,8 @@ def handler(event, context):
     cognito = boto3.client('cognito-idp', region_name='us-east-1')
     try:
         # Authenticate the user
-        user_pool_id = os.environ['COGNITO_USER_POOL_ID']
-        client_id = os.environ['COGNITO_CLIENT_ID']
+        user_pool_id = os.environ['COGNITO_USER_POOL_USERS_ID']
+        client_id = os.environ['COGNITO_USER_POOL_CLIENT_USERS_ID']
         username = data['username']
         password = data['password']
 
