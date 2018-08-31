@@ -1,7 +1,6 @@
-account_id: TODO
-user_pool_arn: TODO
-user_pool_id: TODO
+account_id: 260286112360
 dynamo_host: null
+deletion_policy: Retain
 
 logging:
   version: 1
