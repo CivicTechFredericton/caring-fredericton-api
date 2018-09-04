@@ -33,7 +33,8 @@ password = args.password
 
 # Find the details of the user pool
 stage = args.stage
-user_pool_name = '{}-{}'.format(PREFIX, stage)
+user_pool_name = '{}-{}-users'.format(PREFIX, stage)
+app_client_name = 'users'
 
 response = cognito_idp_client.list_user_pools(
     MaxResults=60
@@ -64,7 +65,7 @@ if user_pool_id:
     )
 
     for user_pool_client in response['UserPoolClients']:
-        if user_pool_client['ClientName'] == user_pool_name:
+        if user_pool_client['ClientName'] == app_client_name:
             client_id = user_pool_client['ClientId']
             break
 
