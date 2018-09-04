@@ -30,8 +30,6 @@ def list_organizations():
 @blueprint.route('/organizations', methods=["POST"])
 @use_kwargs(organization_schema, locations=('json',))
 def add_organization(**kwargs):
-    # TODO: Handle empty description
-    # TODO: Upgrade webargs to 4.0.0 and fix serialization error
     organization = OrganizationModel(id=str(uuid.uuid4()),
                                      name=kwargs['name'],
                                      description=kwargs['description'],

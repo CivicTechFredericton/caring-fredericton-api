@@ -3,12 +3,12 @@ from marshmallow import fields
 
 
 class OrganizationSchema(ma.Schema):
+    id = fields.Str(dump_only=True)
+    name = fields.Str(required=True)
+    description = fields.Str(missing="")
+
     class Meta:
         strict = True
-
-    id = fields.String(dump_only=True)
-    name = fields.String(required=True)
-    description = fields.String(required=False)
 
 
 organization_schema = OrganizationSchema()
