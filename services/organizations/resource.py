@@ -6,6 +6,7 @@ class OrganizationSchema(ma.Schema):
     id = fields.Str(dump_only=True)
     name = fields.Str(required=True)
     description = fields.Str(missing="")
+    is_verified = fields.Bool(dump_only=True)
 
     class Meta:
         strict = True

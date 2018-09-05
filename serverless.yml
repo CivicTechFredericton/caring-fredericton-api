@@ -95,8 +95,17 @@ functions:
     handler: handlers/login.handler
     events:
       - http:
-          method: post
+          method: POST
           path: /api/login
+          cors: true
+
+  registration:
+    name: ${self:service}-${self:provider.stage}-registration
+    handler: wsgi.handler
+    events:
+      - http:
+          method: POST
+          path: /organizations/registration
           cors: true
 
   swagger:
@@ -116,8 +125,6 @@ functions:
   api:
     name: ${self:service}-${self:provider.stage}-api
     handler: wsgi.handler
-    # These environment variables are local and will apply only to this
-    # specific Lambda function.  Uncomment if needed.
     events:
       - http:
           method: any

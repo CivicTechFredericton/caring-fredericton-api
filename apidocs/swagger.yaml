@@ -10,14 +10,14 @@ info:
     # Caring Calendar REST API
 
     These API are used for interacting with information used for the Caring Calendar in
-    complpiance with standard REST specifications.
+    compliance with standard REST specifications.
 
   version: "1.0.0"
 
 host: api.caringfredericton.com
 schemes:
   - https
-basePath: /v1
+basePath: /
 produces:
   - application/json
 consumes:
@@ -26,69 +26,63 @@ paths:
   # API endpoint for retrieving an authentication token
   /api/login:
     post:
+      tags:
+        - external-api
       summary: Retrieve user token
       parameters:
-        - name: username
-          in: body
-          required: true
-        - name: password
-          in: body
-          required: true
+      - in: body
+        name: body
+        description: "User authentication request details"
+        required: true
+        schema:
+          $ref: "#/definitions/AuthRequest"
       responses:
         200:
           description: Auth token for the API user
           schema:
             $ref: '#/definitions/AuthResponse'
-      tags:
-        - authentication
-
-  # TODO: examples only.  Edit as needed for your various API endpoints.
-  # Every endpoint should be specified, including for each type of
-  # submission (GET, POST, PUT, PATCH, DELETE, OPTIONS) that is
-  # supported.
-  /:
-    get:
-      summary: TODO -> Enter a description for what the base URL returns
-  /users:
-    get:
-      summary: returns a page of all users active in the system.
-      parameters:
-          # Name of the parameter.  Parameter names should always be in
-          # camelCase format.
-        - name: id
-          # A parameter can be part of
-          #
-          #   - body  -> a field in the input json payload
-          #   - path  -> in the middle of the URL like /users/42
-          #   - query -> a query string parameter like ?parameterNameCamelCase=42
-          in: body|path|query
-          description: TODO -> Enter a description of the parameter
-          # TODO -> enter a type for the parameter.  Available types can
-          # be found here: https://goo.gl/UUGZ4j
-          type: integer
-          # TODO -> provide a format specification, though this is not
-          # directly supported by the swagger spec.  Examples include
-          # 'email', 'uuid', etc.  This is more or less a hint at the
-          # expected format of the field.
-          format: number
-      #TODO -> list response http codes and their description.
-      responses:
-        200:
-          description: Paged object of users
-          schema:
-            $ref: '#/definitions/PagedUser'
-
         401:
-          description: Authentication error
-          schema:
-            $ref: '#/definitions/AuthError'
+          description: Invalid username and password combination
+        422:
+          description: Missing parameters, user not found, or account locked
 
-        403:
-          description: Authorization error
+  # API for organization registration request
+  /organizations/register:
+    post:
+      tags:
+        - external-api
+      summary: Sends a registration request for an organization
+      parameters:
+      - in: body
+        name: body
+        description: "Organization registration request details"
+        required: true
+        schema:
+          $ref: "#/definitions/OrganizationRequest"
+      responses:
+        201:
+          description: The request was accepted in the system pending verification by the System Adminstrator
           schema:
-            $ref: '#/definitions/AuthError'
+            $ref: '#/definitions/OrganizationResponse'
+        422:
+          description: Missing required parameters
 
 definitions:
+  AuthRequest:
+    description: >
+      Request object that includes user details for authentication
+    type: object
+    required:
+      - username
+      - password
+    properties:
+      username:
+        type: string
+        description: Username of the system user
+      password:
+        type: string
+        description: Password of the system user
+
   AuthResponse:
     description: >
       Response object that includes an auth token for the API user
@@ -114,46 +108,34 @@ definitions:
       message:
         type: string
 
-  User:
+  OrganizationRequest:
     description: >
-      Represents a user in the system
+      Request object that includes details for registering a new organization
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: Name of the organization
+      description:
+        type: string
+        description: Description of the organization
+
+  OrganizationResponse:
+    description: >
+      Response object that includes the details of the created organization
     type: object
     properties:
       id:
-        type: integer
-        format: number
-        description: ID of the user
-      username:
         type: string
-        description: User name of the user
-      email:
+        description: ID of the organization as a UUID
+      name:
         type: string
-        format: email
-        description: Contact email address
-
-  PageLinks:
-    description: >
-      Links included in paged responses for navigation.
-    type: object
-    properties:
-      next_page:
+        description: Name of the organization
+      description:
         type: string
-
-  PagedUser:
-    description: >
-      Page of user resources
-    type: object
-    properties:
-      objects:
-        type: array
-        description: User array for page
-        items:
-          $ref: '#/definitions/User'
-      page:
-        type: integer
-        description: Current page
-      size:
-        type: integer
-        description: Size of the page
-      _links:
-        $ref: '#/definitions/PageLinks'
+        description: Organization description
+      is_verified:
+        type: boolean
+        readOnly: true
