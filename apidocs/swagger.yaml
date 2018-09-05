@@ -46,11 +46,10 @@ paths:
         422:
           description: Missing parameters, user not found, or account locked
 
-  # API for organization registration request
   /organizations/register:
     post:
       tags:
-        - external-api
+        - organizations
       summary: Sends a registration request for an organization
       parameters:
       - in: body
@@ -66,6 +65,25 @@ paths:
             $ref: '#/definitions/OrganizationResponse'
         422:
           description: Missing required parameters
+
+  /organizations/<org_id>/verify:
+    put:
+      tags:
+        - organizations
+      summary: Marks the organization as verified in the system
+      parameters:
+      - name: org_id
+        in: path
+        description: "ID of organization for verification"
+        required: true
+        type: string
+      responses:
+        201:
+          description: The verification request was successful
+          schema:
+            $ref: '#/definitions/OrganizationResponse'
+        422:
+          description: Organization does not exist in the system
 
 definitions:
   AuthRequest:
