@@ -20,6 +20,18 @@ def list_organizations():
     return jsonify(response)
 
 
+@blueprint.route('/organizations/<org_id>', methods=["GET"])
+def retrieve_organization(org_id):
+    try:
+        organization = OrganizationModel.get(hash_key=org_id)
+        response = jsonify(organization_schema.dump(organization).data)
+    except OrganizationModel.DoesNotExist:
+        response = jsonify({'message': 'Organization {} does not exist'.format(org_id)})
+        response.status_code = 422
+
+    return response
+
+
 @blueprint.route('/organizations/registration', methods=["POST"])
 @use_kwargs(organization_schema, locations=('json',))
 def add_organization(**kwargs):

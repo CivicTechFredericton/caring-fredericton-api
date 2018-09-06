@@ -46,6 +46,36 @@ paths:
         422:
           description: Missing parameters, user not found, or account locked
 
+  /organizations:
+    get:
+      tags:
+        - organizations
+      summary: Returns a list of all the organizations in the system
+      responses:
+        200:
+          description: Paged object of organizations
+          schema:
+            $ref: '#/definitions/PagedOrganization'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+
+  /organizations/<org_id>:
+    get:
+      tags:
+        - organizations
+      summary: Returns the details for an organization
+      responses:
+        200:
+          description: Organization details
+          schema:
+            $ref: '#/definitions/OrganizationRequest'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+
   /organizations/register:
     post:
       tags:
@@ -54,7 +84,8 @@ paths:
       parameters:
       - in: body
         name: body
-        description: "Organization registration request details"
+        description: >
+          Organization registration request details
         required: true
         schema:
           $ref: "#/definitions/OrganizationRequest"
@@ -74,7 +105,8 @@ paths:
       parameters:
       - name: org_id
         in: path
-        description: "ID of organization for verification"
+        description: >
+          ID of organization for verification
         required: true
         type: string
       responses:
@@ -82,6 +114,10 @@ paths:
           description: The verification request was successful
           schema:
             $ref: '#/definitions/OrganizationResponse'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
         422:
           description: Organization does not exist in the system
 
@@ -157,3 +193,30 @@ definitions:
       is_verified:
         type: boolean
         readOnly: true
+
+  PageLinks:
+      description: >
+        Links included in paged responses for navigation
+      type: object
+      properties:
+        next_page:
+          type: string
+
+  PagedOrganization:
+    description: >
+      Page of organization resources
+    type: object
+    properties:
+      objects:
+        type: array
+        description: Organizations array for page
+        items:
+          $ref: '#/definitions/OrganizationResponse'
+      page:
+        type: integer
+        description: Current page
+      size:
+        type: integer
+        description: Size of the page
+      _links:
+        $ref: '#/definitions/PageLinks'
