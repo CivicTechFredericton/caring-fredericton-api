@@ -106,7 +106,7 @@ functions:
     events:
       - http:
           method: POST
-          path: /organizations/registration
+          path: /register-organization
           cors: true
 
   swagger:

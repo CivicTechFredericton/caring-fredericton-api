@@ -1,8 +1,8 @@
-from pynamodb.models import Model
-from pynamodb.attributes import BooleanAttribute, UnicodeAttribute, UTCDateTimeAttribute
+from core.model import BaseModel
+from pynamodb.attributes import BooleanAttribute, UnicodeAttribute
 
 
-class OrganizationModel(Model):
+class OrganizationModel(BaseModel):
     class Meta:
         simple_name = 'organization'
 
@@ -10,6 +10,3 @@ class OrganizationModel(Model):
     name = UnicodeAttribute()
     description = UnicodeAttribute(null=True)
     is_verified = BooleanAttribute(default=False)
-    # TODO: Enable time stamps
-    # created = UTCDateTimeAttribute()
-    # updated = UTCDateTimeAttribute()

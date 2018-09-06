@@ -1,12 +1,29 @@
-import json
 import uuid
 
+from datetime import datetime
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 from .model import OrganizationModel
 from .resource import organization_schema
 
 blueprint = Blueprint('organizations', __name__)
+
+
+@blueprint.route('/register-organization', methods=["POST"])
+@use_kwargs(organization_schema, locations=('json',))
+def add_organization(**kwargs):
+    # TODO: Add duplicate organization check (name, address - define rules)
+    organization = OrganizationModel(id=str(uuid.uuid4()),
+                                     name=kwargs['name'],
+                                     description=kwargs['description'],
+                                     is_verified=False)
+
+    organization.save()
+
+    response = jsonify(organization_schema.dump(organization).data)
+    response.status_code = 201
+
+    return response
 
 
 @blueprint.route('/organizations', methods=["GET"])
@@ -32,23 +49,6 @@ def retrieve_organization(org_id):
     return response
 
 
-@blueprint.route('/organizations/registration', methods=["POST"])
-@use_kwargs(organization_schema, locations=('json',))
-def add_organization(**kwargs):
-    # TODO: Add duplicate organization check (name, address - define rules)
-    organization = OrganizationModel(id=str(uuid.uuid4()),
-                                     name=kwargs['name'],
-                                     description=kwargs['description'],
-                                     is_verified=False)
-
-    organization.save()
-
-    response = jsonify(organization_schema.dump(organization).data)
-    response.status_code = 201
-
-    return response
-
-
 @blueprint.route('/organizations/<org_id>/verify', methods=["PUT"])
 def verify_organization(org_id):
     try:
@@ -58,7 +58,8 @@ def verify_organization(org_id):
         organization = OrganizationModel.get(hash_key=org_id)
         organization.update(
             actions=[
-                OrganizationModel.is_verified.set(True)
+                OrganizationModel.is_verified.set(True),
+                OrganizationModel.updated.set(datetime.now())
             ]
         )
 

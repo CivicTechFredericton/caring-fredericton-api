@@ -46,6 +46,27 @@ paths:
         422:
           description: Missing parameters, user not found, or account locked
 
+  /register-organization:
+    post:
+      tags:
+        - external-api
+      summary: Sends a registration request for an organization
+      parameters:
+      - in: body
+        name: body
+        description: >
+          Organization registration request details
+        required: true
+        schema:
+          $ref: "#/definitions/OrganizationRequest"
+      responses:
+        201:
+          description: The request was accepted in the system pending verification by the System Adminstrator
+          schema:
+            $ref: '#/definitions/OrganizationResponse'
+        422:
+          description: Missing required parameters
+
   /organizations:
     get:
       tags:
@@ -75,27 +96,6 @@ paths:
           description: Authentication error
           schema:
             $ref: '#/definitions/AuthError'
-
-  /organizations/register:
-    post:
-      tags:
-        - organizations
-      summary: Sends a registration request for an organization
-      parameters:
-      - in: body
-        name: body
-        description: >
-          Organization registration request details
-        required: true
-        schema:
-          $ref: "#/definitions/OrganizationRequest"
-      responses:
-        201:
-          description: The request was accepted in the system pending verification by the System Adminstrator
-          schema:
-            $ref: '#/definitions/OrganizationResponse'
-        422:
-          description: Missing required parameters
 
   /organizations/<org_id>/verify:
     put:
