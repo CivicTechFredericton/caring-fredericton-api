@@ -4,23 +4,24 @@ from datetime import datetime
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 from .model import OrganizationModel
-from .resource import organization_schema
+from .resource import organization_details_schema, organization_schema
 
 blueprint = Blueprint('organizations', __name__)
 
 
 @blueprint.route('/register-organization', methods=["POST"])
-@use_kwargs(organization_schema, locations=('json',))
+@use_kwargs(organization_details_schema, locations=('json',))
 def add_organization(**kwargs):
     # TODO: Add duplicate organization check (name, address - define rules)
     organization = OrganizationModel(id=str(uuid.uuid4()),
                                      name=kwargs['name'],
                                      description=kwargs['description'],
+                                     contact_details=kwargs['contact_details'],
                                      is_verified=False)
 
     organization.save()
 
-    response = jsonify(organization_schema.dump(organization).data)
+    response = jsonify(organization_details_schema.dump(organization).data)
     response.status_code = 201
 
     return response
@@ -41,7 +42,7 @@ def list_organizations():
 def retrieve_organization(org_id):
     try:
         organization = OrganizationModel.get(hash_key=org_id)
-        response = jsonify(organization_schema.dump(organization).data)
+        response = jsonify(organization_details_schema.dump(organization).data)
     except OrganizationModel.DoesNotExist:
         response = jsonify({'message': 'Organization {} does not exist'.format(org_id)})
         response.status_code = 422
@@ -52,10 +53,10 @@ def retrieve_organization(org_id):
 @blueprint.route('/organizations/<org_id>/verify', methods=["PUT"])
 def verify_organization(org_id):
     try:
+        organization = OrganizationModel.get(hash_key=org_id)
         # TODO: Create the user record in Cognito and the database
 
         # Update the verification flag and assign the user to the organization
-        organization = OrganizationModel.get(hash_key=org_id)
         organization.update(
             actions=[
                 OrganizationModel.is_verified.set(True),
@@ -63,7 +64,7 @@ def verify_organization(org_id):
             ]
         )
 
-        response = jsonify(organization_schema.dump(organization).data)
+        response = jsonify(organization_details_schema.dump(organization).data)
         response.status_code = 201
 
     except OrganizationModel.DoesNotExist:

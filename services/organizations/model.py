@@ -1,5 +1,5 @@
 from core.model import BaseModel
-from pynamodb.attributes import BooleanAttribute, UnicodeAttribute
+from pynamodb.attributes import BooleanAttribute, JSONAttribute, UnicodeAttribute
 
 
 class OrganizationModel(BaseModel):
@@ -9,4 +9,5 @@ class OrganizationModel(BaseModel):
     id = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()
     description = UnicodeAttribute(null=True)
+    contact_details = JSONAttribute(null=True)
     is_verified = BooleanAttribute(default=False)

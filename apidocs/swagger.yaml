@@ -63,7 +63,7 @@ paths:
         201:
           description: The request was accepted in the system pending verification by the System Adminstrator
           schema:
-            $ref: '#/definitions/OrganizationResponse'
+            $ref: '#/definitions/OrganizationDetailsResponse'
         422:
           description: Missing required parameters
 
@@ -113,7 +113,7 @@ paths:
         201:
           description: The verification request was successful
           schema:
-            $ref: '#/definitions/OrganizationResponse'
+            $ref: '#/definitions/OrganizationDetailsResponse'
         401:
           description: Authentication error
           schema:
@@ -162,6 +162,28 @@ definitions:
       message:
         type: string
 
+  ContactDetails:
+    description: >
+      Contact details for an organization
+    type: object
+    required:
+      - first_name
+      - last_name
+      - email
+    properties:
+      first_name:
+        type: string
+        description: Organization's contact first name
+      last_name:
+        type: string
+        description: Organization's contact last name
+      email:
+        type: string
+        description: Organization's contact email address
+      phone:
+        type: string
+        description: Organization's contact phone number
+
   OrganizationRequest:
     description: >
       Request object that includes details for registering a new organization
@@ -178,7 +200,7 @@ definitions:
 
   OrganizationResponse:
     description: >
-      Response object that includes the details of the created organization
+      Response object that includes basic details of the organization; used in list responses
     type: object
     properties:
       id:
@@ -190,6 +212,27 @@ definitions:
       description:
         type: string
         description: Organization description
+      is_verified:
+        type: boolean
+        readOnly: true
+
+  OrganizationDetailsResponse:
+    description: >
+      Response object that includes the details of an organization
+    type: object
+    properties:
+      id:
+        type: string
+        description: ID of the organization as a UUID
+      name:
+        type: string
+        description: Name of the organization
+      description:
+        type: string
+        description: Organization description
+      contact_details:
+        allOf:
+          - $ref: '#/definitions/ContactDetails'
       is_verified:
         type: boolean
         readOnly: true
