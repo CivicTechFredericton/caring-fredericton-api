@@ -31,7 +31,21 @@ class ResourceReadonly(HttpError):
 
 
 class ResourceValidationError(exceptions.UnprocessableEntity):
-
     def __init__(self, messages):
         self.data = {'messages': messages}
         super().__init__()
+
+
+class CognitoError(HttpError):
+    code = 'error.cognito.error'
+    message = 'Cognito error'
+
+
+class SESError(HttpError):
+    code = 'error.ses.error'
+    message = 'SES error'
+
+
+class S3Error(HttpError):
+    code = 'error.s3.error'
+    message = 'S3 error'
