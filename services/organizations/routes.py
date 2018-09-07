@@ -1,10 +1,14 @@
 import uuid
 
 from datetime import datetime
+from core.aws.cognito import create_user, generate_random_password
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 from .model import OrganizationModel
 from .resource import organization_details_schema, organization_schema
+
+import logging
+logger = logging.getLogger(__name__)
 
 blueprint = Blueprint('organizations', __name__)
 
@@ -54,7 +58,15 @@ def retrieve_organization(org_id):
 def verify_organization(org_id):
     try:
         organization = OrganizationModel.get(hash_key=org_id)
-        # TODO: Create the user record in Cognito and the database
+
+        # Create the Cognito user
+        contact_details = organization.contact_details
+        if contact_details:
+            username = contact_details['email']
+            password = generate_random_password()
+            create_user(username, password)
+
+        # TODO: Create the user record in the database
 
         # Update the verification flag and assign the user to the organization
         organization.update(

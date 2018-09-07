@@ -4,12 +4,14 @@ import random
 import os
 import string
 
+from core import configuration
 from core.errors import CognitoError
 
 import logging
 logger = logging.getLogger(__name__)
 
 ADMIN_CREATE_USER = 'admin_create_user'
+ADMIN_GET_USER = 'admin_get_user'
 DESCRIBE_USER_POOL = 'describe_user_pool'
 
 
@@ -24,20 +26,38 @@ def send_cognito_command(command, arguments=None):
     if arguments is None:
         arguments = {}
 
+    client = open_cognito_connection()
     try:
-        client = open_cognito_connection()
-        user_pool_id = os.environ['COGNITO_USER_POOL_USERS_ID']
+        # TODO: Set the envrionment variable when using 'local' option
+        # user_pool_id = os.environ['COGNITO_USER_POOL_USERS_ID']
+        user_pool_id = get_user_pool_id(client)
         response = getattr(client, command)(
             UserPoolId=user_pool_id,
             **arguments
         )
-        logger.debug("Received Cognito response")
     except Exception as e:
         logger.error("Error sending command to cognito: %s" % str(e))
         raise CognitoError()
 
     return response
 
+
+def get_user_pool_id(cognito_idp_client):
+    # Find the details of the user pool
+    service_name = configuration.get_setting('SERVICE_NAME')
+    stage = configuration.get_setting('STAGE')
+    user_pool_name = '{}-{}-users'.format(service_name, stage)
+
+    response = cognito_idp_client.list_user_pools(
+        MaxResults=60
+    )
+
+    for user_pool in response['UserPools']:
+        if user_pool['Name'] == user_pool_name:
+            user_pool_id = user_pool['Id']
+            break
+
+    return user_pool_id
 
 # def get_userpool_passwordpolicy():
 #     pool_details = send_cognito_command(DESCRIBE_USER_POOL)
@@ -92,25 +112,29 @@ def generate_random_password():
     return new_pass
 
 
-def register_user(username, password, suppress=False):
-    args = {
-        'Username': username,
-        'TemporaryPassword': password
-        # 'UserAttributes': [
-        #     {
-        #         'Name': 'email',
-        #         'Value': username
-        #     },
-        #     {
-        #         'Name': 'email_verified',
-        #         'Value': 'True'
-        #     },
-        # ]
-    }
+def create_user(username, password, suppress=False):
+    user = send_cognito_command(ADMIN_GET_USER,
+                                arguments={'Username': username})
 
-    if suppress:
-        args['MessageAction'] = 'SUPPRESS'
+    if not user:
+        args = {
+            'Username': username,
+            'TemporaryPassword': password
+            # 'UserAttributes': [
+            #     {
+            #         'Name': 'email',
+            #         'Value': username
+            #     },
+            #     {
+            #         'Name': 'email_verified',
+            #         'Value': 'True'
+            #     },
+            # ]
+        }
 
-    result = send_cognito_command(ADMIN_CREATE_USER, arguments=args)
+        if suppress:
+            args['MessageAction'] = 'SUPPRESS'
+
+        result = send_cognito_command(ADMIN_CREATE_USER, arguments=args)
 
     return result['User']

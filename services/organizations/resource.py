@@ -29,5 +29,13 @@ class OrganizationDetailsSchema(OrganizationSchema):
         strict = True
 
 
+class OrganizationVerificationSchema(ma.Schema):
+    is_verified = fields.Bool(required=True)
+
+    class Meta:
+        strict = True
+
+
 organization_schema = OrganizationSchema()
 organization_details_schema = OrganizationDetailsSchema()
+organization_verification_schema = OrganizationVerificationSchema()
