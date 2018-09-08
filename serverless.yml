@@ -36,7 +36,6 @@ provider:
     - Effect: Allow
       Action:
         - cognito-idp:AdminCreateUser
-        - cognito-idp:AdminGetUser
         - cognito-idp:AdminInitiateAuth
         - cognito-idp:DescribeUserPool
       Resource: '*'

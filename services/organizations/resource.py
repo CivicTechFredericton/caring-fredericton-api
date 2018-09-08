@@ -31,6 +31,7 @@ class OrganizationDetailsSchema(OrganizationSchema):
 
 class OrganizationVerificationSchema(ma.Schema):
     is_verified = fields.Bool(required=True)
+    reason = fields.Str(required=False)
 
     class Meta:
         strict = True

@@ -109,6 +109,13 @@ paths:
           ID of organization for verification
         required: true
         type: string
+      - in: body
+        name: body
+        description: >
+          Verification details
+        required: true
+        schema:
+          $ref: "#/definitions/VerificationDetails"
       responses:
         201:
           description: The verification request was successful
@@ -184,6 +191,21 @@ definitions:
         type: string
         description: Organization's contact phone number
 
+  VerificationDetails:
+    description: >
+      Verification details for a requested action (for example: verify organization details)
+    type:
+      object
+    required:
+      - is_verified
+    properties:
+      is_verified:
+        type: boolean
+        description: Flag indicating verification status
+      reason:
+        type: string
+        description: Detailed reason if the request is not verified
+
   OrganizationRequest:
     description: >
       Request object that includes details for registering a new organization
@@ -197,6 +219,9 @@ definitions:
       description:
         type: string
         description: Description of the organization
+      contact_details:
+        allOf:
+          - $ref: '#/definitions/ContactDetails'
 
   OrganizationResponse:
     description: >

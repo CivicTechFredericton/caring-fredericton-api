@@ -5,7 +5,7 @@ from core.aws.cognito import create_user, generate_random_password
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 from .model import OrganizationModel
-from .resource import organization_details_schema, organization_schema
+from .resource import organization_details_schema, organization_schema, organization_verification_schema
 
 import logging
 logger = logging.getLogger(__name__)
@@ -55,26 +55,29 @@ def retrieve_organization(org_id):
 
 
 @blueprint.route('/organizations/<org_id>/verify', methods=["PUT"])
-def verify_organization(org_id):
+@use_kwargs(organization_verification_schema, locations=('json',))
+def verify_organization(org_id, **kwargs):
     try:
         organization = OrganizationModel.get(hash_key=org_id)
 
-        # Create the Cognito user
-        contact_details = organization.contact_details
-        if contact_details:
-            username = contact_details['email']
-            password = generate_random_password()
-            create_user(username, password)
+        is_verified = kwargs['is_verified']
+        if is_verified and not organization.is_verified:
+            # Update the verification flag
+            organization.update(
+                actions=[
+                    OrganizationModel.is_verified.set(is_verified),
+                    OrganizationModel.updated.set(datetime.now())
+                ]
+            )
 
-        # TODO: Create the user record in the database
+            # Create the Cognito user for organization's contact
+            contact_details = organization.contact_details
+            if contact_details:
+                username = contact_details['email']
+                password = generate_random_password()
+                create_user(username, password)
 
-        # Update the verification flag and assign the user to the organization
-        organization.update(
-            actions=[
-                OrganizationModel.is_verified.set(True),
-                OrganizationModel.updated.set(datetime.now())
-            ]
-        )
+            # TODO: Create the user record in the database
 
         response = jsonify(organization_details_schema.dump(organization).data)
         response.status_code = 201

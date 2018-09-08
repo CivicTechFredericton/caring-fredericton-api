@@ -1,7 +1,7 @@
 import boto3
 import math
 import random
-import os
+# import os
 import string
 
 from core import configuration
@@ -11,7 +11,6 @@ import logging
 logger = logging.getLogger(__name__)
 
 ADMIN_CREATE_USER = 'admin_create_user'
-ADMIN_GET_USER = 'admin_get_user'
 DESCRIBE_USER_POOL = 'describe_user_pool'
 
 
@@ -23,14 +22,14 @@ def send_cognito_command(command, arguments=None):
     logger.debug("Sending Cognito command '%s'" % command,
                  extra={'arguments': arguments})
 
-    if arguments is None:
-        arguments = {}
-
-    client = open_cognito_connection()
     try:
+        client = open_cognito_connection()
         # TODO: Set the envrionment variable when using 'local' option
         # user_pool_id = os.environ['COGNITO_USER_POOL_USERS_ID']
         user_pool_id = get_user_pool_id(client)
+        if arguments is None:
+            arguments = {}
+
         response = getattr(client, command)(
             UserPoolId=user_pool_id,
             **arguments
@@ -59,19 +58,19 @@ def get_user_pool_id(cognito_idp_client):
 
     return user_pool_id
 
-# def get_userpool_passwordpolicy():
-#     pool_details = send_cognito_command(DESCRIBE_USER_POOL)
-#     return pool_details['UserPool']['Policies']['PasswordPolicy']
-#
-#
-# def describe_user_pool():
-#     return send_cognito_command('describe_user_pool')
+
+def get_userpool_passwordpolicy():
+    pool_details = describe_user_pool()
+    return pool_details['UserPool']['Policies']['PasswordPolicy']
+
+
+def describe_user_pool():
+    return send_cognito_command(DESCRIBE_USER_POOL)
 
 
 def generate_random_password():
     # Using the password policy rules generate a random password
-    pool_details = send_cognito_command(DESCRIBE_USER_POOL)
-    password_policy = pool_details['UserPool']['Policies']['PasswordPolicy']
+    password_policy = get_userpool_passwordpolicy()
 
     min_length = password_policy.get('MinimumLength')
     require_uppercase = password_policy.get('RequireUppercase')
@@ -113,28 +112,24 @@ def generate_random_password():
 
 
 def create_user(username, password, suppress=False):
-    user = send_cognito_command(ADMIN_GET_USER,
-                                arguments={'Username': username})
+    args = {
+        'Username': username,
+        'TemporaryPassword': password
+        # 'UserAttributes': [
+        #     {
+        #         'Name': 'email',
+        #         'Value': username
+        #     },
+        #     {
+        #         'Name': 'email_verified',
+        #         'Value': 'True'
+        #     },
+        # ]
+    }
 
-    if not user:
-        args = {
-            'Username': username,
-            'TemporaryPassword': password
-            # 'UserAttributes': [
-            #     {
-            #         'Name': 'email',
-            #         'Value': username
-            #     },
-            #     {
-            #         'Name': 'email_verified',
-            #         'Value': 'True'
-            #     },
-            # ]
-        }
+    if suppress:
+        args['MessageAction'] = 'SUPPRESS'
 
-        if suppress:
-            args['MessageAction'] = 'SUPPRESS'
-
-        result = send_cognito_command(ADMIN_CREATE_USER, arguments=args)
+    result = send_cognito_command(ADMIN_CREATE_USER, arguments=args)
 
     return result['User']
