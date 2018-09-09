@@ -1,4 +1,6 @@
 account_id: 260286112360
+hosted_zone_name: caringfredericton.com.
+verification_email_recipient: howard.powell@bluespurs.com
 dynamo_host: null  # You can specify localhost:port if you are running Dynalite locally
 
 logging:

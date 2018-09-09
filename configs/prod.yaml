@@ -1,4 +1,7 @@
 account_id: 260286112360
+hosted_zone_name: caringfredericton.com.
+record_set_name: api.caringfredericton.com
+verification_email_recipient: info@socialinnovationfredericton.com
 dynamo_host: null
 deletion_policy: Retain
 

@@ -1,7 +1,9 @@
 import uuid
 
 from datetime import datetime
+from core import configuration, errors
 from core.aws.cognito import create_user, generate_random_password
+from core.aws.ses import SES
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 from .model import OrganizationModel
@@ -17,13 +19,29 @@ blueprint = Blueprint('organizations', __name__)
 @use_kwargs(organization_details_schema, locations=('json',))
 def add_organization(**kwargs):
     # TODO: Add duplicate organization check (name, address - define rules)
+    name = kwargs['name']
     organization = OrganizationModel(id=str(uuid.uuid4()),
-                                     name=kwargs['name'],
+                                     name=name,
                                      description=kwargs['description'],
                                      contact_details=kwargs['contact_details'],
                                      is_verified=False)
 
     organization.save()
+
+    # Send an email to the administrator for verification
+    recipients = [configuration.get_setting('verification_email_recipient')]
+    try:
+        ses = SES()
+        # TODO: Format email message
+        ses.send_email(recipients=recipients,
+                       subject='New Organization Request',
+                       body='New organization request for {}.  Please go to {} to verify the request.'.format(
+                           name,
+                           'https://dev-api.caringcalendar.com/verify'
+                       ))
+    except errors.SESError:
+        # TODO: In addition to logging message include in response message indicating that the email failed to send
+        logger.warning('Organization {} created; error sending email to {}.'.format(name, recipients))
 
     response = jsonify(organization_details_schema.dump(organization).data)
     response.status_code = 201

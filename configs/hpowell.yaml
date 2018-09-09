@@ -1,5 +1,9 @@
 account_id: 260286112360
+hosted_zone_name: caringfredericton.com.
+record_set_name: hpowell-api.caringfredericton.com
+verification_email_recipient: howard.powell@bluespurs.com
 dynamo_host: null
+deletion_policy: Delete
 
 logging:
   version: 1
