@@ -1,7 +1,6 @@
 import boto3
 import math
 import random
-# import os
 import string
 
 from core import configuration
@@ -15,7 +14,8 @@ DESCRIBE_USER_POOL = 'describe_user_pool'
 
 
 def open_cognito_connection():
-    return boto3.client('cognito-idp')
+    # TODO: Remove region restriction when Cognito supported in Canadian region
+    return boto3.client('cognito-idp', region_name='us-east-1')
 
 
 def send_cognito_command(command, arguments=None):
@@ -24,9 +24,7 @@ def send_cognito_command(command, arguments=None):
 
     try:
         client = open_cognito_connection()
-        # TODO: Set the envrionment variable when using 'local' option
-        # user_pool_id = os.environ['COGNITO_USER_POOL_USERS_ID']
-        user_pool_id = get_user_pool_id(client)
+        user_pool_id = configuration.get_setting('user_pool_id')
         if arguments is None:
             arguments = {}
 
@@ -35,28 +33,10 @@ def send_cognito_command(command, arguments=None):
             **arguments
         )
     except Exception as e:
-        logger.error("Error sending command to cognito: %s" % str(e))
+        logger.error("Error sending command to Cognito: %s" % str(e))
         raise CognitoError()
 
     return response
-
-
-def get_user_pool_id(cognito_idp_client):
-    # Find the details of the user pool
-    service_name = configuration.get_setting('SERVICE_NAME')
-    stage = configuration.get_setting('STAGE')
-    user_pool_name = '{}-{}-users'.format(service_name, stage)
-
-    response = cognito_idp_client.list_user_pools(
-        MaxResults=60
-    )
-
-    for user_pool in response['UserPools']:
-        if user_pool['Name'] == user_pool_name:
-            user_pool_id = user_pool['Id']
-            break
-
-    return user_pool_id
 
 
 def get_userpool_passwordpolicy():

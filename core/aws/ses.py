@@ -14,7 +14,8 @@ logger = logging.getLogger(__name__)
 
 class SES:
     def __init__(self):
-        self.client = boto3.client('ses')
+        # TODO: Remove region restriction when Cognito supported in Canadian region
+        self.client = boto3.client('ses', region_name='us-east-1')
         hosted_zone_name = configuration.get_setting('hosted_zone_name')
         if hosted_zone_name[-1] == '.':
             hosted_zone_name = hosted_zone_name[:-1]

@@ -1,4 +1,7 @@
 account_id: 260286112360
+user_pool_arn: TODO
+user_pool_id: TODO
+app_client_id: TODO
 hosted_zone_name: caringfredericton.com.
 record_set_name: api.caringfredericton.com
 verification_email_recipient: info@socialinnovationfredericton.com
