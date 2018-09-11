@@ -18,8 +18,12 @@ blueprint = Blueprint('organizations', __name__)
 @blueprint.route('/register-organization', methods=["POST"])
 @use_kwargs(organization_details_schema, locations=('json',))
 def add_organization(**kwargs):
-    # TODO: Add duplicate organization check (name, address - define rules)
+    # TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
     name = kwargs['name']
+    if len(list(OrganizationModel.scan(OrganizationModel.name == name))) > 0:
+        message = 'Organization with name {} already exists'.format(name)
+        raise errors.ResourceValidationError(messages={'name': [message]})
+
     organization = OrganizationModel(id=str(uuid.uuid4()),
                                      name=name,
                                      description=kwargs['description'],

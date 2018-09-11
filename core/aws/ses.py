@@ -18,7 +18,8 @@ class SES:
         hosted_zone_name = configuration.get_setting('hosted_zone_name')
         if hosted_zone_name[-1] == '.':
             hosted_zone_name = hosted_zone_name[:-1]
-        self.source_email = 'no-reply@%s' % hosted_zone_name
+        # self.source_email = 'no-reply@%s' % hosted_zone_name
+        self.source_email = 'howard.powell@bluespurs.com'
 
     def send_email(self, recipients, subject, body, attachment_name=None, encoded_contents=None):
         logger.info('Sending email', extra={'to addresses': recipients})
