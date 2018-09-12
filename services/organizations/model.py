@@ -5,6 +5,7 @@ from pynamodb.attributes import BooleanAttribute, JSONAttribute, UnicodeAttribut
 class OrganizationModel(BaseModel):
     class Meta:
         simple_name = 'organization'
+        region = BaseModel.Meta.default_region
 
     id = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()
