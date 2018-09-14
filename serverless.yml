@@ -187,6 +187,7 @@ resources:
     #===================================================================
     TableOrganizations:
       Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
       Properties:
         TableName: ${self:service}-${self:provider.stage}-organization
         AttributeDefinitions:
