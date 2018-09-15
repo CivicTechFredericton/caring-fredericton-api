@@ -1,5 +1,6 @@
-from core import init
 import flask
+from core import init
+
 app = init.init_application()
 
 
