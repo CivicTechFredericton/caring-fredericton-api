@@ -1,11 +1,11 @@
 from pynamodb import indexes
-from services.todo.model import TodoModel
+from services.organizations.model import OrganizationModel
 
 import logging
 logger = logging.getLogger(__name__)
 
 # List for all PynamoDB models (both index and tables)
-MODELS = [TodoModel]
+MODELS = [OrganizationModel]
 
 
 def init_models(service_name, stage, host=None):

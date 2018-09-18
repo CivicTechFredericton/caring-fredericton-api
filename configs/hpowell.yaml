@@ -1,5 +1,15 @@
 account_id: 260286112360
+record_set_name: hpowell-api.caringfredericton.com
 dynamo_host: null
+
+# Cognito Settings
+user_pool_arn: arn:aws:cognito-idp:us-east-1:260286112360:userpool/us-east-1_Yne4JefEg
+user_pool_id: us-east-1_Yne4JefEg
+app_client_id: 26d6nueeq6pe5jmcp7flokkofu
+
+# SES Settings
+hosted_zone_name: caringfredericton.com.
+verification_email_recipient: howard.powell@bluespurs.com
 
 logging:
   version: 1

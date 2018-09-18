@@ -30,7 +30,9 @@ region = session.region_name
 # =======================================================================
 stage = args['stage']
 prefix = 'caring-fred'
-user_pool_name = '{}-{}'.format(prefix, stage)
+user_pool_name = '{}-{}-users'.format(prefix, stage)
+app_client_name = 'users'
+
 
 # -----------------------------------------------------------------------
 # Construct email verification message
@@ -45,6 +47,7 @@ invite_email_message = "Your username is {username} and temporary password is {#
 # =======================================================================
 # Create the resources
 # =======================================================================
+user_pool_arn = ''
 user_pool_id = ''
 client_id = ''
 
@@ -87,6 +90,7 @@ if not user_pool_id:
         }
     )
 
+    user_pool_arn = response['UserPool']['Arn']
     user_pool_id = response['UserPool']['Id']
 
 response = cognito_idp_client.list_user_pool_clients(
@@ -94,14 +98,14 @@ response = cognito_idp_client.list_user_pool_clients(
     MaxResults=60
 )
 for user_pool_client in response['UserPoolClients']:
-    if user_pool_client['ClientName'] == user_pool_name:
+    if user_pool_client['ClientName'] == app_client_name:
         client_id = user_pool_client['ClientId']
         break
 
 if not client_id:
     response = cognito_idp_client.create_user_pool_client(
         UserPoolId=user_pool_id,
-        ClientName=user_pool_name,
+        ClientName=app_client_name,
         RefreshTokenValidity=30,
         ExplicitAuthFlows=[
             'ADMIN_NO_SRP_AUTH'
@@ -110,6 +114,6 @@ if not client_id:
 
     client_id = response['UserPoolClient']['ClientId']
 
-print('Pool ARN: arn:aws:cognito-idp:{}:{}:userpool/{}'.format(region, account_id, user_pool_id))
+print('Pool ARN: {}'.format(user_pool_arn))
 print('Pool ID: {}'.format(user_pool_id))
 print('Client ID: {}'.format(client_id))

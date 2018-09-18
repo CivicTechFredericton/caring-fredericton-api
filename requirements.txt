@@ -1,10 +1,10 @@
-boto3==1.8.3 #no-deploy
+boto3==1.9.5 #no-deploy
 Flask==1.0.2
 Flask-Cors==3.0.6
 flask-marshmallow==0.9.0
-marshmallow==2.15.4
+marshmallow==2.15.5
 python-json-logger==0.1.9
 pyyaml==3.13
 requests==2.19.1
-pynamodb==3.3.0
-webargs==4.0.0
+pynamodb==3.3.1
+webargs==4.1.0

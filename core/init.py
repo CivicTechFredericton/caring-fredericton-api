@@ -20,7 +20,7 @@ APP = 'app'
 FULL_STAGES_LIST = (SETTINGS, APP, LOGGING, MODELS)
 
 # Set the list of service names which expose API endpoints
-SERVICE_NAMES = ['error', 'root', 'dogs', 'todo']
+SERVICE_NAMES = ['error', 'root', 'organizations', 'users']
 
 stages_done = {}
 app = None

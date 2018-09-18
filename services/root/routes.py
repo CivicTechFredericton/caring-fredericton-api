@@ -10,8 +10,3 @@ blueprint = flask.Blueprint('root', __name__)
 def root():
     schema = RootSchema(flask.current_app)
     return flask.jsonify(schema.dump({}).data)
-
-
-@blueprint.route('/hello')
-def hello():
-    return 'Hello World'
