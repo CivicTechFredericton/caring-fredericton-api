@@ -1,5 +1,5 @@
 import flask
-from core import init
+from core import init, errors
 
 app = init.init_application()
 
@@ -15,3 +15,11 @@ def handle_unprocessable_entity(err):
     else:
         messages = ["Invalid request"]
     return flask.jsonify({"messages": messages}), 422
+
+
+# Handle ResourceValidationError messages
+@app.errorhandler(errors.ResourceValidationError)
+def handle_invalid_usage(error):
+    response = flask.jsonify(error.to_dict())
+    response.status_code = error.status_code
+    return response

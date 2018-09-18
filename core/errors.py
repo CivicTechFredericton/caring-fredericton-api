@@ -31,9 +31,14 @@ class ResourceReadonly(HttpError):
 
 
 class ResourceValidationError(exceptions.UnprocessableEntity):
+    status_code = UNPROCESSABLE_ENTITY
+
     def __init__(self, messages):
         self.data = {'messages': messages}
         super().__init__()
+
+    def to_dict(self):
+        return self.data
 
 
 class CognitoError(HttpError):
