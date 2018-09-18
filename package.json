@@ -8,9 +8,9 @@
     "rollback": "serverless rollback"
   },
   "dependencies": {
-    "serverless": "1.31.0",
+    "serverless": "1.32.0",
     "serverless-plugin-bind-deployment-id": "1.0.1",
-    "serverless-python-requirements": "4.2.1",
+    "serverless-python-requirements": "4.2.4",
     "serverless-wsgi": "1.5.1"
   },
   "license": "ISC"
