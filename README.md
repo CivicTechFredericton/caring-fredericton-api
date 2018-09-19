@@ -5,8 +5,7 @@ agnostic to the client interface being used (React, Angular, iOS, Android).
 
 ## Functionality: ##
 
-* Feature 1
-* Feature 2
+* Organization Management (Registration, Verification, Updates)
 
 
 ## Project Setup ##
@@ -33,6 +32,11 @@ Ensure the prerequisites are installed
 - Python3.6
 - pip (tool for installing Python packages)
 - virtualenv (python3.6-virtualenv)
+```
+
+Create virtual env for python3.6 inside project directory:
+```
+python3.6 -m venv venv
 ```
 
 Activate newly created environment
