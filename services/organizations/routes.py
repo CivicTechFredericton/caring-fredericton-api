@@ -27,8 +27,7 @@ def add_organization(**kwargs):
     organization = OrganizationModel(id=str(uuid.uuid4()),
                                      name=name,
                                      description=kwargs['description'],
-                                     contact_details=kwargs['contact_details'],
-                                     is_verified=False)
+                                     contact_details=kwargs['contact_details'])
 
     organization.save()
 
@@ -66,46 +65,42 @@ def list_organizations():
 
 @blueprint.route('/organizations/<org_id>', methods=["GET"])
 def retrieve_organization(org_id):
-    try:
-        organization = OrganizationModel.get(hash_key=org_id)
-        response = jsonify(organization_details_schema.dump(organization).data)
-    except OrganizationModel.DoesNotExist:
-        response = jsonify({'message': 'Organization {} does not exist'.format(org_id)})
-        response.status_code = 422
-
-    return response
+    organization = retrieve_organization(org_id)
+    return jsonify(organization_details_schema.dump(organization).data)
 
 
 @blueprint.route('/organizations/<org_id>/verify', methods=["PUT"])
 @use_kwargs(organization_verification_schema, locations=('json',))
 def verify_organization(org_id, **kwargs):
-    try:
-        organization = OrganizationModel.get(hash_key=org_id)
+    organization = retrieve_organization(org_id)
+    is_verified = kwargs['is_verified']
 
-        is_verified = kwargs['is_verified']
-        if is_verified and not organization.is_verified:
-            # Update the verification flag
-            organization.update(
-                actions=[
-                    OrganizationModel.is_verified.set(is_verified),
-                    OrganizationModel.updated.set(datetime.now())
-                ]
-            )
+    if is_verified and not organization.is_verified:
+        # Update the verification flag
+        organization.update(
+            actions=[
+                OrganizationModel.is_verified.set(is_verified),
+                OrganizationModel.updated.set(datetime.now())
+            ]
+        )
 
-            # Create the Cognito user for organization's contact
-            contact_details = organization.contact_details
-            if contact_details:
-                username = contact_details['email']
-                password = generate_random_password()
-                create_user(username, password)
+        # Create the Cognito user for organization's contact
+        contact_details = organization.contact_details
+        if contact_details:
+            username = contact_details['email']
+            password = generate_random_password()
+            create_user(username, password)
 
-            # TODO: Create the user record in the database
+        # TODO: Create the user record in the database
 
-        response = jsonify(organization_details_schema.dump(organization).data)
-        response.status_code = 201
-
-    except OrganizationModel.DoesNotExist:
-        response = jsonify({'message': 'Organization {} does not exist'.format(org_id)})
-        response.status_code = 422
-
+    response = jsonify(organization_details_schema.dump(organization).data)
+    response.status_code = 201
     return response
+
+
+def retrieve_organization(org_id):
+    try:
+        return OrganizationModel.get(hash_key=org_id)
+    except OrganizationModel.DoesNotExist:
+        message = 'Organization {} does not exist'.format(org_id)
+        raise errors.ResourceValidationError(messages={'name': [message]})
