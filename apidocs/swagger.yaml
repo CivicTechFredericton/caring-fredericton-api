@@ -91,11 +91,13 @@ paths:
         200:
           description: Organization details
           schema:
-            $ref: '#/definitions/OrganizationRequest'
+            $ref: '#/definitions/OrganizationDetailsResponse'
         401:
           description: Authentication error
           schema:
             $ref: '#/definitions/AuthError'
+        422:
+          description: Organization does not exist in the system
 
   /organizations/<org_id>/verify:
     put:
