@@ -32,6 +32,7 @@ Ensure the prerequisites are installed
 - Python3.6
 - pip (tool for installing Python packages)
 - virtualenv (python3.6-virtualenv)
+- pip install wheel (Ubuntu 18.04 specific)
 ```
 
 Create virtual env for python3.6 inside project directory:
