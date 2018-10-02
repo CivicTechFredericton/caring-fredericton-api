@@ -69,7 +69,7 @@ def retrieve_organization(org_id):
     return jsonify(organization_details_schema.dump(organization).data)
 
 
-@blueprint.route('/organizations/<org_id>/verify', methods=["PUT"])
+@blueprint.route('/organizations/<org_id>/verify', methods=["POST"])
 @use_kwargs(organization_verification_schema, locations=('json',))
 def verify_organization(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
@@ -93,7 +93,10 @@ def verify_organization(org_id, **kwargs):
 
         # TODO: Create the user record in the database
 
-    return jsonify(organization_details_schema.dump(organization).data)
+    response = jsonify(organization_details_schema.dump(organization).data)
+    response.status_code = 201
+
+    return response
 
 
 def get_organization_from_db(org_id):
