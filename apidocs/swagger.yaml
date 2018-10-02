@@ -100,7 +100,7 @@ paths:
           description: Organization does not exist in the system
 
   /organizations/<org_id>/verify:
-    put:
+    post:
       tags:
         - organizations
       summary: Marks the organization as verified in the system
