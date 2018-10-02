@@ -65,14 +65,14 @@ def list_organizations():
 
 @blueprint.route('/organizations/<org_id>', methods=["GET"])
 def retrieve_organization(org_id):
-    organization = retrieve_organization(org_id)
+    organization = get_organization_from_db(org_id)
     return jsonify(organization_details_schema.dump(organization).data)
 
 
 @blueprint.route('/organizations/<org_id>/verify', methods=["PUT"])
 @use_kwargs(organization_verification_schema, locations=('json',))
 def verify_organization(org_id, **kwargs):
-    organization = retrieve_organization(org_id)
+    organization = get_organization_from_db(org_id)
     is_verified = kwargs['is_verified']
 
     if is_verified and not organization.is_verified:
@@ -98,7 +98,7 @@ def verify_organization(org_id, **kwargs):
     return response
 
 
-def retrieve_organization(org_id):
+def get_organization_from_db(org_id):
     try:
         return OrganizationModel.get(hash_key=org_id)
     except OrganizationModel.DoesNotExist:
