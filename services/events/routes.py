@@ -2,7 +2,7 @@ from flask import Blueprint, jsonify
 from .model import EventModel
 from .resource import event_schema
 
-blueprint = Blueprint('organizations', __name__)
+blueprint = Blueprint('events', __name__)
 
 
 @blueprint.route('/events', methods=["GET"])

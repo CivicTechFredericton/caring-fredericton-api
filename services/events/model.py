@@ -4,7 +4,7 @@ from pynamodb.attributes import BooleanAttribute, JSONAttribute, UnicodeAttribut
 
 class EventModel(BaseModel):
     class Meta:
-        simple_name = 'organization'
+        simple_name = 'event'
         region = BaseModel.Meta.default_region
 
     id = UnicodeAttribute(hash_key=True)

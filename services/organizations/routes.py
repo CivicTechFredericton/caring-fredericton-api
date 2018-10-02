@@ -93,9 +93,7 @@ def verify_organization(org_id, **kwargs):
 
         # TODO: Create the user record in the database
 
-    response = jsonify(organization_details_schema.dump(organization).data)
-    response.status_code = 201
-    return response
+    return jsonify(organization_details_schema.dump(organization).data)
 
 
 def get_organization_from_db(org_id):
