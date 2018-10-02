@@ -98,6 +98,35 @@ paths:
             $ref: '#/definitions/AuthError'
         422:
           description: Organization does not exist in the system
+    put:
+      tags:
+        - organizations
+      summary: Update the details of an organization
+      parameters:
+      - name: org_id
+        in: path
+        description: >
+          ID of organization to update
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: >
+          Organization registration request details
+        required: true
+        schema:
+          $ref: "#/definitions/OrganizationRequest"
+      responses:
+        200:
+          description: Update Organization details
+          schema:
+            $ref: '#/definitions/OrganizationDetailsResponse'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+        422:
+          description: Organization does not exist in the system
 
   /organizations/<org_id>/verify:
     put:
