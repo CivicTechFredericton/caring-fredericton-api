@@ -1,11 +1,12 @@
 from pynamodb import indexes
+from services.events.model import EventModel
 from services.organizations.model import OrganizationModel
 
 import logging
 logger = logging.getLogger(__name__)
 
 # List for all PynamoDB models (both index and tables)
-MODELS = [OrganizationModel]
+MODELS = [EventModel, OrganizationModel]
 
 
 def init_models(service_name, stage, host=None):

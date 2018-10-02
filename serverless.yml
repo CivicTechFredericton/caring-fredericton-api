@@ -200,4 +200,17 @@ resources:
           ReadCapacityUnits: 1
           WriteCapacityUnits: 1
 
-
+    TableEvents:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-event
+        AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
