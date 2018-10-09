@@ -1,4 +1,5 @@
 from flask import Blueprint, jsonify
+from webargs.flaskparser import use_kwargs
 from .model import EventModel
 from .resource import event_schema
 
@@ -14,3 +15,12 @@ def list_organizations():
         response.append(event_schema.dump(event).data)
 
     return jsonify(response)
+
+
+@blueprint.route('/events', methods=["POST"])
+@use_kwargs(event_schema, locations=('json',))
+def create_event(**kwargs):
+    return jsonify({
+        "name": kwargs["name"],
+        "description": kwargs["description"]
+    })
