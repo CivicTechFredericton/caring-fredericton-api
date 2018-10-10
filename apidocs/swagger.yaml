@@ -58,7 +58,7 @@ paths:
           Organization registration request details
         required: true
         schema:
-          $ref: "#/definitions/OrganizationRequest"
+          $ref: "#/definitions/OrganizationRegistrationRequest"
       responses:
         201:
           description: The request was accepted in the system pending verification by the System Adminstrator
@@ -238,6 +238,20 @@ definitions:
         description: Detailed reason if the request is not verified
 
   OrganizationRequest:
+    description: >
+      Request object for an organization
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: Name of the organization
+      description:
+        type: string
+        description: Description of the organization
+
+  OrganizationRegistrationRequest:
     description: >
       Request object that includes details for registering a new organization
     type: object
