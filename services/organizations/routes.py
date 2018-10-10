@@ -93,6 +93,28 @@ def verify_organization(org_id, **kwargs):
     return response
 
 
+@blueprint.route('/organizations/<org_id>/', methods=["PUT"])
+@use_kwargs(organization_schema, locations=('json',))
+def update_organization(org_id, **kwargs):
+    organization = get_organization_from_db(org_id)
+    name = kwargs['name']
+    description = kwargs['description'] 
+    if organization.name != name:
+        if len(list(OrganizationModel.scan(OrganizationModel.name == name))) > 0:
+            message = 'Organization with name {} already exists'.format(name)
+            raise errors.ResourceValidationError(messages={'name': [message]})
+
+    organization.update(
+        actions=[
+            OrganizationModel.name.set(name),
+            OrganizationModel.description.set(description),
+            OrganizationModel.updated.set(OrganizationModel.get_current_time())
+        ]
+    )
+
+    return jsonify(organization_details_schema.dump(organization).data)
+
+
 def get_organization_from_db(org_id):
     try:
         return OrganizationModel.get(hash_key=org_id)
