@@ -62,7 +62,7 @@ paths:
             $ref: '#/definitions/AuthError'
     post:
       tags:
-        - event
+        - events
       summary: Creates a new event in the system for an organization
       parameters:
       - in: body
