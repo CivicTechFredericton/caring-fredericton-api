@@ -6,7 +6,7 @@ agnostic to the client interface being used (React, Angular, iOS, Android).
 ## Functionality: ##
 
 * Organization Management (Registration, Verification, Updates)
-
+* Scheduling Events
 
 ## Project Setup ##
 
