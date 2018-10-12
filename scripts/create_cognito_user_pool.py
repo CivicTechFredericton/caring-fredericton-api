@@ -12,8 +12,8 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 parser = argparse.ArgumentParser()
 parser.add_argument('-p', '--profile',
                     help='AWS CLI profile to use', required=True)
-parser.add_argument(
-    '-s', '--stage', help='Stage name or environment such as dev, stage, uat, etc.', required=True)
+parser.add_argument('-s', '--stage',
+                    help='Stage name or environment such as dev, stage, uat, etc.', required=True)
 
 args = vars(parser.parse_args())
 
@@ -32,7 +32,6 @@ stage = args['stage']
 prefix = 'caring-fred'
 user_pool_name = '{}-{}-users'.format(prefix, stage)
 app_client_name = 'users'
-
 
 # -----------------------------------------------------------------------
 # Construct email verification message

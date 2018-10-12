@@ -3,11 +3,6 @@ record_set_name: api.caringfredericton.com
 dynamo_host: null
 deletion_policy: Retain
 
-# Cognito Settings
-user_pool_arn: TODO
-user_pool_id: TODO
-app_client_id: TODO
-
 #SES Settings
 hosted_zone_name: caringfredericton.com.
 verification_email_recipient: info@socialinnovationfredericton.com
