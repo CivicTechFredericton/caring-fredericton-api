@@ -1,6 +1,7 @@
 account_id: 260286112360
-record_set_name: dev-api.caringfredericton.com
+domain_name: dev-api.caringfredericton.com
 dynamo_host: null
+deletion_policy: Delete
 
 # SES Settings
 hosted_zone_name: caringfredericton.com.
