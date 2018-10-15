@@ -145,8 +145,6 @@ functions:
           method: any
           path: /{proxy+}
           cors: true
-          # authorizer:
-            # arn: ${self:custom.env.user_pool_arn}
 
 resources:
   Resources:
