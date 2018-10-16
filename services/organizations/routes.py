@@ -1,13 +1,11 @@
-import uuid
-
-from datetime import datetime
-from core import configuration, errors
+from core import configuration, db, errors
 from core.aws.cognito import create_user, generate_random_password
 from core.aws.ses import SES
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
-from .model import OrganizationModel
-from .resource import organization_details_schema, organization_schema, organization_verification_schema
+from services.organizations.model import OrganizationModel
+from services.organizations.resource import organization_details_schema, organization_schema, \
+    organization_verification_schema
 
 import logging
 logger = logging.getLogger(__name__)
@@ -24,12 +22,8 @@ def add_organization(**kwargs):
         message = 'Organization with name {} already exists'.format(name)
         raise errors.ResourceValidationError(messages={'name': [message]})
 
-    organization = OrganizationModel(id=str(uuid.uuid4()),
-                                     name=name,
-                                     description=kwargs['description'],
-                                     contact_details=kwargs['contact_details'])
-
-    organization.save()
+    organization = OrganizationModel(**kwargs)
+    db.save_with_unique_id(organization)
 
     # Send an email to the administrator for verification
     recipients = [configuration.get_setting('verification_email_recipient')]
@@ -80,7 +74,7 @@ def verify_organization(org_id, **kwargs):
         organization.update(
             actions=[
                 OrganizationModel.is_verified.set(is_verified),
-                OrganizationModel.updated.set(datetime.now())
+                OrganizationModel.updated.set(OrganizationModel.get_current_time())
             ]
         )
 
@@ -95,6 +89,7 @@ def verify_organization(org_id, **kwargs):
 
     response = jsonify(organization_details_schema.dump(organization).data)
     response.status_code = 201
+
     return response
 
 
@@ -113,7 +108,7 @@ def update_organization(org_id, **kwargs):
         actions=[
             OrganizationModel.name.set(name),
             OrganizationModel.description.set(description),
-            OrganizationModel.updated.set(datetime.now())
+            OrganizationModel.updated.set(OrganizationModel.get_current_time())
         ]
     )
 

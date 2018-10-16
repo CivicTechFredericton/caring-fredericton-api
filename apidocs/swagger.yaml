@@ -46,26 +46,41 @@ paths:
         422:
           description: Missing parameters, user not found, or account locked
 
-  /register-organization:
+  /events:
+    get:
+      tags:
+        - events
+      summary: Returns a list of all the events in the system
+      responses:
+        200:
+          description: Paged object of organizations
+          schema:
+            $ref: '#/definitions/PagedEvent'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
     post:
       tags:
-        - external-api
-      summary: Sends a registration request for an organization
+        - events
+      summary: Creates a new event in the system for an organization
       parameters:
       - in: body
         name: body
         description: >
-          Organization registration request details
+          Event request details
         required: true
         schema:
-          $ref: "#/definitions/OrganizationRegistrationRequest"
+          $ref: "#/definitions/EventRequest"
       responses:
         201:
-          description: The request was accepted in the system pending verification by the System Adminstrator
+          description: The event was created in the system
           schema:
-            $ref: '#/definitions/OrganizationDetailsResponse'
+            $ref: '#/definitions/EventResponse'
         422:
           description: Missing required parameters
+          schema:
+            $ref: '#/definitions/AuthError'
 
   /organizations:
     get:
@@ -90,35 +105,6 @@ paths:
       responses:
         200:
           description: Organization details
-          schema:
-            $ref: '#/definitions/OrganizationDetailsResponse'
-        401:
-          description: Authentication error
-          schema:
-            $ref: '#/definitions/AuthError'
-        422:
-          description: Organization does not exist in the system
-    put:
-      tags:
-        - organizations
-      summary: Update the details of an organization
-      parameters:
-      - name: org_id
-        in: path
-        description: >
-          ID of organization to update
-        required: true
-        type: string
-      - in: body
-        name: body
-        description: >
-          Organization registration request details
-        required: true
-        schema:
-          $ref: "#/definitions/OrganizationRequest"
-      responses:
-        200:
-          description: Update Organization details
           schema:
             $ref: '#/definitions/OrganizationDetailsResponse'
         401:
@@ -158,6 +144,27 @@ paths:
             $ref: '#/definitions/AuthError'
         422:
           description: Organization does not exist in the system
+
+  /register-organization:
+    post:
+      tags:
+        - external-api
+      summary: Sends a registration request for an organization
+      parameters:
+      - in: body
+        name: body
+        description: >
+          Organization registration request details
+        required: true
+        schema:
+          $ref: "#/definitions/OrganizationRequest"
+      responses:
+        201:
+          description: The request was accepted in the system pending verification by the System Adminstrator
+          schema:
+            $ref: '#/definitions/OrganizationDetailsResponse'
+        422:
+          description: Missing required parameters
 
 definitions:
   AuthRequest:
@@ -237,21 +244,64 @@ definitions:
         type: string
         description: Detailed reason if the request is not verified
 
-  OrganizationRequest:
+  EventRequest:
     description: >
-      Request object for an organization
+      Request object that includes details for an event
     type: object
     required:
-      - name
+    - name
+    - start_date
+    - end_date
+    - start_time
+    - end_time
     properties:
       name:
         type: string
-        description: Name of the organization
+        description: Name of the event
       description:
         type: string
-        description: Description of the organization
+        description: Description of the event
+      start_date:
+        type: string
+        description: The start date for the event
+      end_date:
+        type: string
+        description: The end date for the event
+      start_time:
+        type: string
+        description: The start time for the event
+      end_time:
+        type: string
+        description: The end time for the event
 
-  OrganizationRegistrationRequest:
+  EventResponse:
+    description: >
+      Response object containing the event details
+    type: object
+    properties:
+      name:
+        type: string
+        description: Name of the event
+      description:
+        type: string
+        description: Description of the event
+      start_date:
+        type: string
+        description: The start date for the event
+      end_date:
+        type: string
+        description: The end date for the event
+      start_time:
+        type: string
+        description: The start time for the event
+      end_time:
+        type: string
+        description: The end time for the event
+      timezone:
+        type: string
+        description: Timezone for the event as it was created
+
+  OrganizationRequest:
     description: >
       Request object that includes details for registering a new organization
     type: object
@@ -314,6 +364,25 @@ definitions:
       properties:
         next_page:
           type: string
+
+  PagedEvent:
+    description: >
+      Page of organization resources
+    type: object
+    properties:
+      objects:
+        type: array
+        description: Events array for page
+        items:
+          $ref: '#/definitions/EventResponse'
+      page:
+        type: integer
+        description: Current page
+      size:
+        type: integer
+        description: Size of the page
+      _links:
+        $ref: '#/definitions/PageLinks'
 
   PagedOrganization:
     description: >
