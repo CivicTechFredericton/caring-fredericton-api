@@ -169,7 +169,7 @@ resources:
     #===================================================================
     CognitoUserPoolUsers:
       Type: AWS::Cognito::UserPool
-      DeletionPolicy: ${self:custom.env.deletion_policy}
+      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
       Properties:
         AdminCreateUserConfig:
           AllowAdminCreateUserOnly: True
@@ -230,7 +230,7 @@ resources:
     #===================================================================
     TableOrganizations:
       Type: AWS::DynamoDB::Table
-      DeletionPolicy: ${self:custom.env.deletion_policy}
+      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
       Properties:
         TableName: ${self:service}-${self:provider.stage}-organization
         AttributeDefinitions:
@@ -245,7 +245,7 @@ resources:
 
     TableEvents:
       Type: AWS::DynamoDB::Table
-      DeletionPolicy: ${self:custom.env.deletion_policy}
+      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
       Properties:
         TableName: ${self:service}-${self:provider.stage}-event
         AttributeDefinitions:
