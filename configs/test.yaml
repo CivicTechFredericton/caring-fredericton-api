@@ -1,11 +1,11 @@
 account_id: 260286112360
-domain_name: api.caringfredericton.com
+domain_name: test-api.caringfredericton.com
 dynamo_host: null
-deletion_policy: Retain
+deletion_policy: Delete
 
-#SES Settings
+# SES Settings
 hosted_zone_name: caringfredericton.com.
-verification_email_recipient: info@socialinnovationfredericton.com
+verification_email_recipient: howard.powell@bluespurs.com
 
 logging:
   version: 1
@@ -21,9 +21,9 @@ logging:
 
   loggers:
     core:
-      level: INFO
+      level: DEBUG
     services:
-      level: INFO
+      level: DEBUG
 
   root:
     level: INFO

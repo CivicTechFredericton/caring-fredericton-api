@@ -14,8 +14,7 @@ DESCRIBE_USER_POOL = 'describe_user_pool'
 
 
 def open_cognito_connection():
-    # TODO: Remove region restriction when Cognito supported in Canadian region
-    return boto3.client('cognito-idp', region_name='us-east-1')
+    return boto3.client('cognito-idp')
 
 
 def send_cognito_command(command, arguments=None):
@@ -24,7 +23,7 @@ def send_cognito_command(command, arguments=None):
 
     try:
         client = open_cognito_connection()
-        user_pool_id = configuration.get_setting('user_pool_id')
+        user_pool_id = configuration.get_setting('COGNITO_USER_POOL_USERS_ID')
         if arguments is None:
             arguments = {}
 

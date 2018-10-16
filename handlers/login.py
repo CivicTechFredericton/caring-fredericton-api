@@ -27,12 +27,11 @@ def handler(event, context):
                 })
                 }
 
-    # TODO: Remove region restriction when Cognito supported in Canadian region
-    cognito = boto3.client('cognito-idp', region_name='us-east-1')
+    cognito = boto3.client('cognito-idp')
     try:
         # Authenticate the user
-        user_pool_id = os.environ['COGNITO_USER_POOL_ID']
-        client_id = os.environ['COGNITO_CLIENT_ID']
+        user_pool_id = os.environ['COGNITO_USER_POOL_USERS_ID']
+        client_id = os.environ['COGNITO_USER_POOL_CLIENT_USERS_ID']
         username = data['username']
         password = data['password']
 

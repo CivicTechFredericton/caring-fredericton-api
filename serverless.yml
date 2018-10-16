@@ -10,6 +10,12 @@ provider:
   environment:
     SERVICE_NAME: ${self:service}
     STAGE: ${self:provider.stage}
+    COGNITO_USER_POOL_USERS_ID:
+      Ref: CognitoUserPoolUsers
+    COGNITO_USER_POOL_USERS_ARN:
+      Fn::GetAtt: [CognitoUserPoolUsers, Arn]
+    COGNITO_USER_POOL_CLIENT_USERS_ID:
+      Ref: CognitoUserPoolClientUsers
 
   # IAM role permissions given to the Lambda function.  Update as
   # needed.  More information about IAM permissions can be found here:
@@ -78,27 +84,30 @@ package:
     - venv/**
 
 plugins:
+  - serverless-domain-manager
   - serverless-plugin-bind-deployment-id
-  - serverless-python-requirements
+  - serverless-plugin-scripts
   - serverless-wsgi
 
 custom:
-  env: ${file(configs/${self:provider.stage}.yaml)}
-  default_acm_cert_arn: arn:aws:acm:us-east-1:260286112360:certificate/b7dfce25-c007-4aa7-a20b-d56218dac01b
-  default_hosted_zone_name: caringfredericton.com.
-  default_record_set_name: ${self:provider.stage}-api.caringfredericton.com
+  customDomain:
+    domainName: ${self:custom.env.domain_name, self:custom.default_domain_name}
+    stage:
+      Ref: Stage
   default_deletion_policy: Delete
+  default_domain_name: ${self:provider.stage}-api.caringfredericton.com
+  env: ${file(configs/${self:provider.stage}.yaml)}
+  scripts:
+    hooks:
+      'after:package:finalize': npm run create_domain -- --stage ${self:provider.stage}
+      'before:remove:remove': npm run delete_domain -- --stage ${self:provider.stage}
   wsgi:
     app: api.app
-    packRequirements: false
 
 functions:
   login:
     name: ${self:service}-${self:provider.stage}-api-login
     handler: handlers/login.handler
-    environment:
-      COGNITO_USER_POOL_ID: ${self:custom.env.user_pool_id}
-      COGNITO_CLIENT_ID: ${self:custom.env.app_client_id}
     events:
       - http:
           method: POST
@@ -136,11 +145,12 @@ functions:
           method: any
           path: /{proxy+}
           cors: true
-          authorizer:
-            arn: ${self:custom.env.user_pool_arn}
 
 resources:
   Resources:
+    #===================================================================
+    # API Gateway
+    #===================================================================
     # This resource is here so we can specifically define methods other
     # than the default / and /{proxy+} so that they show up in
     # CloudWatch separately for monitoring purposes.
@@ -154,33 +164,66 @@ resources:
           Ref: ApiGatewayRestApi
         StageName: ${self:provider.stage}
 
-    DomainName:
-      Type: AWS::ApiGateway::DomainName
+    #===================================================================
+    # Cognito
+    #===================================================================
+    CognitoUserPoolUsers:
+      Type: AWS::Cognito::UserPool
+      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
       Properties:
-        # CertificateArn: ${self:custom.env.cert_arn, self:custom.default_acm_cert_arn}
-        CertificateArn: ${self:custom.default_acm_cert_arn}
-        DomainName: ${self:custom.env.record_set_name, self:custom.default_record_set_name}
+        AdminCreateUserConfig:
+          AllowAdminCreateUserOnly: True
+          InviteMessageTemplate:
+            EmailSubject: Your temporary password
+            EmailMessage: |
+              Your username is {username} and temporary password is {####}.
+        AutoVerifiedAttributes:
+          - email
+        EmailVerificationMessage: |
+          Your verification code is {####}.
+        EmailVerificationSubject: |
+          Your verification code
+        Policies:
+          PasswordPolicy:
+            RequireLowercase: true
+            RequireNumbers: true
+            RequireSymbols: false
+            RequireUppercase: false
+            MinimumLength: 8
+        UsernameAttributes:
+          - email
+        UserPoolName: ${self:service}-${self:provider.stage}-users
+        UserPoolTags:
+            CLIENT: Civic Tech
+            PROJECT: Caring Calendar
 
-    DomainNameMapping:
-      Type: AWS::ApiGateway::BasePathMapping
+    CognitoUserPoolClientUsers:
+      Type: AWS::Cognito::UserPoolClient
       Properties:
-        DomainName:
-          Ref: DomainName
+        ClientName: users
+        ExplicitAuthFlows:
+          - ADMIN_NO_SRP_AUTH
+        RefreshTokenValidity: 30
+        UserPoolId:
+          Ref: CognitoUserPoolUsers
+
+    CognitoAuthorizer:
+      Type: AWS::ApiGateway::Authorizer
+      Properties:
+        IdentitySource: method.request.header.Authorization
+        Name: ${self:service}-${self:provider.stage}-users-authorizer
         RestApiId:
           Ref: ApiGatewayRestApi
-        Stage: ${self:provider.stage}
+        Type: COGNITO_USER_POOLS
+        ProviderARNs:
+          - Fn::GetAtt: [CognitoUserPoolUsers, Arn]
 
-    Route53:
+    # Augments the compiled function cf json
+    ApiGatewayMethodProxyVarAny:
       Properties:
-        AliasTarget:
-          DNSName:
-            Fn::GetAtt: [ DomainName , DistributionDomainName ]
-          HostedZoneId: Z2FDTNDATAQYW2
-        Name:
-          Ref: DomainName
-        Type: A
-        HostedZoneName: ${self:custom.env.hosted_zone_name, self:custom.default_hosted_zone_name}
-      Type: AWS::Route53::RecordSet
+        AuthorizationType: COGNITO_USER_POOLS
+        AuthorizerId:
+          Ref: CognitoAuthorizer
 
     #===================================================================
     # DynamoDB

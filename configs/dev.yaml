@@ -1,11 +1,7 @@
 account_id: 260286112360
-record_set_name: dev-api.caringfredericton.com
+domain_name: dev-api.caringfredericton.com
 dynamo_host: null
-
-# Cognito Settings
-user_pool_arn: arn:aws:cognito-idp:us-east-1:260286112360:userpool/us-east-1_hnomVUtN9
-user_pool_id: us-east-1_hnomVUtN9
-app_client_id: 3i7a287f6gjrgormieughu83qn
+deletion_policy: Delete
 
 # SES Settings
 hosted_zone_name: caringfredericton.com.
