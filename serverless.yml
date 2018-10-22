@@ -194,7 +194,7 @@ resources:
           - email
         UserPoolName: ${self:service}-${self:provider.stage}-users
         UserPoolTags:
-            CLIENT: Civic Tech
+            CLIENT: Civic Tech Fredericton
             PROJECT: Caring Calendar
 
     CognitoUserPoolClientUsers:
@@ -228,6 +228,35 @@ resources:
     #===================================================================
     # DynamoDB
     #===================================================================
+    TableUser:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-user
+        AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
+        KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+        - IndexName: ${self:service}-${self:provider.stage}-user-email-index
+          KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+          Projection:
+            ProjectionType: INCLUDE
+            NonKeyAttributes:
+              - id
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+
     TableOrganizations:
       Type: AWS::DynamoDB::Table
       DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}

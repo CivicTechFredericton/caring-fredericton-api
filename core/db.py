@@ -4,12 +4,13 @@ from pynamodb import indexes
 from pynamodb.exceptions import PutError
 from services.events.model import EventModel
 from services.organizations.model import OrganizationModel
+from services.users.model import UserModel
 
 import logging
 logger = logging.getLogger(__name__)
 
 # List for all PynamoDB models (both index and tables)
-MODELS = [EventModel, OrganizationModel]
+MODELS = [EventModel, OrganizationModel, UserModel]
 
 
 def init_models(service_name, stage, host=None):
