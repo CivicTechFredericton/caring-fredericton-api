@@ -1,0 +1,31 @@
+account_id: 260286112360
+domain_name: adba-api.caringfredericton.com
+dynamo_host: null
+deletion_policy: Delete
+
+# SES Settings
+hosted_zone_name: caringfredericton.com.
+verification_email_recipient: bmhadnen@gmail.com
+
+logging:
+  version: 1
+  formatters:
+    default:
+      format: '[%(asctime)s][%(name)s][%(levelname)s]: %(message)s'
+
+  handlers:
+    console:
+      class: logging.StreamHandler
+      formatter: default
+      stream: ext://sys.stdout
+
+  loggers:
+    core:
+      level: DEBUG
+    services:
+      level: DEBUG
+
+  root:
+    level: INFO
+    handlers:
+      - console

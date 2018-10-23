@@ -128,6 +128,23 @@ paths:
         422:
           description: Organization does not exist in the system
 
+  /organizations/<org_id>:
+    put:
+      tags:
+        - organizations
+      summary: Update the details of an organization
+      responses:
+        204:
+          description: Organization details updated
+          schema:
+            $ref: '#/definitions/OrganizationDetailsResponse'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+        422:
+          description: Organization does not exist in the system
+
   /organizations/<org_id>/verify:
     post:
       tags:
@@ -221,7 +238,7 @@ definitions:
       message:
         type: string
 
-  ContactDetails:
+  AdministratorDetails:
     description: >
       Contact details for an organization
     type: object
@@ -239,9 +256,33 @@ definitions:
       email:
         type: string
         description: Organization's contact email address
-      phone:
+  
+  Address:
+    description: >
+      organization address
+    type: object
+    required:
+      - street
+      - postal_code
+      - city
+      - province
+      - country
+    properties:
+      street:
         type: string
-        description: Organization's contact phone number
+        description: Street
+      postal_code:
+        type: string
+        description: Postal code
+      city:
+        type: string
+        description: City
+      province:
+        type: string
+        description: Province
+      country:
+        type: string
+        description: Country
 
   VerificationDetails:
     description: >
@@ -328,9 +369,12 @@ definitions:
       description:
         type: string
         description: Description of the organization
-      contact_details:
+      administrator_details:
         allOf:
-          - $ref: '#/definitions/ContactDetails'
+          - $ref: '#/definitions/AdministratorDetails'
+      address:
+        allOf:
+          - $ref: '#/definitions/Adress'
 
   OrganizationResponse:
     description: >
@@ -361,12 +405,18 @@ definitions:
       name:
         type: string
         description: Name of the organization
-      description:
+      phone:
         type: string
-        description: Organization description
-      contact_details:
+        description: Organization phone number
+      email:
+        type: string
+        description: Organization email
+      administrator_details:
         allOf:
-          - $ref: '#/definitions/ContactDetails'
+          - $ref: '#/definitions/AdministratorDetails'
+      address:
+        allOf:
+          - $ref: '#/definitions/Adress'
       is_verified:
         type: boolean
         readOnly: true

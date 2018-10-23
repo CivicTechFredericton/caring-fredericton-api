@@ -108,10 +108,14 @@ def verify_organization(org_id, **kwargs):
 
 
 @blueprint.route('/organizations/<org_id>/', methods=["PUT"])
-@use_kwargs(organization_schema, locations=('json',))
+@use_kwargs(organization_details_schema, locations=('json',))
 def update_organization(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
     name = kwargs['name']
+    email = kwargs['email'] 
+    phone = kwargs['phone']
+    administrator = kwargs['administrator']
+    address = kwargs['address']
     if organization.name != name:
         if is_duplicate_name(name):
             message = 'Organization with name {} already exists'.format(name)
@@ -120,7 +124,10 @@ def update_organization(org_id, **kwargs):
     organization.update(
         actions=[
             OrganizationModel.name.set(name),
-            OrganizationModel.description.set(kwargs['description']),
+            OrganizationModel.email.set(email),
+            OrganizationModel.phone.set(phone),
+            OrganizationModel.administrator.set(administrator),
+            OrganizationModel.address.set(address),
             OrganizationModel.updated.set(OrganizationModel.get_current_time())
         ]
     )

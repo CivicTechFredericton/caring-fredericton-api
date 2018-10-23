@@ -9,6 +9,8 @@ class OrganizationModel(BaseModel):
 
     id = UnicodeAttribute(hash_key=True)
     name = UnicodeAttribute()
-    description = UnicodeAttribute(null=True)
-    contact_details = JSONAttribute(null=True)
+    email = UnicodeAttribute()
+    phone = UnicodeAttribute()
+    administrator = JSONAttribute(null=True)
+    address = JSONAttribute(null=True)
     is_verified = BooleanAttribute(default=False)
