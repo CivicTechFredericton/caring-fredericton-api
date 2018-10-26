@@ -87,6 +87,13 @@ paths:
       tags:
         - organizations
       summary: Returns a list of all the organizations in the system
+      parameters:
+      - name: is_verified
+        in: query
+        description: >
+          Filter value on organization's verification status
+        required: false
+        type: boolean
       responses:
         200:
           description: Paged object of organizations
@@ -102,6 +109,13 @@ paths:
       tags:
         - organizations
       summary: Returns the details for an organization
+      parameters:
+      - name: org_id
+        in: path
+        description: >
+          ID of organization for verification
+        required: true
+        type: string
       responses:
         200:
           description: Organization details

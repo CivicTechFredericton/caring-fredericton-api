@@ -2,10 +2,12 @@ from core import configuration, db, errors
 from core.aws.cognito import create_user, generate_random_password
 from core.aws.ses import SES
 from flask import Blueprint, jsonify
+from webargs import missing
 from webargs.flaskparser import use_kwargs
+
 from services.organizations.model import OrganizationModel
-from services.organizations.resource import organization_details_schema, organization_schema, \
-    organization_verification_schema
+from services.organizations.resource import organization_details_schema, organization_list_schema,\
+    organization_schema, organization_verification_schema
 from services.users.model import UserModel
 
 import logging
@@ -48,8 +50,14 @@ def add_organization(**kwargs):
 
 
 @blueprint.route('/organizations', methods=["GET"])
-def list_organizations():
-    organizations = OrganizationModel.scan()
+@use_kwargs(organization_list_schema, locations=('query',))
+def list_organizations(**kwargs):
+    is_verified = kwargs['is_verified']
+    if is_verified is missing:
+        organizations = OrganizationModel.scan()
+    else:
+        organizations = OrganizationModel.scan(OrganizationModel.is_verified == is_verified)
+
     response = []
 
     for org in organizations:
