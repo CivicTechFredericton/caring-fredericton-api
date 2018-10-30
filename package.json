@@ -1,15 +1,18 @@
 {
   "scripts": {
+    "create_domain": "serverless create_domain",
+    "delete_domain": "serverless delete_domain",
     "deploy": "serverless deploy",
     "local": "serverless wsgi serve",
     "remove": "serverless remove",
     "rollback": "serverless rollback"
   },
   "dependencies": {
-    "serverless": "1.30.3",
-    "serverless-plugin-bind-deployment-id": "1.0.1",
-    "serverless-python-requirements": "4.1.1",
-    "serverless-wsgi": "1.5.0"
+    "serverless": "1.32.0",
+    "serverless-domain-manager": "2.6.5",
+    "serverless-plugin-bind-deployment-id": "1.0.2",
+    "serverless-plugin-scripts": "1.0.2",
+    "serverless-wsgi": "1.5.2"
   },
   "license": "ISC"
 }

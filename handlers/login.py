@@ -27,7 +27,7 @@ def handler(event, context):
                 })
                 }
 
-    cognito = boto3.client('cognito-idp', region_name='us-east-1')
+    cognito = boto3.client('cognito-idp')
     try:
         # Authenticate the user
         user_pool_id = os.environ['COGNITO_USER_POOL_USERS_ID']

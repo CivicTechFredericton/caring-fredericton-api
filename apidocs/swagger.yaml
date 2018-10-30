@@ -10,14 +10,14 @@ info:
     # Caring Calendar REST API
 
     These API are used for interacting with information used for the Caring Calendar in
-    complpiance with standard REST specifications.
+    compliance with standard REST specifications.
 
   version: "1.0.0"
 
 host: api.caringfredericton.com
 schemes:
   - https
-basePath: /v1
+basePath: /
 produces:
   - application/json
 consumes:
@@ -26,69 +26,176 @@ paths:
   # API endpoint for retrieving an authentication token
   /api/login:
     post:
+      tags:
+        - external-api
       summary: Retrieve user token
       parameters:
-        - name: username
-          in: body
-          required: true
-        - name: password
-          in: body
-          required: true
+      - in: body
+        name: body
+        description: "User authentication request details"
+        required: true
+        schema:
+          $ref: "#/definitions/AuthRequest"
       responses:
         200:
           description: Auth token for the API user
           schema:
             $ref: '#/definitions/AuthResponse'
-      tags:
-        - authentication
+        401:
+          description: Invalid username and password combination
+        422:
+          description: Missing parameters, user not found, or account locked
 
-  # TODO: examples only.  Edit as needed for your various API endpoints.
-  # Every endpoint should be specified, including for each type of
-  # submission (GET, POST, PUT, PATCH, DELETE, OPTIONS) that is
-  # supported.
-  /:
+  /events:
     get:
-      summary: TODO -> Enter a description for what the base URL returns
-  /users:
-    get:
-      summary: returns a page of all users active in the system.
-      parameters:
-          # Name of the parameter.  Parameter names should always be in
-          # camelCase format.
-        - name: id
-          # A parameter can be part of
-          #
-          #   - body  -> a field in the input json payload
-          #   - path  -> in the middle of the URL like /users/42
-          #   - query -> a query string parameter like ?parameterNameCamelCase=42
-          in: body|path|query
-          description: TODO -> Enter a description of the parameter
-          # TODO -> enter a type for the parameter.  Available types can
-          # be found here: https://goo.gl/UUGZ4j
-          type: integer
-          # TODO -> provide a format specification, though this is not
-          # directly supported by the swagger spec.  Examples include
-          # 'email', 'uuid', etc.  This is more or less a hint at the
-          # expected format of the field.
-          format: number
-      #TODO -> list response http codes and their description.
+      tags:
+        - events
+      summary: Returns a list of all the events in the system
       responses:
         200:
-          description: Paged object of users
+          description: Paged object of organizations
           schema:
-            $ref: '#/definitions/PagedUser'
+            $ref: '#/definitions/PagedEvent'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+    post:
+      tags:
+        - events
+      summary: Creates a new event in the system for an organization
+      parameters:
+      - in: body
+        name: body
+        description: >
+          Event request details
+        required: true
+        schema:
+          $ref: "#/definitions/EventRequest"
+      responses:
+        201:
+          description: The event was created in the system
+          schema:
+            $ref: '#/definitions/EventResponse'
+        422:
+          description: Missing required parameters
+          schema:
+            $ref: '#/definitions/AuthError'
 
+  /organizations:
+    get:
+      tags:
+        - organizations
+      summary: Returns a list of all the organizations in the system
+      parameters:
+      - name: is_verified
+        in: query
+        description: >
+          Filter value on organization's verification status
+        required: false
+        type: boolean
+      responses:
+        200:
+          description: Paged object of organizations
+          schema:
+            $ref: '#/definitions/PagedOrganization'
         401:
           description: Authentication error
           schema:
             $ref: '#/definitions/AuthError'
 
-        403:
-          description: Authorization error
+  /organizations/<org_id>:
+    get:
+      tags:
+        - organizations
+      summary: Returns the details for an organization
+      parameters:
+      - name: org_id
+        in: path
+        description: >
+          ID of organization for verification
+        required: true
+        type: string
+      responses:
+        200:
+          description: Organization details
+          schema:
+            $ref: '#/definitions/OrganizationDetailsResponse'
+        401:
+          description: Authentication error
           schema:
             $ref: '#/definitions/AuthError'
+        422:
+          description: Organization does not exist in the system
+
+  /organizations/<org_id>/verify:
+    post:
+      tags:
+        - organizations
+      summary: Marks the organization as verified in the system
+      parameters:
+      - name: org_id
+        in: path
+        description: >
+          ID of organization for verification
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: >
+          Verification details
+        required: true
+        schema:
+          $ref: "#/definitions/VerificationDetails"
+      responses:
+        201:
+          description: The verification request was successful
+          schema:
+            $ref: '#/definitions/OrganizationDetailsResponse'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+        422:
+          description: Organization does not exist in the system
+
+  /register-organization:
+    post:
+      tags:
+        - external-api
+      summary: Sends a registration request for an organization
+      parameters:
+      - in: body
+        name: body
+        description: >
+          Organization registration request details
+        required: true
+        schema:
+          $ref: "#/definitions/OrganizationRequest"
+      responses:
+        201:
+          description: The request was accepted in the system pending verification by the System Adminstrator
+          schema:
+            $ref: '#/definitions/OrganizationDetailsResponse'
+        422:
+          description: Missing required parameters
 
 definitions:
+  AuthRequest:
+    description: >
+      Request object that includes user details for authentication
+    type: object
+    required:
+      - username
+      - password
+    properties:
+      username:
+        type: string
+        description: Username of the system user
+      password:
+        type: string
+        description: Password of the system user
+
   AuthResponse:
     description: >
       Response object that includes an auth token for the API user
@@ -114,41 +221,193 @@ definitions:
       message:
         type: string
 
-  User:
+  ContactDetails:
     description: >
-      Represents a user in the system
+      Contact details for an organization
+    type: object
+    required:
+      - first_name
+      - last_name
+      - email
+    properties:
+      first_name:
+        type: string
+        description: Organization's contact first name
+      last_name:
+        type: string
+        description: Organization's contact last name
+      email:
+        type: string
+        description: Organization's contact email address
+      phone:
+        type: string
+        description: Organization's contact phone number
+
+  VerificationDetails:
+    description: >
+      Verification details for a requested action (for example: verify organization details)
+    type:
+      object
+    required:
+      - is_verified
+    properties:
+      is_verified:
+        type: boolean
+        description: Flag indicating verification status
+      reason:
+        type: string
+        description: Detailed reason if the request is not verified
+
+  EventRequest:
+    description: >
+      Request object that includes details for an event
+    type: object
+    required:
+    - name
+    - start_date
+    - end_date
+    - start_time
+    - end_time
+    properties:
+      name:
+        type: string
+        description: Name of the event
+      description:
+        type: string
+        description: Description of the event
+      start_date:
+        type: string
+        description: The start date for the event
+      end_date:
+        type: string
+        description: The end date for the event
+      start_time:
+        type: string
+        description: The start time for the event
+      end_time:
+        type: string
+        description: The end time for the event
+
+  EventResponse:
+    description: >
+      Response object containing the event details
+    type: object
+    properties:
+      name:
+        type: string
+        description: Name of the event
+      description:
+        type: string
+        description: Description of the event
+      start_date:
+        type: string
+        description: The start date for the event
+      end_date:
+        type: string
+        description: The end date for the event
+      start_time:
+        type: string
+        description: The start time for the event
+      end_time:
+        type: string
+        description: The end time for the event
+      timezone:
+        type: string
+        description: Timezone for the event as it was created
+
+  OrganizationRequest:
+    description: >
+      Request object that includes details for registering a new organization
+    type: object
+    required:
+      - name
+    properties:
+      name:
+        type: string
+        description: Name of the organization
+      description:
+        type: string
+        description: Description of the organization
+      contact_details:
+        allOf:
+          - $ref: '#/definitions/ContactDetails'
+
+  OrganizationResponse:
+    description: >
+      Response object that includes basic details of the organization; used in list responses
     type: object
     properties:
       id:
-        type: integer
-        format: number
-        description: ID of the user
-      username:
         type: string
-        description: User name of the user
-      email:
+        description: ID of the organization as a UUID
+      name:
         type: string
-        format: email
-        description: Contact email address
+        description: Name of the organization
+      description:
+        type: string
+        description: Organization description
+      is_verified:
+        type: boolean
+        readOnly: true
 
-  PageLinks:
+  OrganizationDetailsResponse:
     description: >
-      Links included in paged responses for navigation.
+      Response object that includes the details of an organization
     type: object
     properties:
-      next_page:
+      id:
         type: string
+        description: ID of the organization as a UUID
+      name:
+        type: string
+        description: Name of the organization
+      description:
+        type: string
+        description: Organization description
+      contact_details:
+        allOf:
+          - $ref: '#/definitions/ContactDetails'
+      is_verified:
+        type: boolean
+        readOnly: true
 
-  PagedUser:
+  PageLinks:
+      description: >
+        Links included in paged responses for navigation
+      type: object
+      properties:
+        next_page:
+          type: string
+
+  PagedEvent:
     description: >
-      Page of user resources
+      Page of organization resources
     type: object
     properties:
       objects:
         type: array
-        description: User array for page
+        description: Events array for page
         items:
-          $ref: '#/definitions/User'
+          $ref: '#/definitions/EventResponse'
+      page:
+        type: integer
+        description: Current page
+      size:
+        type: integer
+        description: Size of the page
+      _links:
+        $ref: '#/definitions/PageLinks'
+
+  PagedOrganization:
+    description: >
+      Page of organization resources
+    type: object
+    properties:
+      objects:
+        type: array
+        description: Organizations array for page
+        items:
+          $ref: '#/definitions/OrganizationResponse'
       page:
         type: integer
         description: Current page

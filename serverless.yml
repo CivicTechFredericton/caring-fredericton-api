@@ -35,12 +35,24 @@ provider:
 
     - Effect: Allow
       Action:
+        - cognito-idp:AdminCreateUser
         - cognito-idp:AdminInitiateAuth
+        - cognito-idp:DescribeUserPool
       Resource: '*'
 
     - Effect: Allow
       Action:
+        - ses:SendEmail
+        - ses:SendRawEmail
+      Resource: '*'
+
+    - Effect: Allow
+      Action:
+        - dynamodb:DescribeTable
         - dynamodb:GetItem
+        - dynamodb:PutItem
+        - dynamodb:Scan
+        - dynamodb:UpdateItem
       Resource: arn:aws:dynamodb:*:*:table/${self:service}-${self:provider.stage}*
 
   # How much memory to grant to the Lambda function.  Allocated memory
@@ -53,7 +65,7 @@ provider:
   # https://goo.gl/g8YjqY
   memorySize: 128
   name: aws
-  region: us-east-1
+  region: ca-central-1
   runtime: python3.6
   stage: ${opt:stage}
   # The default is 6 seconds. Note: API Gateway current maximum is 30 seconds
@@ -72,19 +84,25 @@ package:
     - venv/**
 
 plugins:
+  - serverless-domain-manager
   - serverless-plugin-bind-deployment-id
-  - serverless-python-requirements
+  - serverless-plugin-scripts
   - serverless-wsgi
 
 custom:
-  env: ${file(configs/${self:provider.stage}.yaml)}
-  default_acm_cert_arn: arn:aws:acm:us-east-1:260286112360:certificate/b7dfce25-c007-4aa7-a20b-d56218dac01b
-  default_hosted_zone_name: caringfredericton.com.
-  default_record_set_name: ${self:provider.stage}-api.caringfredericton.com
+  customDomain:
+    domainName: ${self:custom.env.domain_name, self:custom.default_domain_name}
+    stage:
+      Ref: Stage
   default_deletion_policy: Delete
+  default_domain_name: ${self:provider.stage}-api.caringfredericton.com
+  env: ${file(configs/${self:provider.stage}.yaml)}
+  scripts:
+    hooks:
+      'after:package:finalize': npm run create_domain -- --stage ${self:provider.stage}
+      'before:remove:remove': npm run delete_domain -- --stage ${self:provider.stage}
   wsgi:
     app: api.app
-    packRequirements: false
 
 functions:
   login:
@@ -92,8 +110,17 @@ functions:
     handler: handlers/login.handler
     events:
       - http:
-          method: post
+          method: POST
           path: /api/login
+          cors: true
+
+  registration:
+    name: ${self:service}-${self:provider.stage}-registration
+    handler: wsgi.handler
+    events:
+      - http:
+          method: POST
+          path: /register-organization
           cors: true
 
   swagger:
@@ -113,8 +140,6 @@ functions:
   api:
     name: ${self:service}-${self:provider.stage}-api
     handler: wsgi.handler
-    # These environment variables are local and will apply only to this
-    # specific Lambda function.  Uncomment if needed.
     events:
       - http:
           method: any
@@ -123,6 +148,9 @@ functions:
 
 resources:
   Resources:
+    #===================================================================
+    # API Gateway
+    #===================================================================
     # This resource is here so we can specifically define methods other
     # than the default / and /{proxy+} so that they show up in
     # CloudWatch separately for monitoring purposes.
@@ -135,36 +163,6 @@ resources:
         RestApiId:
           Ref: ApiGatewayRestApi
         StageName: ${self:provider.stage}
-
-    DomainName:
-      Type: AWS::ApiGateway::DomainName
-      Properties:
-        # CertificateArn: ${self:custom.env.cert_arn, self:custom.default_acm_cert_arn}
-        CertificateArn: ${self:custom.default_acm_cert_arn}
-        # DomainName: ${self:custom.env.record_set_name, self:custom.default_record_set_name}
-        DomainName: ${self:custom.default_record_set_name}
-
-    DomainNameMapping:
-      Type: AWS::ApiGateway::BasePathMapping
-      Properties:
-        DomainName:
-          Ref: DomainName
-        RestApiId:
-          Ref: ApiGatewayRestApi
-        Stage: ${self:provider.stage}
-
-    Route53:
-      Properties:
-        AliasTarget:
-          DNSName:
-            Fn::GetAtt: [ DomainName , DistributionDomainName ]
-          HostedZoneId: Z2FDTNDATAQYW2
-        Name:
-          Ref: DomainName
-        Type: A
-        # HostedZoneName: ${self:custom.env.hosted_zone_name, self:custom.default_hosted_zone_name}
-        HostedZoneName: ${self:custom.default_hosted_zone_name}
-      Type: AWS::Route53::RecordSet
 
     #===================================================================
     # Cognito
@@ -196,7 +194,7 @@ resources:
           - email
         UserPoolName: ${self:service}-${self:provider.stage}-users
         UserPoolTags:
-            CLIENT: Civic Tech
+            CLIENT: Civic Tech Fredericton
             PROJECT: Caring Calendar
 
     CognitoUserPoolClientUsers:
@@ -227,3 +225,64 @@ resources:
         AuthorizerId:
           Ref: CognitoAuthorizer
 
+    #===================================================================
+    # DynamoDB
+    #===================================================================
+    TableUser:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-user
+        AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
+        KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+        GlobalSecondaryIndexes:
+        - IndexName: ${self:service}-${self:provider.stage}-user-email-index
+          KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+          Projection:
+            ProjectionType: INCLUDE
+            NonKeyAttributes:
+              - id
+          ProvisionedThroughput:
+            ReadCapacityUnits: 1
+            WriteCapacityUnits: 1
+
+    TableOrganizations:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-organization
+        AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
+
+    TableEvents:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-event
+        AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        ProvisionedThroughput:
+          ReadCapacityUnits: 1
+          WriteCapacityUnits: 1
