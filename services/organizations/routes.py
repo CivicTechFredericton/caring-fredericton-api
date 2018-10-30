@@ -21,7 +21,7 @@ blueprint = Blueprint('organizations', __name__)
 def add_organization(**kwargs):
     # TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
     name = kwargs['name']
-    if len(list(OrganizationModel.scan(OrganizationModel.name == name))) > 0:
+    if is_duplicate_name(name):
         message = 'Organization with name {} already exists'.format(name)
         raise errors.ResourceValidationError(messages={'name': [message]})
 
@@ -112,21 +112,24 @@ def verify_organization(org_id, **kwargs):
 def update_organization(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
     name = kwargs['name']
-    description = kwargs['description'] 
     if organization.name != name:
-        if len(list(OrganizationModel.scan(OrganizationModel.name == name))) > 0:
+        if is_duplicate_name(name):
             message = 'Organization with name {} already exists'.format(name)
             raise errors.ResourceValidationError(messages={'name': [message]})
 
     organization.update(
         actions=[
             OrganizationModel.name.set(name),
-            OrganizationModel.description.set(description),
+            OrganizationModel.description.set(kwargs['description']),
             OrganizationModel.updated.set(OrganizationModel.get_current_time())
         ]
     )
 
     return jsonify(organization_details_schema.dump(organization).data)
+
+
+def is_duplicate_name(org_name):
+    return len(list(OrganizationModel.scan(OrganizationModel.name == org_name))) > 0
 
 
 def get_organization_from_db(org_id):
