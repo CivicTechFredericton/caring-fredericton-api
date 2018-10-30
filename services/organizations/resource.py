@@ -12,6 +12,13 @@ class ContactSchema(ma.Schema):
         strict = True
 
 
+class OrganizationListSchema(ma.Schema):
+    is_verified = fields.Bool(required=False)
+
+    class Meta:
+        strict = True
+
+
 class OrganizationSchema(ma.Schema):
     id = fields.Str(dump_only=True)
     name = fields.Str(required=True)
@@ -38,5 +45,6 @@ class OrganizationVerificationSchema(ma.Schema):
 
 
 organization_schema = OrganizationSchema()
+organization_list_schema = OrganizationListSchema()
 organization_details_schema = OrganizationDetailsSchema()
 organization_verification_schema = OrganizationVerificationSchema()

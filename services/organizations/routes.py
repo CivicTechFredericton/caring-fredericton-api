@@ -2,10 +2,12 @@ from core import configuration, db, errors
 from core.aws.cognito import create_user, generate_random_password
 from core.aws.ses import SES
 from flask import Blueprint, jsonify
+from webargs import missing
 from webargs.flaskparser import use_kwargs
+
 from services.organizations.model import OrganizationModel
-from services.organizations.resource import organization_details_schema, organization_schema, \
-    organization_verification_schema
+from services.organizations.resource import organization_details_schema, organization_list_schema,\
+    organization_schema, organization_verification_schema
 from services.users.model import UserModel
 
 import logging
@@ -19,7 +21,7 @@ blueprint = Blueprint('organizations', __name__)
 def add_organization(**kwargs):
     # TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
     name = kwargs['name']
-    if len(list(OrganizationModel.scan(OrganizationModel.name == name))) > 0:
+    if is_duplicate_name(name):
         message = 'Organization with name {} already exists'.format(name)
         raise errors.ResourceValidationError(messages={'name': [message]})
 
@@ -48,8 +50,14 @@ def add_organization(**kwargs):
 
 
 @blueprint.route('/organizations', methods=["GET"])
-def list_organizations():
-    organizations = OrganizationModel.scan()
+@use_kwargs(organization_list_schema, locations=('query',))
+def list_organizations(**kwargs):
+    is_verified = kwargs['is_verified']
+    if is_verified is missing:
+        organizations = OrganizationModel.scan()
+    else:
+        organizations = OrganizationModel.scan(OrganizationModel.is_verified == is_verified)
+
     response = []
 
     for org in organizations:
@@ -104,21 +112,24 @@ def verify_organization(org_id, **kwargs):
 def update_organization(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
     name = kwargs['name']
-    description = kwargs['description'] 
     if organization.name != name:
-        if len(list(OrganizationModel.scan(OrganizationModel.name == name))) > 0:
+        if is_duplicate_name(name):
             message = 'Organization with name {} already exists'.format(name)
             raise errors.ResourceValidationError(messages={'name': [message]})
 
     organization.update(
         actions=[
             OrganizationModel.name.set(name),
-            OrganizationModel.description.set(description),
+            OrganizationModel.description.set(kwargs['description']),
             OrganizationModel.updated.set(OrganizationModel.get_current_time())
         ]
     )
 
     return jsonify(organization_details_schema.dump(organization).data)
+
+
+def is_duplicate_name(org_name):
+    return len(list(OrganizationModel.scan(OrganizationModel.name == org_name))) > 0
 
 
 def get_organization_from_db(org_id):
