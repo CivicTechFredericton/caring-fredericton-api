@@ -22,7 +22,7 @@ class AddressSchema(ma.Schema):
         strict = True
 
 
-class OrganizationListSchema(ma.Schema):
+class OrganizationListFiltersSchema(ma.Schema):
     is_verified = fields.Bool(required=False)
 
     class Meta:
@@ -57,6 +57,6 @@ class OrganizationVerificationSchema(ma.Schema):
 
 
 organization_schema = OrganizationSchema()
-organization_list_schema = OrganizationListSchema()
+organization_list_filters_schema = OrganizationListFiltersSchema()
 organization_details_schema = OrganizationDetailsSchema()
 organization_verification_schema = OrganizationVerificationSchema()

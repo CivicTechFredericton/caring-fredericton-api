@@ -53,7 +53,7 @@ paths:
       summary: Returns a list of all the events in the system
       responses:
         200:
-          description: Paged object of organizations
+          description: Paged object of events
           schema:
             $ref: '#/definitions/PagedEvent'
         401:
@@ -62,6 +62,26 @@ paths:
             $ref: '#/definitions/AuthError'
 
   /organizations/<org_id>/events:
+    get:
+      tags:
+      - events
+      summary: Returns a list of all the events associated with the organization
+      parameters:
+      - in: path
+        name: org_id
+        description: >
+          Organization ID
+        required: true
+        type: string
+      responses:
+        200:
+          description: Paged object of events
+          schema:
+            $ref: '#/definitions/PagedEvent'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
     post:
       tags:
         - events

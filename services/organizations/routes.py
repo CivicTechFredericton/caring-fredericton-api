@@ -7,7 +7,7 @@ from webargs.flaskparser import use_kwargs
 
 from services.organizations.utils import check_for_duplicate_name, get_organization_from_db
 from services.organizations.model import OrganizationModel
-from services.organizations.resource import organization_details_schema, organization_list_schema,\
+from services.organizations.resource import organization_details_schema, organization_list_filters_schema,\
     organization_schema, organization_verification_schema
 from services.users.model import UserModel
 
@@ -49,7 +49,7 @@ def register_organization(**kwargs):
 
 
 @blueprint.route('/organizations', methods=["GET"])
-@use_kwargs(organization_list_schema, locations=('query',))
+@use_kwargs(organization_list_filters_schema, locations=('query',))
 def list_organizations(**kwargs):
     is_verified = kwargs['is_verified']
     if is_verified is missing:
@@ -86,9 +86,9 @@ def verify_organization(org_id, **kwargs):
             ]
         )
 
-        # Create the Cognito user for organization's contact
         administrator_details = organization.administrator
         if administrator_details:
+            # Create the Cognito user for organization's administrator
             email = administrator_details['email']
             password = generate_random_password()
             create_user(email, password)
