@@ -127,12 +127,24 @@ paths:
             $ref: '#/definitions/AuthError'
         422:
           description: Organization does not exist in the system
-
-  /organizations/<org_id>:
     put:
       tags:
         - organizations
       summary: Update the details of an organization
+      parameters:
+      - name: org_id
+        in: path
+        description: >
+          ID of organization for verification
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: >
+          Verification details
+        required: true
+        schema:
+          $ref: "#/definitions/VerificationDetails"
       responses:
         204:
           description: Organization details updated
@@ -256,7 +268,7 @@ definitions:
       email:
         type: string
         description: Organization's contact email address
-  
+
   Address:
     description: >
       organization address
@@ -362,6 +374,10 @@ definitions:
     type: object
     required:
       - name
+      - email
+      - phone
+      - administrator
+      - address
     properties:
       name:
         type: string
@@ -369,12 +385,18 @@ definitions:
       description:
         type: string
         description: Description of the organization
-      administrator_details:
+      email:
+        type: string
+        description: Email for the organization
+      phone:
+        type: string
+        description: Phone number for the organization
+      administrator:
         allOf:
           - $ref: '#/definitions/AdministratorDetails'
       address:
         allOf:
-          - $ref: '#/definitions/Adress'
+          - $ref: '#/definitions/Address'
 
   OrganizationResponse:
     description: >
@@ -384,12 +406,16 @@ definitions:
       id:
         type: string
         description: ID of the organization as a UUID
+        readOnly: true
       name:
         type: string
         description: Name of the organization
-      description:
+      email:
         type: string
-        description: Organization description
+        description: Organization email
+      phone:
+        type: string
+        description: Organization phone number
       is_verified:
         type: boolean
         readOnly: true
@@ -402,6 +428,7 @@ definitions:
       id:
         type: string
         description: ID of the organization as a UUID
+        readOnly: true
       name:
         type: string
         description: Name of the organization
@@ -416,7 +443,7 @@ definitions:
           - $ref: '#/definitions/AdministratorDetails'
       address:
         allOf:
-          - $ref: '#/definitions/Adress'
+          - $ref: '#/definitions/Address'
       is_verified:
         type: boolean
         readOnly: true
