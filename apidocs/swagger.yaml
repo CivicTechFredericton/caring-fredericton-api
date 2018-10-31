@@ -127,6 +127,35 @@ paths:
             $ref: '#/definitions/AuthError'
         422:
           description: Organization does not exist in the system
+    put:
+      tags:
+        - organizations
+      summary: Update the details of an organization
+      parameters:
+      - name: org_id
+        in: path
+        description: >
+          ID of organization for verification
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: >
+          Verification details
+        required: true
+        schema:
+          $ref: "#/definitions/VerificationDetails"
+      responses:
+        204:
+          description: Organization details updated
+          schema:
+            $ref: '#/definitions/OrganizationDetailsResponse'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+        422:
+          description: Organization does not exist in the system
 
   /organizations/<org_id>/verify:
     post:
@@ -221,7 +250,7 @@ definitions:
       message:
         type: string
 
-  ContactDetails:
+  AdministratorDetails:
     description: >
       Contact details for an organization
     type: object
@@ -239,9 +268,33 @@ definitions:
       email:
         type: string
         description: Organization's contact email address
-      phone:
+
+  Address:
+    description: >
+      organization address
+    type: object
+    required:
+      - street
+      - postal_code
+      - city
+      - province
+      - country
+    properties:
+      street:
         type: string
-        description: Organization's contact phone number
+        description: Street
+      postal_code:
+        type: string
+        description: Postal code
+      city:
+        type: string
+        description: City
+      province:
+        type: string
+        description: Province
+      country:
+        type: string
+        description: Country
 
   VerificationDetails:
     description: >
@@ -321,6 +374,10 @@ definitions:
     type: object
     required:
       - name
+      - email
+      - phone
+      - administrator
+      - address
     properties:
       name:
         type: string
@@ -328,9 +385,18 @@ definitions:
       description:
         type: string
         description: Description of the organization
-      contact_details:
+      email:
+        type: string
+        description: Email for the organization
+      phone:
+        type: string
+        description: Phone number for the organization
+      administrator:
         allOf:
-          - $ref: '#/definitions/ContactDetails'
+          - $ref: '#/definitions/AdministratorDetails'
+      address:
+        allOf:
+          - $ref: '#/definitions/Address'
 
   OrganizationResponse:
     description: >
@@ -340,12 +406,16 @@ definitions:
       id:
         type: string
         description: ID of the organization as a UUID
+        readOnly: true
       name:
         type: string
         description: Name of the organization
-      description:
+      email:
         type: string
-        description: Organization description
+        description: Organization email
+      phone:
+        type: string
+        description: Organization phone number
       is_verified:
         type: boolean
         readOnly: true
@@ -358,15 +428,22 @@ definitions:
       id:
         type: string
         description: ID of the organization as a UUID
+        readOnly: true
       name:
         type: string
         description: Name of the organization
-      description:
+      phone:
         type: string
-        description: Organization description
-      contact_details:
+        description: Organization phone number
+      email:
+        type: string
+        description: Organization email
+      administrator_details:
         allOf:
-          - $ref: '#/definitions/ContactDetails'
+          - $ref: '#/definitions/AdministratorDetails'
+      address:
+        allOf:
+          - $ref: '#/definitions/Address'
       is_verified:
         type: boolean
         readOnly: true
