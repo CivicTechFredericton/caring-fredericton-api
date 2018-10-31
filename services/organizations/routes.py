@@ -19,13 +19,10 @@ blueprint = Blueprint('organizations', __name__)
 
 @blueprint.route('/register-organization', methods=["POST"])
 @use_kwargs(organization_details_schema, locations=('json',))
-def add_organization(**kwargs):
+def register_organization(**kwargs):
     # TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
     name = kwargs['name']
     check_for_duplicate_name(name)
-    # if is_duplicate_name(name):
-    #     message = 'Organization with name {} already exists'.format(name)
-    #     raise errors.ResourceValidationError(messages={'name': [message]})
 
     organization = OrganizationModel(**kwargs)
     db.save_with_unique_id(organization)
@@ -90,17 +87,17 @@ def verify_organization(org_id, **kwargs):
         )
 
         # Create the Cognito user for organization's contact
-        contact_details = organization.contact_details
-        if contact_details:
-            email = contact_details['email']
+        administrator_details = organization.administrator
+        if administrator_details:
+            email = administrator_details['email']
             password = generate_random_password()
             create_user(email, password)
 
             # Create the user record in the database
             user = UserModel(organization_id=organization.id,
                              email=email,
-                             first_name=contact_details['first_name'],
-                             last_name=contact_details['last_name'])
+                             first_name=administrator_details['first_name'],
+                             last_name=administrator_details['last_name'])
             db.save_with_unique_id(user)
 
     response = jsonify(organization_details_schema.dump(organization).data)
@@ -114,23 +111,17 @@ def verify_organization(org_id, **kwargs):
 def update_organization(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
     name = kwargs['name']
-    email = kwargs['email'] 
-    phone = kwargs['phone']
-    administrator = kwargs['administrator']
-    address = kwargs['address']
+
     if organization.name != name:
         check_for_duplicate_name(name)
-        # if is_duplicate_name(name):
-        #     message = 'Organization with name {} already exists'.format(name)
-        #     raise errors.ResourceValidationError(messages={'name': [message]})
 
     organization.update(
         actions=[
             OrganizationModel.name.set(name),
-            OrganizationModel.email.set(email),
-            OrganizationModel.phone.set(phone),
-            OrganizationModel.administrator.set(administrator),
-            OrganizationModel.address.set(address),
+            OrganizationModel.email.set(kwargs['email'] ),
+            OrganizationModel.phone.set(kwargs['phone']),
+            OrganizationModel.administrator.set(kwargs['administrator']),
+            OrganizationModel.address.set(kwargs['address']),
             OrganizationModel.updated.set(OrganizationModel.get_current_time())
         ]
     )

@@ -60,11 +60,19 @@ paths:
           description: Authentication error
           schema:
             $ref: '#/definitions/AuthError'
+
+  /organizations/<org_id>/events:
     post:
       tags:
         - events
       summary: Creates a new event in the system for an organization
       parameters:
+      - in: path
+        name: org_id
+        description: >
+          Organization ID
+        required: true
+        type: string
       - in: body
         name: body
         description: >
@@ -110,10 +118,10 @@ paths:
         - organizations
       summary: Returns the details for an organization
       parameters:
-      - name: org_id
-        in: path
+      - in: path
+        name: org_id
         description: >
-          ID of organization for verification
+          Organization ID
         required: true
         type: string
       responses:
@@ -132,10 +140,10 @@ paths:
         - organizations
       summary: Update the details of an organization
       parameters:
-      - name: org_id
-        in: path
+      - in: path
+        name: org_id
         description: >
-          ID of organization for verification
+          Organization ID
         required: true
         type: string
       - in: body
@@ -163,10 +171,10 @@ paths:
         - organizations
       summary: Marks the organization as verified in the system
       parameters:
-      - name: org_id
-        in: path
+      - in: path
+        name: org_id
         description: >
-          ID of organization for verification
+          Organization ID
         required: true
         type: string
       - in: body
