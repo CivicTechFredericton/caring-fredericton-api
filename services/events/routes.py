@@ -1,8 +1,10 @@
 from core import db
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
+
 from services.events.model import EventModel
 from services.events.resource import event_schema
+from services.organizations.utils import get_organization_from_db
 
 blueprint = Blueprint('events', __name__)
 
@@ -18,8 +20,22 @@ def list_organizations():
     return jsonify(response)
 
 
-@blueprint.route('/events', methods=["POST"])
+# @blueprint.route('/events', methods=["POST"])
+@blueprint.route('/organizations/<org_id>/events', methods=["POST"])
 @use_kwargs(event_schema, locations=('json',))
+def create_organization_event(org_id, **kwargs):
+    organization = get_organization_from_db(org_id)
+    kwargs['owner'] = organization.id
+
+    return create_event(**kwargs)
+    # event = EventModel(**kwargs)
+    # db.save_with_unique_id(event)
+    #
+    # response = jsonify(event_schema.dump(event).data)
+    # response.status_code = 201
+    # return response
+
+
 def create_event(**kwargs):
     event = EventModel(**kwargs)
     db.save_with_unique_id(event)

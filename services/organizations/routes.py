@@ -5,6 +5,7 @@ from flask import Blueprint, jsonify
 from webargs import missing
 from webargs.flaskparser import use_kwargs
 
+from services.organizations.utils import check_for_duplicate_name, get_organization_from_db
 from services.organizations.model import OrganizationModel
 from services.organizations.resource import organization_details_schema, organization_list_schema,\
     organization_schema, organization_verification_schema
@@ -21,9 +22,10 @@ blueprint = Blueprint('organizations', __name__)
 def add_organization(**kwargs):
     # TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
     name = kwargs['name']
-    if is_duplicate_name(name):
-        message = 'Organization with name {} already exists'.format(name)
-        raise errors.ResourceValidationError(messages={'name': [message]})
+    check_for_duplicate_name(name)
+    # if is_duplicate_name(name):
+    #     message = 'Organization with name {} already exists'.format(name)
+    #     raise errors.ResourceValidationError(messages={'name': [message]})
 
     organization = OrganizationModel(**kwargs)
     db.save_with_unique_id(organization)
@@ -113,9 +115,10 @@ def update_organization(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
     name = kwargs['name']
     if organization.name != name:
-        if is_duplicate_name(name):
-            message = 'Organization with name {} already exists'.format(name)
-            raise errors.ResourceValidationError(messages={'name': [message]})
+        check_for_duplicate_name(name)
+        # if is_duplicate_name(name):
+        #     message = 'Organization with name {} already exists'.format(name)
+        #     raise errors.ResourceValidationError(messages={'name': [message]})
 
     organization.update(
         actions=[
@@ -128,13 +131,3 @@ def update_organization(org_id, **kwargs):
     return jsonify(organization_details_schema.dump(organization).data)
 
 
-def is_duplicate_name(org_name):
-    return len(list(OrganizationModel.scan(OrganizationModel.name == org_name))) > 0
-
-
-def get_organization_from_db(org_id):
-    try:
-        return OrganizationModel.get(hash_key=org_id)
-    except OrganizationModel.DoesNotExist:
-        message = 'Organization {} does not exist'.format(org_id)
-        raise errors.ResourceValidationError(messages={'name': [message]})
