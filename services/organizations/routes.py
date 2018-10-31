@@ -118,7 +118,7 @@ def update_organization(org_id, **kwargs):
     organization.update(
         actions=[
             OrganizationModel.name.set(name),
-            OrganizationModel.email.set(kwargs['email'] ),
+            OrganizationModel.email.set(kwargs['email']),
             OrganizationModel.phone.set(kwargs['phone']),
             OrganizationModel.administrator.set(kwargs['administrator']),
             OrganizationModel.address.set(kwargs['address']),
