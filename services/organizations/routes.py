@@ -88,19 +88,20 @@ def verify_organization(org_id, **kwargs):
         )
 
         # Create the Cognito user for organization's contact
-        contact_details = organization.contact_details
-        if contact_details:
-            email = contact_details['email']
+        administrator_details = organization.administrator
+        if administrator_details:
+            # Create the Cognito user for organization's administrator
+            email = administrator_details['email']
             password = generate_random_password()
             create_user(email, password)
 
             # Create the user record in the database
             user = UserModel(organization_id=organization.id,
                              email=email,
-                             first_name=contact_details['first_name'],
-                             last_name=contact_details['last_name'])
+                             first_name=administrator_details['first_name'],
+                             last_name=administrator_details['last_name'])
             db.save_with_unique_id(user)
-
+            
     response = jsonify(organization_details_schema.dump(organization).data)
     response.status_code = 201
 
