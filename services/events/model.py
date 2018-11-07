@@ -33,7 +33,7 @@ class EventModel(BaseModel):
         region = BaseModel.Meta.default_region
 
     id = UnicodeAttribute(hash_key=True)
-    owner = UnicodeAttribute()
+    owner = UnicodeAttribute(range_key=True)
     name = UnicodeAttribute()
     description = UnicodeAttribute(null=True)
     start_date = DateAttribute()
