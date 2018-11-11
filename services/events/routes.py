@@ -3,7 +3,8 @@ from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 
 from services.events.model import EventModel
-from services.events.resource import event_schema
+from services.events.resource import event_schema, event_details_schema
+from services.events.utils import set_occurrences
 from services.organizations.utils import get_organization_from_db
 
 blueprint = Blueprint('events', __name__)
@@ -33,10 +34,15 @@ def list_events_for_organization(org_id):
 @blueprint.route('/organizations/<org_id>/events', methods=["POST"])
 @use_kwargs(event_schema, locations=('json',))
 def create_organization_event(org_id, **kwargs):
-    organization = get_organization_from_db(org_id)
-    kwargs['owner'] = organization.id
+    event_args = {k: v for k, v in kwargs.items() if v is not None}
 
-    return create_event(**kwargs)
+    organization = get_organization_from_db(org_id)
+    event_args['owner'] = organization.id
+
+    # Set the number of occurrences
+    set_occurrences(event_args)
+
+    return create_event(**event_args)
 
 
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["PUT"])
@@ -67,11 +73,11 @@ def get_events_response(events_list):
     return jsonify(response)
 
 
-def create_event(**kwargs):
-    event = EventModel(**kwargs)
+def create_event(**event_args):
+    event = EventModel(**event_args)
     db.save_with_unique_id(event)
 
-    response = jsonify(event_schema.dump(event).data)
+    response = jsonify(event_details_schema.dump(event).data)
     response.status_code = 201
     return response
 
