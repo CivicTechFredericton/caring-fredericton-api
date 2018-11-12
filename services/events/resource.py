@@ -23,6 +23,9 @@ class RecurrenceDetails(ma.Schema):
                             validate=validate_recurrence)
     num_recurrences = fields.Int(missing=constants.MIN_RECURRENCE,
                                  validate=lambda val: constants.MIN_RECURRENCE <= val <= constants.MAX_RECURRENCE)
+    day_of_week = fields.Int(required=False, validate=lambda val: 1 <= val <= 7)
+    week_of_month = fields.Int(required=False, validate=lambda val: 1 <= val <= 4)
+    day_of_month = fields.Int(required=False, validate=lambda val: 1 <= val <= 31)
     # days_of_week = fields.List(fields.Int(), validate=lambda val: 1 <= val <= 7, required=False)
 
     class Meta:

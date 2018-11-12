@@ -75,7 +75,7 @@ def get_events_response(events_list):
 
 def create_event(**event_args):
     event = EventModel(**event_args)
-    db.save_with_unique_id(event)
+    # db.save_with_unique_id(event)
 
     response = jsonify(event_details_schema.dump(event).data)
     response.status_code = 201
