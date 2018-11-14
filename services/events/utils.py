@@ -5,6 +5,9 @@ from services.events import constants
 from webargs import missing
 
 
+# -------------------------
+# Set occurrences on save
+# -------------------------
 def set_occurrences(event_args):
     if event_args['is_recurring']:
         # Look for the recurrence details
@@ -61,6 +64,17 @@ def define_interval_increments(recurrence):
 
     # Get the function from switcher dictionary
     return switcher.get(recurrence, lambda: "Invalid Interval Value")
+
+
+# -------------------------
+# List occurrences on read
+# -------------------------
+def get_recurring_events_list(event):
+    occurrences = event.occurrences
+    if occurrences is not None:
+        return [get_recurring_event(event, occurrence) for occurrence in occurrences]
+    else:
+        return [event]
 
 
 def get_recurring_event(event, occurrence):

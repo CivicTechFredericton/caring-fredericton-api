@@ -4,7 +4,7 @@ from webargs.flaskparser import use_kwargs
 
 from services.events.model import EventModel
 from services.events.resource import event_schema, event_details_schema
-from services.events.utils import get_recurring_event, set_occurrences
+from services.events.utils import get_recurring_events_list, set_occurrences
 from services.organizations.utils import get_organization_from_db
 
 blueprint = Blueprint('events', __name__)
@@ -66,13 +66,9 @@ def get_events_response(events_list):
 
     # Filter the list of events
     for event in events_list:
-        occurrences = event.occurrences
-        if occurrences is not None:
-            # Include the recurring events
-            for val in occurrences:
-                add_to_response_list(response, get_recurring_event(event, val))
-        else:
-            add_to_response_list(response, event)
+        occurrences = get_recurring_events_list(event)
+        for occurrence in occurrences:
+            response.append(event_schema.dump(occurrence).data)
 
     return jsonify(response)
 
@@ -99,7 +95,3 @@ def get_event_from_db(event_id, owner):
     except EventModel.DoesNotExist:
         message = 'Event {} for owner {} does not exist'.format(event_id, owner)
         raise errors.ResourceValidationError(messages={'event': [message]})
-
-
-def add_to_response_list(response, event):
-    response.append(event_schema.dump(event).data)
