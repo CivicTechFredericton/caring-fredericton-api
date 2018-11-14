@@ -4,8 +4,6 @@ from services.events import constants
 from webargs import ValidationError
 
 
-# http://www.vertabelo.com/blog/technical-articles/again-and-again-managing-recurring-events-in-a-data-model
-# https://stackoverflow.com/questions/10890480/recurring-events-schema-w-mongodb
 class OccurrenceSchema(ma.Schema):
     date = fields.List(fields.Str())
 
@@ -37,20 +35,30 @@ class EventSchema(ma.Schema):
     owner = fields.Str(dump_only=True)
     name = fields.Str(required=True)
     description = fields.Str(missing="")
-    is_recurring = fields.Bool(missing=False)
-    recurrence_details = fields.Nested(RecurrenceDetails, required=False)
     start_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
     end_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
-    start_time = fields.Time(required=True, format=constants.EVENT_TIME_FORMAT)
-    end_time = fields.Time(required=True, format=constants.EVENT_TIME_FORMAT)
+    start_time = fields.DateTime(required=True, format=constants.EVENT_TIME_FORMAT)
+    end_time = fields.DateTime(required=True, format=constants.EVENT_TIME_FORMAT)
 
     class Meta:
         strict = True
 
 
 class EventDetailsSchema(EventSchema):
-    timezone = fields.Str(dump_only=True)
+    is_recurring = fields.Bool(missing=False)
+    recurrence_details = fields.Nested(RecurrenceDetails, required=False)
     occurrences = fields.List(fields.Str, dump_only=True)
+    timezone = fields.Str(dump_only=True)
+
+# class EventListSchema(ma.Schema):
+#     id = fields.Str()
+#     owner = fields.Str()
+#     name = fields.Str()
+#     description = fields.Str()
+#     start_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
+#     end_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
+#     start_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
+#     end_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
 
     class Meta:
         strict = True

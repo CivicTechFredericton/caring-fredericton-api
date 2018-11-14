@@ -137,7 +137,7 @@ paths:
         200:
           description: Event details updated
           schema:
-            $ref: '#/definitions/EventResponse'
+            $ref: '#/definitions/EventDetailsResponse'
         401:
           description: Authentication error
           schema:
@@ -496,6 +496,9 @@ definitions:
       name:
         type: string
         description: Name of the event
+      owner:
+        type: string
+        description: Owner identifier for the event
       description:
         type: string
         description: Description of the event
@@ -524,9 +527,16 @@ definitions:
       Response object containing the base event information
     type: object
     properties:
+      id:
+        type: string
+        description: ID of the event as a UUID
+        readOnly: true
       name:
         type: string
         description: Name of the event
+      owner:
+        type: string
+        description: Owner identifier for the event
       description:
         type: string
         description: Description of the event
@@ -542,21 +552,22 @@ definitions:
       end_time:
         type: string
         description: The end time for the event
-      is_recurring:
-        type: boolean
-        description: Flag indicating if the event is recurring
-      recurrence_details:
-        allOf:
-          - $ref: '#/definitions/RecurrenceDetails'
 
   EventDetailsResponse:
     description: >
       Response object containing the detailed event information
     type: object
     properties:
+      id:
+        type: string
+        description: ID of the event as a UUID
+        readOnly: true
       name:
         type: string
         description: Name of the event
+      owner:
+        type: string
+        description: Owner identifier for the event
       description:
         type: string
         description: Description of the event
