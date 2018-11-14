@@ -28,6 +28,7 @@ def list_events_for_organization(org_id):
     :return: The list of events associated to the organization
     """
     events_list = EventModel.scan(EventModel.owner == org_id)
+
     return get_events_response(events_list)
 
 
@@ -68,6 +69,9 @@ def get_events_response(events_list):
     response = []
 
     for event in events_list:
+        # Include the list of recurring events
+        if event.occurrences is not None:
+            print('Here')
         response.append(event_schema.dump(event).data)
 
     return jsonify(response)

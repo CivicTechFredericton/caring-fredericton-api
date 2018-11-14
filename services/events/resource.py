@@ -39,8 +39,8 @@ class EventSchema(ma.Schema):
     description = fields.Str(missing="")
     is_recurring = fields.Bool(missing=False)
     recurrence_details = fields.Nested(RecurrenceDetails, required=False)
-    start_date = fields.Date(required=True, format=constants.EVENT_DATE_FORMAT)
-    end_date = fields.Date(required=True, format=constants.EVENT_DATE_FORMAT)
+    start_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
+    end_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
     start_time = fields.Time(required=True, format=constants.EVENT_TIME_FORMAT)
     end_time = fields.Time(required=True, format=constants.EVENT_TIME_FORMAT)
 
