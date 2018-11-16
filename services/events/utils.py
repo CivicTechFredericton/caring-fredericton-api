@@ -1,3 +1,4 @@
+import copy
 import pendulum
 
 from core import errors
@@ -71,16 +72,24 @@ def define_interval_increments(recurrence):
 # -------------------------
 def get_recurring_events_list(event):
     occurrences = event.occurrences
-    if occurrences is not None:
+    if occurrences:
         return [get_recurring_event(event, occurrence) for occurrence in occurrences]
     else:
         return [event]
 
 
+def append_to_list(event_list, event):
+    event_list.append(event)
+    return event_list
+
+
 def get_recurring_event(event, occurrence):
     date = pendulum.parse(occurrence, strict=False)
-    event.start_date = date
-    event.end_date = date
 
-    return event
+    # Perform a deep copy of the event object so that unique objects are inserted in the list
+    new_event = copy.deepcopy(event)
+    new_event.start_date = date
+    new_event.end_date = date
+
+    return new_event
 

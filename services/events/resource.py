@@ -50,16 +50,6 @@ class EventDetailsSchema(EventSchema):
     occurrences = fields.List(fields.Str, dump_only=True)
     timezone = fields.Str(dump_only=True)
 
-# class EventListSchema(ma.Schema):
-#     id = fields.Str()
-#     owner = fields.Str()
-#     name = fields.Str()
-#     description = fields.Str()
-#     start_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
-#     end_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
-#     start_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
-#     end_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
-
     class Meta:
         strict = True
 
