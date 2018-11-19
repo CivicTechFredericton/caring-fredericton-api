@@ -109,6 +109,34 @@ paths:
           description: Missing required parameters
 
   /organizations/<org_id>/events/<event_id>:
+    get:
+      tags:
+        - events
+      summary: Gets the details of an existing event
+      parameters:
+        - in: path
+          name: org_id
+          description: >
+            Organization ID
+          required: true
+          type: string
+        - in: path
+          name: event_id
+          description: >
+            Event ID
+          required: true
+          type: string
+      responses:
+        200:
+          description: Event found
+          schema:
+            $ref: '#/definitions/EventDetailsResponse'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+        422:
+          description: Event for the organization does not exist in the system
     put:
       tags:
         - events
@@ -589,23 +617,9 @@ definitions:
       recurrence_details:
         allOf:
         - $ref: '#/definitions/RecurrenceDetails'
-      occurrences:
-        allOf:
-          - $ref: '#/definitions/Occurrences'
       timezone:
         type: string
         description: Timezone for the event as it was created
-
-  Occurrences:
-    description: >
-      Details of the event occurrences
-    type: object
-    properties:
-      occurrences:
-        type: array
-        items:
-          type: string
-        description: List of event occurrences
 
   PagedEvent:
     description: >

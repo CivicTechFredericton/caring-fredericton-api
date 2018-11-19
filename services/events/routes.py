@@ -42,6 +42,13 @@ def create_organization_event(org_id, **kwargs):
     return create_event(**event_args)
 
 
+@blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["GET"])
+def get_organization_event(org_id, event_id):
+    # TODO: Handle specific occurrence lookup
+    event = get_event_from_db(event_id, org_id)
+    return jsonify(event_details_schema.dump(event).data)
+
+
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["PUT"])
 @use_kwargs(event_details_schema, locations=('json',))
 def update_organization_event(org_id, event_id, **kwargs):
