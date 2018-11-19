@@ -53,7 +53,29 @@ paths:
       summary: Returns a list of all the events in the system
       responses:
         200:
-          description: Paged object of organizations
+          description: Paged object of events
+          schema:
+            $ref: '#/definitions/PagedEvent'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+
+  /organizations/<org_id>/events:
+    get:
+      tags:
+      - events
+      summary: Returns a list of all the events associated with the organization
+      parameters:
+      - in: path
+        name: org_id
+        description: >
+          Organization ID
+        required: true
+        type: string
+      responses:
+        200:
+          description: Paged object of events
           schema:
             $ref: '#/definitions/PagedEvent'
         401:
@@ -65,6 +87,12 @@ paths:
         - events
       summary: Creates a new event in the system for an organization
       parameters:
+      - in: path
+        name: org_id
+        description: >
+          Organization ID
+        required: true
+        type: string
       - in: body
         name: body
         description: >
@@ -79,8 +107,44 @@ paths:
             $ref: '#/definitions/EventResponse'
         422:
           description: Missing required parameters
+
+  /organizations/<org_id>/events/<event_id>:
+    put:
+      tags:
+        - events
+      summary: Updates an existing event
+      parameters:
+        - in: path
+          name: org_id
+          description: >
+            Organization ID
+          required: true
+          type: string
+        - in: path
+          name: event_id
+          description: >
+            Event ID
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: >
+            Event request details
+          required: true
+          schema:
+            $ref: "#/definitions/EventRequest"
+      reponses:
+        200:
+          description: Event details updated
+          schema:
+            $ref: '#/definitions/EventResponse'
+        401:
+          description: Authentication error
           schema:
             $ref: '#/definitions/AuthError'
+        422:
+          description: Event for the organization does not exist in the system
+
 
   /organizations:
     get:
@@ -110,10 +174,10 @@ paths:
         - organizations
       summary: Returns the details for an organization
       parameters:
-      - name: org_id
-        in: path
+      - in: path
+        name: org_id
         description: >
-          ID of organization for verification
+          Organization ID
         required: true
         type: string
       responses:
@@ -132,10 +196,10 @@ paths:
         - organizations
       summary: Update the details of an organization
       parameters:
-      - name: org_id
-        in: path
+      - in: path
+        name: org_id
         description: >
-          ID of organization for verification
+          Organization ID
         required: true
         type: string
       - in: body
@@ -146,7 +210,7 @@ paths:
         schema:
           $ref: "#/definitions/VerificationDetails"
       responses:
-        204:
+        200:
           description: Organization details updated
           schema:
             $ref: '#/definitions/OrganizationDetailsResponse'
@@ -163,10 +227,10 @@ paths:
         - organizations
       summary: Marks the organization as verified in the system
       parameters:
-      - name: org_id
-        in: path
+      - in: path
+        name: org_id
         description: >
-          ID of organization for verification
+          Organization ID
         required: true
         type: string
       - in: body

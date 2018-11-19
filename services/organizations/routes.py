@@ -5,8 +5,9 @@ from flask import Blueprint, jsonify
 from webargs import missing
 from webargs.flaskparser import use_kwargs
 
+from services.organizations.utils import check_for_duplicate_name, get_organization_from_db
 from services.organizations.model import OrganizationModel
-from services.organizations.resource import organization_details_schema, organization_list_schema,\
+from services.organizations.resource import organization_details_schema, organization_list_filters_schema,\
     organization_schema, organization_verification_schema
 from services.users.model import UserModel
 
@@ -18,12 +19,10 @@ blueprint = Blueprint('organizations', __name__)
 
 @blueprint.route('/register-organization', methods=["POST"])
 @use_kwargs(organization_details_schema, locations=('json',))
-def add_organization(**kwargs):
+def register_organization(**kwargs):
     # TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
     name = kwargs['name']
-    if is_duplicate_name(name):
-        message = 'Organization with name {} already exists'.format(name)
-        raise errors.ResourceValidationError(messages={'name': [message]})
+    check_for_duplicate_name(name)
 
     organization = OrganizationModel(**kwargs)
     db.save_with_unique_id(organization)
@@ -50,7 +49,7 @@ def add_organization(**kwargs):
 
 
 @blueprint.route('/organizations', methods=["GET"])
-@use_kwargs(organization_list_schema, locations=('query',))
+@use_kwargs(organization_list_filters_schema, locations=('query',))
 def list_organizations(**kwargs):
     is_verified = kwargs['is_verified']
     if is_verified is missing:
@@ -87,7 +86,6 @@ def verify_organization(org_id, **kwargs):
             ]
         )
 
-        # Create the Cognito user for organization's contact
         administrator_details = organization.administrator
         if administrator_details:
             # Create the Cognito user for organization's administrator
@@ -101,7 +99,7 @@ def verify_organization(org_id, **kwargs):
                              first_name=administrator_details['first_name'],
                              last_name=administrator_details['last_name'])
             db.save_with_unique_id(user)
-            
+
     response = jsonify(organization_details_schema.dump(organization).data)
     response.status_code = 201
 
@@ -113,22 +111,17 @@ def verify_organization(org_id, **kwargs):
 def update_organization(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
     name = kwargs['name']
-    email = kwargs['email'] 
-    phone = kwargs['phone']
-    administrator = kwargs['administrator']
-    address = kwargs['address']
+
     if organization.name != name:
-        if is_duplicate_name(name):
-            message = 'Organization with name {} already exists'.format(name)
-            raise errors.ResourceValidationError(messages={'name': [message]})
+        check_for_duplicate_name(name)
 
     organization.update(
         actions=[
             OrganizationModel.name.set(name),
-            OrganizationModel.email.set(email),
-            OrganizationModel.phone.set(phone),
-            OrganizationModel.administrator.set(administrator),
-            OrganizationModel.address.set(address),
+            OrganizationModel.email.set(kwargs['email']),
+            OrganizationModel.phone.set(kwargs['phone']),
+            OrganizationModel.administrator.set(kwargs['administrator']),
+            OrganizationModel.address.set(kwargs['address']),
             OrganizationModel.updated.set(OrganizationModel.get_current_time())
         ]
     )
@@ -136,13 +129,3 @@ def update_organization(org_id, **kwargs):
     return jsonify(organization_details_schema.dump(organization).data)
 
 
-def is_duplicate_name(org_name):
-    return len(list(OrganizationModel.scan(OrganizationModel.name == org_name))) > 0
-
-
-def get_organization_from_db(org_id):
-    try:
-        return OrganizationModel.get(hash_key=org_id)
-    except OrganizationModel.DoesNotExist:
-        message = 'Organization {} does not exist'.format(org_id)
-        raise errors.ResourceValidationError(messages={'name': [message]})

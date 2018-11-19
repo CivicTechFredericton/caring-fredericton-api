@@ -34,6 +34,6 @@ def save_with_unique_id(item):
     """
     item.id = str(uuid.uuid4())
     try:
-        item.save(id__null=True)
+        item.save()
     except PutError as e:
         logger.error('Unable to save the item {}'.format(str(e)))

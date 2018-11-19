@@ -10,6 +10,7 @@ class AdminSchema(ma.Schema):
     class Meta:
         strict = True
 
+
 class AddressSchema(ma.Schema):
     street = fields.Str(required=True)
     postal_code = fields.Str(required=True)
@@ -17,11 +18,16 @@ class AddressSchema(ma.Schema):
     province = fields.Str(required=True)
     country = fields.Str(required=True)
 
-class OrganizationListSchema(ma.Schema):
+    class Meta:
+        strict = True
+
+
+class OrganizationListFiltersSchema(ma.Schema):
     is_verified = fields.Bool(required=False)
 
     class Meta:
         strict = True
+
 
 class OrganizationSchema(ma.Schema):
     id = fields.Str(dump_only=True)
@@ -37,6 +43,7 @@ class OrganizationSchema(ma.Schema):
 class OrganizationDetailsSchema(OrganizationSchema):
     administrator = fields.Nested(AdminSchema, required=True)
     address = fields.Nested(AddressSchema, required=True)
+
     class Meta:
         strict = True
 
@@ -50,6 +57,6 @@ class OrganizationVerificationSchema(ma.Schema):
 
 
 organization_schema = OrganizationSchema()
-organization_list_schema = OrganizationListSchema()
+organization_list_filters_schema = OrganizationListFiltersSchema()
 organization_details_schema = OrganizationDetailsSchema()
 organization_verification_schema = OrganizationVerificationSchema()
