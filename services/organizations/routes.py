@@ -8,7 +8,7 @@ from webargs.flaskparser import use_kwargs
 from services.organizations.utils import check_for_duplicate_name, get_organization_from_db
 from services.organizations.model import OrganizationModel
 from services.organizations.resource import organization_details_schema, organization_list_filters_schema,\
-    organization_schema, organization_verification_schema
+    organization_schema, organization_update_schema, organization_verification_schema
 from services.users.model import UserModel
 
 import logging
@@ -81,8 +81,7 @@ def verify_organization(org_id, **kwargs):
         # Update the verification flag
         organization.update(
             actions=[
-                OrganizationModel.is_verified.set(is_verified),
-                OrganizationModel.updated.set(OrganizationModel.get_current_time())
+                OrganizationModel.is_verified.set(is_verified)
             ]
         )
 
@@ -107,25 +106,31 @@ def verify_organization(org_id, **kwargs):
 
 
 @blueprint.route('/organizations/<org_id>/', methods=["PUT"])
-@use_kwargs(organization_details_schema, locations=('json',))
+@use_kwargs(organization_update_schema, locations=('json',))
 def update_organization(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
-    name = kwargs['name']
 
-    if organization.name != name:
-        check_for_duplicate_name(name)
+    actions = []
+    name = kwargs['name']
+    if name:
+        if organization.name != name:
+            check_for_duplicate_name(name)
+        actions.append(OrganizationModel.name.set(name))
+
+    email = kwargs['email']
+    if email:
+        actions.append(OrganizationModel.email.set(email))
+
+    phone = kwargs['phone']
+    if phone:
+        actions.append(OrganizationModel.phone.set(phone))
+
+    address = kwargs['address']
+    if address:
+        actions.append(OrganizationModel.phone.set(address))
 
     organization.update(
-        actions=[
-            OrganizationModel.name.set(name),
-            OrganizationModel.email.set(kwargs['email']),
-            OrganizationModel.phone.set(kwargs['phone']),
-            OrganizationModel.administrator.set(kwargs['administrator']),
-            OrganizationModel.address.set(kwargs['address']),
-            OrganizationModel.updated.set(OrganizationModel.get_current_time())
-        ]
+        actions=actions
     )
 
     return jsonify(organization_details_schema.dump(organization).data)
-
-
