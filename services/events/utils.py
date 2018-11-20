@@ -2,7 +2,7 @@ import copy
 import pendulum
 
 from core import errors
-from datetime import datetime
+# from datetime import datetime
 from services.events import constants
 from webargs import missing
 
@@ -16,6 +16,7 @@ def set_occurrences(event_args):
     # time = event_args['start_time']
     # print(time.time())
 
+    start_date = pendulum.instance(event_args['start_date'])
     if event_args['is_recurring']:
         # Look for the recurrence details
         recurrence_details = event_args['recurrence_details']
@@ -23,26 +24,33 @@ def set_occurrences(event_args):
             message = 'Missing data for required field'
             raise errors.ResourceValidationError(messages={'recurrence_details': [message]})
 
-        start_date = pendulum.instance(event_args['start_date'])
         # print(start_date)
         occurrences, new_end_date = populate_occurrences(start_date, recurrence_details)
+    else:
+        # Populate a single occurrence
+        occurrences = [start_date.strftime(constants.EVENT_DATE_FORMAT)]
+        new_end_date = event_args['end_date']
 
-        # Update the occurrences and end date to reflect the last occurrence
-        event_args['occurrences'] = occurrences
-        event_args['end_date'] = new_end_date
+    # Update the occurrences and end date to reflect the last occurrence
+    event_args['occurrences'] = occurrences
+    event_args['end_date'] = new_end_date
 
     # Combine the times together into one date
-    full_start_date = datetime.combine(event_args['start_date'].date(), event_args['start_time'].time())
-    full_end_date = datetime.combine(event_args['end_date'].date(), event_args['end_time'].time())
+    # full_start_date = datetime.combine(event_args['start_date'].date(), event_args['start_time'].time())
+    # full_end_date = datetime.combine(event_args['end_date'].date(), event_args['end_time'].time())
 
     # print(full_start_date.isoformat())
-    event_args['full_start_date'] = pendulum.instance(full_start_date).to_iso8601_string()
-    print(full_start_date.strftime('%Y-%m-%dT%H:%M:%S.%f%z'))
-    print(event_args['full_start_date'])
+    # event_args['full_start_date'] = pendulum.instance(full_start_date).to_iso8601_string()
+    # event_args['full_start_date'] = start_date.timestamp()
+    # print(start_date)
+    # print(start_date.timestamp())
+    # print(full_start_date.strftime('%Y-%m-%dT%H:%M:%S.%f%z'))
+    # print(event_args['full_start_date'])
     # print(full_start_date.date())
     # print(full_start_date.time())
-    event_args['full_end_date'] = pendulum.instance(full_end_date).to_iso8601_string()
-    print(event_args['full_end_date'])
+    # event_args['full_end_date'] = pendulum.instance(full_end_date).to_iso8601_string()
+    # event_args['full_end_date'] = pendulum.instance(full_end_date).timestamp()
+    # print(event_args['full_end_date'])
 
 
 def populate_occurrences(start_date, recurrence_details):

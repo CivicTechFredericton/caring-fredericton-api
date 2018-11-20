@@ -14,7 +14,7 @@ from webargs import ValidationError
 
 def validate_recurrence(val):
     if not constants.RecurrenceType.has_value(val):
-        raise ValidationError('Invalid value, must be one of {}'.format(constants.RecurrenceType.list_values()))
+        raise ValidationError('Invalid value, must be one of {}'.format(constants.RecurrenceType.values()))
 
 
 class RecurrenceDetails(ma.Schema):

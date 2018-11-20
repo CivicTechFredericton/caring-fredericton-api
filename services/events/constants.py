@@ -14,7 +14,7 @@ class RecurrenceType(Enum):
     MONTHLY = 'MONTHLY'
 
     @classmethod
-    def list_values(cls):
+    def values(cls):
         values = [item.value for item in RecurrenceType]
         return ', '.join(values)
 

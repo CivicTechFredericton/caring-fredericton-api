@@ -9,7 +9,7 @@ logger = logging.getLogger(__name__)
 
 
 def get_time_now():
-    return pendulum.now().in_timezone('UTC').timestamp()
+    return pendulum.now().in_timezone('UTC')
 
 
 class BaseModel(Model):
@@ -17,11 +17,11 @@ class BaseModel(Model):
         abstract = True
         default_region = 'ca-central-1'
 
-    created_at = NumberAttribute()
-    # UTCDateTimeAttribute(default=get_time_now())
+    # created_at = NumberAttribute()
+    created_at = UTCDateTimeAttribute()
     created_by = UnicodeAttribute()
-    updated_at = NumberAttribute()
-    # UTCDateTimeAttribute(default=get_time_now())
+    # updated_at = NumberAttribute()
+    updated_at = UTCDateTimeAttribute()
     updated_by = UnicodeAttribute()
 
     def save(self, *args, **kwargs):

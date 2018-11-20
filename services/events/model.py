@@ -1,8 +1,21 @@
 import pendulum
 
 from core.model import BaseModel
-from pynamodb.attributes import BooleanAttribute, JSONAttribute, UnicodeAttribute
+from pynamodb.attributes import BooleanAttribute, JSONAttribute, UnicodeAttribute, NumberAttribute
+from pynamodb.constants import STRING
+from pynamodb.expressions.operand import Path
 from services.events import constants
+
+
+class RecurrenceTypeEnumUnicodeAttribute(UnicodeAttribute):
+    attr_type = STRING
+
+    def serialize(self, value):
+        if value not in constants.RecurrenceType.values():
+            raise ValueError(
+                f"{self.attr_name} must be one of {RECURRENCE_TYPE}, not '{value}'")
+        else:
+            return UnicodeAttribute.serialize(self, value)
 
 
 class DateAttribute(UnicodeAttribute):
@@ -14,6 +27,12 @@ class DateAttribute(UnicodeAttribute):
 
     def deserialize(self, value):
         return pendulum.parse(value)
+
+    # def __ge__(self, other):
+    #     return Path.__ge__(other)
+    #
+    # def __le__(self, other):
+    #     return Path.__le__(other)
 
 
 class TimeAttribute(UnicodeAttribute):
@@ -38,11 +57,11 @@ class EventModel(BaseModel):
     description = UnicodeAttribute(null=True)
     start_date = DateAttribute()
     end_date = DateAttribute()
-    full_start_date = UnicodeAttribute()
+    # full_start_date = NumberAttribute()
     start_time = TimeAttribute()
     end_time = TimeAttribute()
-    full_end_date = UnicodeAttribute()
+    # full_end_date = NumberAttribute()
     is_recurring = BooleanAttribute(default=False)
     recurrence_details = JSONAttribute(null=True)
-    occurrences = JSONAttribute(null=True)
+    occurrences = JSONAttribute(default=lambda: [])
     timezone = UnicodeAttribute(default='AST')
