@@ -2,7 +2,7 @@ import pendulum
 
 from core.auth import get_current_user_id
 from pynamodb.models import Model
-from pynamodb.attributes import NumberAttribute, UnicodeAttribute, UTCDateTimeAttribute
+from pynamodb.attributes import UnicodeAttribute, UTCDateTimeAttribute
 
 import logging
 logger = logging.getLogger(__name__)
@@ -17,10 +17,8 @@ class BaseModel(Model):
         abstract = True
         default_region = 'ca-central-1'
 
-    # created_at = NumberAttribute()
     created_at = UTCDateTimeAttribute()
     created_by = UnicodeAttribute()
-    # updated_at = NumberAttribute()
     updated_at = UTCDateTimeAttribute()
     updated_by = UnicodeAttribute()
 
@@ -48,8 +46,3 @@ class BaseModel(Model):
         actions.append(BaseModel.updated_by.set(get_current_user_id()))
 
         return Model.update(self, attributes, actions, condition, conditional_operator, **expected_values)
-
-    # @staticmethod
-    # def get_current_time():
-    #     return get_time_now()
-

@@ -4,14 +4,6 @@ from services.events import constants
 from webargs import ValidationError
 
 
-# class OccurrenceSchema(ma.Schema):
-#     occurrence = fields.Int()
-#     date = fields.Str()
-#
-#     class Meta:
-#         strict = True
-
-
 def validate_recurrence(val):
     if not constants.RecurrenceType.has_value(val):
         raise ValidationError('Invalid value, must be one of {}'.format(constants.RecurrenceType.values()))
@@ -49,7 +41,6 @@ class EventDetailsSchema(EventSchema):
     is_recurring = fields.Bool(missing=False)
     recurrence_details = fields.Nested(RecurrenceDetails, required=False)
     # occurrences = fields.List(fields.Str(), dump_only=True)
-    # occurrences = fields.Nested(OccurrenceSchema, dump_only=True)
     timezone = fields.Str(dump_only=True)
 
     class Meta:
