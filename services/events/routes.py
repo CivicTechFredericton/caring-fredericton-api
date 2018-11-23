@@ -72,13 +72,14 @@ def get_events_response(events_list):
     response = []
 
     import pendulum
-    filter_date = pendulum.parse('2018-11-30')
+    start_date = pendulum.today()
+    end_date = start_date.add(days=14)
 
     # Filter the list of events
     for event in events_list:
         occurrences = get_recurring_events_list(event)
         for occurrence in occurrences:
-            if occurrence.start_date >= filter_date:
+            if start_date <= occurrence.start_date and occurrence.end_date <= end_date:
                 response.append(event_schema.dump(occurrence).data)
 
     return jsonify(response)
