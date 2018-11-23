@@ -40,7 +40,7 @@ class EventSchema(ma.Schema):
 class EventDetailsSchema(EventSchema):
     is_recurring = fields.Bool(missing=False)
     recurrence_details = fields.Nested(RecurrenceDetails, required=False)
-    # occurrences = fields.List(fields.Str(), dump_only=True)
+    occurrences = fields.List(fields.Str(), dump_only=True)
     timezone = fields.Str(dump_only=True)
 
     class Meta:
