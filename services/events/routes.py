@@ -4,7 +4,7 @@ from webargs.flaskparser import use_kwargs
 
 from services.events.model import EventModel
 from services.events.resource import event_schema, event_details_schema, event_filters_schema
-from services.events.utils import get_recurring_events_list, set_occurrences
+from services.events.utils import get_recurring_events_list, set_filter_dates, set_occurrences
 from services.organizations.utils import get_organization_from_db
 
 blueprint = Blueprint('events', __name__)
@@ -74,9 +74,12 @@ def update_organization_event(org_id, event_id, **kwargs):
 def get_events_response(events_list, **kwargs):
     response = []
 
+    # Set the filters
+    filter_start_date, filter_end_date = set_filter_dates(kwargs['start_date'], kwargs['end_date'])
+
     # Filter the list of events
     for event in events_list:
-        occurrences = get_recurring_events_list(event, kwargs['start_date'], kwargs['end_date'])
+        occurrences = get_recurring_events_list(event, filter_start_date, filter_end_date)
         for occurrence in occurrences:
             # if filter_start_date <= occurrence.start_date <= filter_end_date or \
             #         filter_start_date <= occurrence.end_date <= filter_end_date:

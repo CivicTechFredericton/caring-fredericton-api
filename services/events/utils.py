@@ -7,6 +7,23 @@ from webargs import missing
 
 
 # -------------------------
+# Handle filter conditions
+# -------------------------
+def set_filter_dates(start_date, end_date):
+    if not start_date and not end_date:
+        filter_date = pendulum.today()
+        return filter_date, filter_date.add(days=7)
+    if start_date and not end_date:
+        filter_date = pendulum.instance(start_date)
+        return filter_date, filter_date.add(days=7)
+    if not start_date and end_date:
+        filter_date = pendulum.instance(end_date)
+        return filter_date.subtract(days=7), filter_date
+    if start_date and end_date:
+        return pendulum.instance(start_date), pendulum.instance(end_date)
+
+
+# -------------------------
 # Set occurrences on save
 # -------------------------
 def set_occurrences(event_args):
@@ -78,10 +95,10 @@ def define_interval_increments(recurrence):
 # List occurrences on read
 # -------------------------
 def get_recurring_events_list(event, start_date, end_date):
-    filter_start_date, filter_end_date = set_filter_dates(start_date, end_date)
+    # print(filter_end_date.int_timestamp())
 
     return [get_recurring_event(event, occurrence) for occurrence in event.occurrences
-            if within_date_range(occurrence, filter_start_date, filter_end_date)]
+            if within_date_range(occurrence, start_date, end_date)]
     # occurrences = event.occurrences
     # occurrences_list = []
     # for occurrence in event.occurrences:
@@ -96,20 +113,6 @@ def get_recurring_events_list(event, start_date, end_date):
     #     return [get_recurring_event(event, occurrence) for occurrence in occurrences]
     # else:
     #     return [event]
-
-
-def set_filter_dates(start_date, end_date):
-    if not start_date and not end_date:
-        filter_date = pendulum.today()
-        return filter_date, filter_date.add(days=7)
-    if start_date and not end_date:
-        filter_date = pendulum.instance(start_date)
-        return filter_date, filter_date.add(days=7)
-    if not start_date and end_date:
-        filter_date = pendulum.instance(end_date)
-        return filter_date.subtract(days=7), filter_date
-    if start_date and end_date:
-        return pendulum.instance(start_date), pendulum.instance(end_date)
 
 
 def within_date_range(occurrence, start_date, end_date):
