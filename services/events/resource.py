@@ -47,6 +47,15 @@ class EventDetailsSchema(EventSchema):
         strict = True
 
 
+class EventFiltersSchema(ma.Schema):
+    start_date = fields.DateTime(required=False, missing=None, format=constants.EVENT_DATE_FORMAT)
+    end_date = fields.DateTime(required=False, missing=None, format=constants.EVENT_DATE_FORMAT)
+
+    class Meta:
+        strict = True
+
+
 event_schema = EventSchema()
 event_details_schema = EventDetailsSchema()
+event_filters_schema = EventFiltersSchema()
 
