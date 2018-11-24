@@ -1,4 +1,4 @@
-import pendulum
+# import pendulum
 
 from core.auth import get_current_user_id
 from pynamodb.models import Model
@@ -9,7 +9,9 @@ logger = logging.getLogger(__name__)
 
 
 def get_time_now():
-    return pendulum.now().in_timezone('UTC')
+    from datetime import datetime
+    return datetime.utcnow()
+    # return pendulum.now().in_timezone('UTC')
 
 
 class BaseModel(Model):

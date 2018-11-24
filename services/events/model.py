@@ -1,4 +1,6 @@
-import pendulum
+# import pendulum
+# import datetime
+from dateutil import parser
 
 from core.model import BaseModel
 from pynamodb.attributes import BooleanAttribute, ListAttribute, MapAttribute, NumberAttribute, UnicodeAttribute
@@ -22,6 +24,12 @@ class RecurrenceDetails(MapAttribute):
     num_recurrences = NumberAttribute()
 
 
+class OccurrenceDetail(MapAttribute):
+    occurrence_num = NumberAttribute()
+    start_date = NumberAttribute()
+    end_date = NumberAttribute()
+
+
 class DateAttribute(UnicodeAttribute):
     """
     This class will serializer/deserialize any date Python object and store as a unicode attribute
@@ -32,7 +40,7 @@ class DateAttribute(UnicodeAttribute):
         return super(DateAttribute, self).serialize(value.strftime(constants.EVENT_DATE_FORMAT))
 
     def deserialize(self, value):
-        return pendulum.parse(value)
+        return parser.parse(value)
 
 
 class TimeAttribute(UnicodeAttribute):
@@ -45,7 +53,7 @@ class TimeAttribute(UnicodeAttribute):
         return super(TimeAttribute, self).serialize(value.strftime(constants.EVENT_TIME_FORMAT))
 
     def deserialize(self, value):
-        return pendulum.parse(value)
+        return parser.parse(value)
 
 
 class EventModel(BaseModel):

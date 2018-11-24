@@ -1,9 +1,13 @@
 import copy
-import pendulum
+# import pendulum
+
+from datetime import datetime
+from dateutil import parser
+from dateutil.relativedelta import relativedelta
+from webargs import missing
 
 from core import errors
 from services.events import constants
-from webargs import missing
 
 
 # -------------------------
@@ -11,23 +15,32 @@ from webargs import missing
 # -------------------------
 def set_filter_dates(start_date, end_date):
     if not start_date and not end_date:
-        filter_date = pendulum.today()
-        return filter_date, filter_date.add(days=7)
+        today = datetime.today()
+        filter_date = datetime(today.year, today.month, today.day)  # .strftime('%Y-%m-%d')
+        # print(filter_date + relativedelta(days=+7))
+        # filter_date = pendulum.today()
+        # return filter_date, filter_date.add(days=7)
+        return filter_date, filter_date + relativedelta(days=+7)
     if start_date and not end_date:
-        filter_date = pendulum.instance(start_date)
-        return filter_date, filter_date.add(days=7)
+        return start_date, start_date + relativedelta(days=+7)
+        # filter_date = pendulum.instance(start_date)
+        # return filter_date, filter_date.add(days=7)
     if not start_date and end_date:
-        filter_date = pendulum.instance(end_date)
-        return filter_date.subtract(days=7), filter_date
-    if start_date and end_date:
-        return pendulum.instance(start_date), pendulum.instance(end_date)
+        return end_date + relativedelta(days=-7), end_date
+        # filter_date = pendulum.instance(end_date)
+        # return filter_date.subtract(days=7), filter_date
+    # if start_date and end_date:
+    #     return pendulum.instance(start_date), pendulum.instance(end_date)
+
+    return start_date, end_date
 
 
 # -------------------------
 # Set occurrences on save
 # -------------------------
 def set_occurrences(event_args):
-    start_date = pendulum.instance(event_args['start_date'])
+    # start_date = pendulum.instance(event_args['start_date'])
+    start_date = event_args['start_date']
     new_end_date = event_args['end_date']
 
     if event_args['is_recurring']:
@@ -55,12 +68,27 @@ def populate_occurrences(start_date, recurrence_details):
     occurrences = []
 
     for i in range(recurrence_details['num_recurrences']):
-        last_occurrence_date = start_date.add(days=i*day_separation,
-                                              weeks=i*week_separation,
-                                              months=i*month_separation)
+        # from dateutil.relativedelta import relativedelta
+        # last_occurrence_date = start_date + relativedelta(day=i*day_separation,
+        #                                                   weeks=i*week_separation,
+        #                                                   months=i*month_separation)
+
+        last_occurrence_date = set_occurrence_date(start_date,
+                                                   i*day_separation,
+                                                   i*week_separation,
+                                                   i*month_separation)
+        # last_occurrence_date = start_date.add(days=i*day_separation,
+        #                                       weeks=i*week_separation,
+        #                                       months=i*month_separation)
         occurrences.append(last_occurrence_date.strftime(constants.EVENT_DATE_FORMAT))
 
     return occurrences, last_occurrence_date
+
+
+def set_occurrence_date(start_date, day_separation, week_separation, month_separation):
+    return start_date + relativedelta(day=+day_separation,
+                                      weeks=+week_separation,
+                                      months=+month_separation)
 
 
 def base_daily_interval():
@@ -83,7 +111,7 @@ def define_interval_increments(recurrence):
     switcher = {
         constants.RecurrenceType.DAILY.value: base_daily_interval(),
         constants.RecurrenceType.WEEKLY.value: base_weekly_interval(),
-        constants.RecurrenceType.BI_WEEKLY: base_bi_weekly_interval(),
+        constants.RecurrenceType.BI_WEEKLY.value: base_bi_weekly_interval(),
         constants.RecurrenceType.MONTHLY.value: base_monthly_interval()
     }
 
@@ -116,12 +144,17 @@ def get_recurring_events_list(event, start_date, end_date):
 
 
 def within_date_range(occurrence, start_date, end_date):
-    date = pendulum.parse(occurrence, strict=False)
+    date = parser.parse(occurrence)
+    # print(datetime.fromtimestamp(start_date.timestamp()))
+    # print(f'Date {date}, Start Date {start_date}, End Date {end_date}')
+    # date = pendulum.parse(occurrence, strict=False)
+    # print(f'Comparing {start_date.timestamp()} <= {date.timestamp()} <= {end_date.timestamp()}')
     return start_date <= date <= end_date
 
 
 def get_recurring_event(event, occurrence):
-    date = pendulum.parse(occurrence, strict=False)
+    date = parser.parse(occurrence)
+    # date = pendulum.parse(occurrence, strict=False)
 
     # Perform a deep copy of the event object so that unique objects are inserted in the list
     new_event = copy.deepcopy(event)

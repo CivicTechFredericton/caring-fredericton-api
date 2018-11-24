@@ -29,7 +29,6 @@ def list_events_for_organization(org_id, **kwargs):
     :param org_id: The organization identifier
     :return: The list of events associated to the organization
     """
-    # date_range_filters
     events_list = EventModel.scan(EventModel.owner == org_id)
     return get_events_response(events_list, **kwargs)
 
@@ -97,7 +96,7 @@ def create_event(**event_args):
 
     # Save the object
     event = EventModel(**event_args)
-    db.save_with_unique_id(event)
+    # db.save_with_unique_id(event)
 
     response = jsonify(event_details_schema.dump(event).data)
     response.status_code = 201
