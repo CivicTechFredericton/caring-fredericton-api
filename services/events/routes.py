@@ -38,6 +38,7 @@ def list_events_for_organization(org_id, **kwargs):
 def create_organization_event(org_id, **kwargs):
     event_args = {k: v for k, v in kwargs.items() if v is not None}
 
+    # Verify organization exists
     organization = get_organization_from_db(org_id)
     event_args['owner'] = organization.id
 
@@ -76,12 +77,9 @@ def get_events_response(events_list, **kwargs):
     # Set the filters
     filter_start_date, filter_end_date = set_filter_dates(kwargs['start_date'], kwargs['end_date'])
 
-    # Filter the list of events
     for event in events_list:
         occurrences = get_recurring_events_list(event, filter_start_date, filter_end_date)
         for occurrence in occurrences:
-            # if filter_start_date <= occurrence.start_date <= filter_end_date or \
-            #         filter_start_date <= occurrence.end_date <= filter_end_date:
             response.append(event_schema.dump(occurrence).data)
 
     return jsonify(response)
@@ -96,7 +94,7 @@ def create_event(**event_args):
 
     # Save the object
     event = EventModel(**event_args)
-    # db.save_with_unique_id(event)
+    db.save_with_unique_id(event)
 
     response = jsonify(event_details_schema.dump(event).data)
     response.status_code = 201

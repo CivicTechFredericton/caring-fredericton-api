@@ -40,55 +40,143 @@ def set_filter_dates(start_date, end_date):
 # -------------------------
 def set_occurrences(event_args):
     # start_date = pendulum.instance(event_args['start_date'])
-    start_date = event_args['start_date']
-    new_end_date = event_args['end_date']
+    # start_date = event_args['start_date']
+    # end_date = event_args['end_date']
 
     if event_args['is_recurring']:
         # Look for the recurrence details
-        recurrence_details = event_args['recurrence_details']
-        if recurrence_details is missing:
-            message = 'Missing data for required field'
-            raise errors.ResourceValidationError(messages={'recurrence_details': [message]})
+        # recurrence_details = event_args['recurrence_details']
+        # if recurrence_details is missing:
+        #     message = 'Missing data for required field'
+        #     raise errors.ResourceValidationError(messages={'recurrence_details': [message]})
 
-        occurrences, new_end_date = populate_occurrences(start_date, recurrence_details)
+        event_args['occurrences'] = populate_occurrences(event_args)
+        # occurrences, end_date = populate_occurrences(start_date, end_date, recurrence_details)
     else:
         # Populate a single occurrence
         event_args['recurrence_details'] = None
-        occurrences = [start_date.strftime(constants.EVENT_DATE_FORMAT)]
+        # occurrences = [start_date.strftime(constants.EVENT_DATE_FORMAT)]
+        event_args['occurrences'] = [get_occurrence_entry(1, event_args['start_date'], event_args['end_date'])]
 
     # Update the occurrences and end date to reflect the last occurrence
-    event_args['occurrences'] = occurrences
-    event_args['end_date'] = new_end_date
+    # event_args['occurrences'] = occurrences
+    # event_args['end_date'] = end_date
 
 
-def populate_occurrences(start_date, recurrence_details):
+def populate_occurrences(event_args):
+    # Look for the recurrence details
+    recurrence_details = event_args['recurrence_details']
+    if recurrence_details is missing:
+        message = 'Missing data for required field'
+        raise errors.ResourceValidationError(messages={'recurrence_details': [message]})
+
     day_separation, week_separation, month_separation = define_interval_increments(recurrence_details['recurrence'])
+    start_date = event_args['start_date']
+    end_date = event_args['end_date']
 
-    last_occurrence_date = start_date
     occurrences = []
 
     for i in range(recurrence_details['num_recurrences']):
-        # from dateutil.relativedelta import relativedelta
-        # last_occurrence_date = start_date + relativedelta(day=i*day_separation,
-        #                                                   weeks=i*week_separation,
-        #                                                   months=i*month_separation)
+        curr_start_date, curr_end_date = set_occurrence_date(start_date,
+                                                             end_date,
+                                                             i * day_separation,
+                                                             i * week_separation,
+                                                             i * month_separation)
 
-        last_occurrence_date = set_occurrence_date(start_date,
-                                                   i*day_separation,
-                                                   i*week_separation,
-                                                   i*month_separation)
-        # last_occurrence_date = start_date.add(days=i*day_separation,
-        #                                       weeks=i*week_separation,
-        #                                       months=i*month_separation)
-        occurrences.append(last_occurrence_date.strftime(constants.EVENT_DATE_FORMAT))
+        occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_end_date))
 
-    return occurrences, last_occurrence_date
+    event_args['end_date'] = curr_end_date
+
+    return occurrences
 
 
-def set_occurrence_date(start_date, day_separation, week_separation, month_separation):
-    return start_date + relativedelta(day=+day_separation,
-                                      weeks=+week_separation,
-                                      months=+month_separation)
+# def populate_occurrences(start_date, end_date, recurrence_details):
+#     day_separation, week_separation, month_separation = define_interval_increments(recurrence_details['recurrence'])
+#
+#     # curr_start_date = start_date
+#     # last_occurrence_date = end_date
+#     occurrences = []
+#
+#     for i in range(recurrence_details['num_recurrences']):
+#         # from dateutil.relativedelta import relativedelta
+#         # last_occurrence_date = start_date + relativedelta(day=i*day_separation,
+#         #                                                   weeks=i*week_separation,
+#         #                                                   months=i*month_separation)
+#
+#         curr_start_date, last_occurrence_date = set_occurrence_date(start_date,
+#                                                                     end_date,
+#                                                                     i * day_separation,
+#                                                                     i * week_separation,
+#                                                                     i * month_separation)
+#         # curr_start_date = set_occurrence_date(start_date,
+#         #                                       i*day_separation,
+#         #                                       i*week_separation,
+#         #                                       i*month_separation)
+#         #
+#         # last_occurrence_date = set_occurrence_date(end_date,
+#         #                                            i*day_separation,
+#         #                                            i*week_separation,
+#         #                                            i*month_separation)
+#
+#         occurrences.append(get_occurrence_entry(i+1, curr_start_date, last_occurrence_date))
+#         # {'occurrence_num': i+1,
+#         #                     'start_date': curr_start_date,
+#         #                     'end_date': last_occurrence_date})
+#
+#         # occurrence_num = i
+#         # last_occurrence_date = start_date.add(days=i*day_separation,
+#         # occurrences.update({occurrence_num: dict(start_date=curr_start_date.strftime(constants.EVENT_DATE_FORMAT),
+#         #                                          end_date=last_occurrence_date.strftime(constants.EVENT_DATE_FORMAT))})
+#         #                                       weeks=i*week_separation,
+#         #                                       months=i*month_separation)
+#
+#         # occurrences.append(last_occurrence_date.strftime(constants.EVENT_DATE_FORMAT))
+#
+#     return occurrences, last_occurrence_date
+
+
+def get_occurrence_entry(occurrence_num, start_date, end_date):
+    return {
+        'occurrence_num': occurrence_num,
+        'start_date': start_date,
+        'end_date': end_date
+    }
+
+# def populate_occurrences(start_date, recurrence_details):
+#     day_separation, week_separation, month_separation = define_interval_increments(recurrence_details['recurrence'])
+#
+#     last_occurrence_date = start_date
+#     occurrences = []
+#
+#     for i in range(recurrence_details['num_recurrences']):
+#         # from dateutil.relativedelta import relativedelta
+#         # last_occurrence_date = start_date + relativedelta(day=i*day_separation,
+#         #                                                   weeks=i*week_separation,
+#         #                                                   months=i*month_separation)
+#
+#         last_occurrence_date = set_occurrence_date(start_date,
+#                                                    i*day_separation,
+#                                                    i*week_separation,
+#                                                    i*month_separation)
+#         # last_occurrence_date = start_date.add(days=i*day_separation,
+#         #                                       weeks=i*week_separation,
+#         #                                       months=i*month_separation)
+#         occurrences.append(last_occurrence_date.strftime(constants.EVENT_DATE_FORMAT))
+#
+#     return occurrences, last_occurrence_date
+
+
+def set_occurrence_date(start_date, end_date, day_separation, week_separation, month_separation):
+    new_start_date = start_date + relativedelta(day=+day_separation,
+                                                weeks=+week_separation,
+                                                months=+month_separation)
+
+    new_end_date = end_date + relativedelta(day=+day_separation,
+                                            weeks=+week_separation,
+                                            months=+month_separation)
+
+    return new_start_date, new_end_date
+
 
 
 def base_daily_interval():
@@ -144,22 +232,28 @@ def get_recurring_events_list(event, start_date, end_date):
 
 
 def within_date_range(occurrence, start_date, end_date):
-    date = parser.parse(occurrence)
+    # print(occurrence.start_date)
+    # date = occurrence.start_date
+    # date = parser.parse(occurrence.start_date)
+    # occurrence_start_date = occurrence.start_date
+    # occurrence_start_date = occurrence.start_date
     # print(datetime.fromtimestamp(start_date.timestamp()))
     # print(f'Date {date}, Start Date {start_date}, End Date {end_date}')
     # date = pendulum.parse(occurrence, strict=False)
-    # print(f'Comparing {start_date.timestamp()} <= {date.timestamp()} <= {end_date.timestamp()}')
-    return start_date <= date <= end_date
+    return start_date <= occurrence.start_date <= end_date or \
+           start_date <= occurrence.end_date <= end_date
 
 
 def get_recurring_event(event, occurrence):
-    date = parser.parse(occurrence)
+    # start_date = occurrence.start_date
+    # end_date = occurrence.end_date
+    # date = parser.parse(occurrence.start_date)
     # date = pendulum.parse(occurrence, strict=False)
 
     # Perform a deep copy of the event object so that unique objects are inserted in the list
     new_event = copy.deepcopy(event)
-    new_event.start_date = date
-    new_event.end_date = date
+    new_event.start_date = occurrence.start_date
+    new_event.end_date = occurrence.end_date
 
     return new_event
 

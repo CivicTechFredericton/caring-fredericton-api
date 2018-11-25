@@ -23,6 +23,12 @@ class RecurrenceDetails(ma.Schema):
         strict = True
 
 
+class OccurrenceDetails(ma.Schema):
+    occurrence_num = fields.Int(required=True)
+    start_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
+    end_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
+
+
 class EventSchema(ma.Schema):
     id = fields.Str(dump_only=True)
     owner = fields.Str(dump_only=True)
@@ -40,7 +46,7 @@ class EventSchema(ma.Schema):
 class EventDetailsSchema(EventSchema):
     is_recurring = fields.Bool(missing=False)
     recurrence_details = fields.Nested(RecurrenceDetails, required=False)
-    occurrences = fields.List(fields.Str(), dump_only=True)
+    occurrences = fields.Nested(OccurrenceDetails, many=True, missing=[], default=[], dump_only=True)
     timezone = fields.Str(dump_only=True)
 
     class Meta:

@@ -24,12 +24,6 @@ class RecurrenceDetails(MapAttribute):
     num_recurrences = NumberAttribute()
 
 
-class OccurrenceDetail(MapAttribute):
-    occurrence_num = NumberAttribute()
-    start_date = NumberAttribute()
-    end_date = NumberAttribute()
-
-
 class DateAttribute(UnicodeAttribute):
     """
     This class will serializer/deserialize any date Python object and store as a unicode attribute
@@ -56,6 +50,12 @@ class TimeAttribute(UnicodeAttribute):
         return parser.parse(value)
 
 
+class OccurrenceDetail(MapAttribute):
+    occurrence_num = NumberAttribute()
+    start_date = DateAttribute()
+    end_date = DateAttribute()
+
+
 class EventModel(BaseModel):
     class Meta:
         simple_name = 'event'
@@ -71,5 +71,5 @@ class EventModel(BaseModel):
     end_time = TimeAttribute()
     is_recurring = BooleanAttribute(default=False)
     recurrence_details = RecurrenceDetails(null=True, default=lambda: [])
-    occurrences = ListAttribute(default=lambda: [])
+    occurrences = ListAttribute(of=OccurrenceDetail, default=lambda: [])
     timezone = UnicodeAttribute(default='AST')
