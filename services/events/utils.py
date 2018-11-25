@@ -14,7 +14,7 @@ from services.events import constants
 def set_filter_dates(start_date, end_date):
     if not start_date and not end_date:
         today = datetime.today()
-        filter_date = datetime(today.year, today.month, today.day)  # .strftime('%Y-%m-%d')
+        filter_date = datetime(today.year, today.month, today.day)
         return filter_date, filter_date + relativedelta(days=+7)
     if start_date and not end_date:
         return start_date, start_date + relativedelta(days=+7)
