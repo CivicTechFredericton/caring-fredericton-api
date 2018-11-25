@@ -1,5 +1,3 @@
-# import pendulum
-# import datetime
 from dateutil import parser
 
 from core.model import BaseModel
