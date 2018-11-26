@@ -28,24 +28,34 @@ def set_filter_dates(start_date, end_date):
 # Set occurrences on save
 # -------------------------
 def set_occurrences(event_args):
+    # Check to see if the recurrence details is set
     if event_args['is_recurring']:
-        event_args['occurrences'] = populate_occurrences(event_args)
+        recurrence_details = event_args['recurrence_details']
+        if recurrence_details is missing:
+            message = 'Missing data for required field when is_recurring is true'
+            raise errors.ResourceValidationError(messages={'recurrence_details': [message]})
     else:
-        # Populate a single occurrence
         event_args['recurrence_details'] = None
-        event_args['occurrences'] = [get_occurrence_entry(1, event_args['start_date'], event_args['end_date'])]
+        recurrence_details = set_default_recurrence_details()
+
+    # Populate the occurrences list and last end date
+    last_end_date, occurrences = populate_occurrences(event_args['start_date'],
+                                                      event_args['end_date'],
+                                                      recurrence_details)
+
+    event_args['end_date'] = last_end_date
+    event_args['occurrences'] = occurrences
 
 
-def populate_occurrences(event_args):
-    # Look for the recurrence details
-    recurrence_details = event_args['recurrence_details']
-    if recurrence_details is missing:
-        message = 'Missing data for required field'
-        raise errors.ResourceValidationError(messages={'recurrence_details': [message]})
+def set_default_recurrence_details():
+    return {
+        'recurrence': constants.RecurrenceType.DAILY.value,
+        'num_recurrences': constants.MIN_RECURRENCE
+    }
 
+
+def populate_occurrences(start_date, end_date, recurrence_details):
     day_separation, week_separation, month_separation = define_interval_increments(recurrence_details['recurrence'])
-    start_date = event_args['start_date']
-    end_date = event_args['end_date']
 
     occurrences = []
 
@@ -58,9 +68,7 @@ def populate_occurrences(event_args):
 
         occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_end_date))
 
-    event_args['end_date'] = curr_end_date
-
-    return occurrences
+    return curr_end_date, occurrences
 
 
 def get_occurrence_entry(occurrence_num, start_date, end_date):

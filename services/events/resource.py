@@ -10,9 +10,8 @@ def validate_recurrence(val):
 
 
 class RecurrenceDetails(ma.Schema):
-    recurrence = fields.Str(required=True, missing=constants.RecurrenceType.DAILY,
-                            validate=validate_recurrence)
-    num_recurrences = fields.Int(missing=constants.MIN_RECURRENCE,
+    recurrence = fields.Str(required=True, validate=validate_recurrence)
+    num_recurrences = fields.Int(required=True,
                                  validate=lambda val: constants.MIN_RECURRENCE <= val <= constants.MAX_RECURRENCE)
     day_of_week = fields.Int(required=False, validate=lambda val: 1 <= val <= 7)
     week_of_month = fields.Int(required=False, validate=lambda val: 1 <= val <= 4)
