@@ -104,11 +104,39 @@ paths:
         201:
           description: The event was created in the system
           schema:
-            $ref: '#/definitions/EventResponse'
+            $ref: '#/definitions/EventDetailsResponse'
         422:
           description: Missing required parameters
 
   /organizations/<org_id>/events/<event_id>:
+    get:
+      tags:
+        - events
+      summary: Gets the details of an existing event
+      parameters:
+        - in: path
+          name: org_id
+          description: >
+            Organization ID
+          required: true
+          type: string
+        - in: path
+          name: event_id
+          description: >
+            Event ID
+          required: true
+          type: string
+      responses:
+        200:
+          description: Event found
+          schema:
+            $ref: '#/definitions/EventDetailsResponse'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+        422:
+          description: Event for the organization does not exist in the system
     put:
       tags:
         - events
@@ -133,18 +161,17 @@ paths:
           required: true
           schema:
             $ref: "#/definitions/EventRequest"
-      reponses:
+      responses:
         200:
           description: Event details updated
           schema:
-            $ref: '#/definitions/EventResponse'
+            $ref: '#/definitions/EventDetailsResponse'
         401:
           description: Authentication error
           schema:
             $ref: '#/definitions/AuthError'
         422:
           description: Event for the organization does not exist in the system
-
 
   /organizations:
     get:
@@ -274,6 +301,9 @@ paths:
           description: Missing required parameters
 
 definitions:
+  # -------------------------------------
+  # Auth Definitions
+  # -------------------------------------
   AuthRequest:
     description: >
       Request object that includes user details for authentication
@@ -314,25 +344,9 @@ definitions:
       message:
         type: string
 
-  AdministratorDetails:
-    description: >
-      Contact details for an organization
-    type: object
-    required:
-      - first_name
-      - last_name
-      - email
-    properties:
-      first_name:
-        type: string
-        description: Organization's contact first name
-      last_name:
-        type: string
-        description: Organization's contact last name
-      email:
-        type: string
-        description: Organization's contact email address
-
+  # -------------------------------------
+  # Organization Definitions
+  # -------------------------------------
   Address:
     description: >
       organization address
@@ -360,88 +374,35 @@ definitions:
         type: string
         description: Country
 
-  VerificationDetails:
+  AdministratorDetails:
     description: >
-      Verification details for a requested action (for example: verify organization details)
-    type:
-      object
-    required:
-      - is_verified
-    properties:
-      is_verified:
-        type: boolean
-        description: Flag indicating verification status
-      reason:
-        type: string
-        description: Detailed reason if the request is not verified
-
-  EventRequest:
-    description: >
-      Request object that includes details for an event
+      Contact details for an organization
     type: object
     required:
-    - name
-    - start_date
-    - end_date
-    - start_time
-    - end_time
+      - first_name
+      - last_name
+      - email
     properties:
-      name:
+      first_name:
         type: string
-        description: Name of the event
-      description:
+        description: Organization's contact first name
+      last_name:
         type: string
-        description: Description of the event
-      start_date:
+        description: Organization's contact last name
+      email:
         type: string
-        description: The start date for the event
-      end_date:
-        type: string
-        description: The end date for the event
-      start_time:
-        type: string
-        description: The start time for the event
-      end_time:
-        type: string
-        description: The end time for the event
-
-  EventResponse:
-    description: >
-      Response object containing the event details
-    type: object
-    properties:
-      name:
-        type: string
-        description: Name of the event
-      description:
-        type: string
-        description: Description of the event
-      start_date:
-        type: string
-        description: The start date for the event
-      end_date:
-        type: string
-        description: The end date for the event
-      start_time:
-        type: string
-        description: The start time for the event
-      end_time:
-        type: string
-        description: The end time for the event
-      timezone:
-        type: string
-        description: Timezone for the event as it was created
+        description: Organization's contact email address
 
   OrganizationRequest:
     description: >
       Request object that includes details for registering a new organization
     type: object
     required:
-      - name
-      - email
-      - phone
-      - administrator
-      - address
+    - name
+    - email
+    - phone
+    - administrator
+    - address
     properties:
       name:
         type: string
@@ -457,10 +418,10 @@ definitions:
         description: Phone number for the organization
       administrator:
         allOf:
-          - $ref: '#/definitions/AdministratorDetails'
+        - $ref: '#/definitions/AdministratorDetails'
       address:
         allOf:
-          - $ref: '#/definitions/Address'
+        - $ref: '#/definitions/Address'
 
   OrganizationResponse:
     description: >
@@ -504,21 +465,161 @@ definitions:
         description: Organization email
       administrator_details:
         allOf:
-          - $ref: '#/definitions/AdministratorDetails'
+        - $ref: '#/definitions/AdministratorDetails'
       address:
         allOf:
-          - $ref: '#/definitions/Address'
+        - $ref: '#/definitions/Address'
       is_verified:
         type: boolean
         readOnly: true
 
-  PageLinks:
-      description: >
-        Links included in paged responses for navigation
-      type: object
-      properties:
-        next_page:
-          type: string
+  PagedOrganization:
+    description: >
+      Page of organization resources
+    type: object
+    properties:
+      objects:
+        type: array
+        description: Organizations array for page
+        items:
+          $ref: '#/definitions/OrganizationResponse'
+      page:
+        type: integer
+        description: Current page
+      size:
+        type: integer
+        description: Size of the page
+      _links:
+        $ref: '#/definitions/PageLinks'
+
+  VerificationDetails:
+    description: >
+      Verification details for a requested action (for example: verify organization details)
+    type:
+      object
+    required:
+      - is_verified
+    properties:
+      is_verified:
+        type: boolean
+        description: Flag indicating verification status
+      reason:
+        type: string
+        description: Detailed reason if the request is not verified
+
+  # -------------------------------------
+  # Event Definitions
+  # -------------------------------------
+  EventRequest:
+    description: >
+      Request object that includes details for an event
+    type: object
+    required:
+    - name
+    - start_date
+    - end_date
+    - start_time
+    - end_time
+    properties:
+      name:
+        type: string
+        description: Name of the event
+      owner:
+        type: string
+        description: Owner identifier for the event
+      description:
+        type: string
+        description: Description of the event
+      start_date:
+        type: string
+        description: The start date for the event
+      end_date:
+        type: string
+        description: The end date for the event
+      start_time:
+        type: string
+        description: The start time for the event
+      end_time:
+        type: string
+        description: The end time for the event
+      is_recurring:
+        type: boolean
+        description: Flag indicating if the event is recurring
+        default: false
+      recurrence_details:
+        allOf:
+        - $ref: '#/definitions/RecurrenceDetails'
+
+  EventResponse:
+    description: >
+      Response object containing the base event information
+    type: object
+    properties:
+      id:
+        type: string
+        description: ID of the event as a UUID
+        readOnly: true
+      name:
+        type: string
+        description: Name of the event
+      owner:
+        type: string
+        description: Owner identifier for the event
+      description:
+        type: string
+        description: Description of the event
+      start_date:
+        type: string
+        description: The start date for the event
+      end_date:
+        type: string
+        description: The end date for the event
+      start_time:
+        type: string
+        description: The start time for the event
+      end_time:
+        type: string
+        description: The end time for the event
+
+  EventDetailsResponse:
+    description: >
+      Response object containing the detailed event information
+    type: object
+    properties:
+      id:
+        type: string
+        description: ID of the event as a UUID
+        readOnly: true
+      name:
+        type: string
+        description: Name of the event
+      owner:
+        type: string
+        description: Owner identifier for the event
+      description:
+        type: string
+        description: Description of the event
+      start_date:
+        type: string
+        description: The start date for the event
+      end_date:
+        type: string
+        description: The end date for the event
+      start_time:
+        type: string
+        description: The start time for the event
+      end_time:
+        type: string
+        description: The end time for the event
+      is_recurring:
+        type: boolean
+        description: Flag indicating if the event is recurring
+      recurrence_details:
+        allOf:
+        - $ref: '#/definitions/RecurrenceDetails'
+      timezone:
+        type: string
+        description: Timezone for the event as it was created
 
   PagedEvent:
     description: >
@@ -539,21 +640,28 @@ definitions:
       _links:
         $ref: '#/definitions/PageLinks'
 
-  PagedOrganization:
+  RecurrenceDetails:
     description: >
-      Page of organization resources
+      Details pertaining to the event's recurrence information
+    type: object
+    required:
+    - recurrence
+    properties:
+      recurrence:
+        type: string
+        description: The event recurrence option (DAILY, WEEKLY, BI_WEEKLY, MONTHLY)
+      num_recurrences:
+        type: integer
+        description: The number of times the event is set to recur
+
+  # -------------------------------------
+  # Common Page Definitions
+  # -------------------------------------
+  PageLinks:
+    description: >
+      Links included in paged responses for navigation
     type: object
     properties:
-      objects:
-        type: array
-        description: Organizations array for page
-        items:
-          $ref: '#/definitions/OrganizationResponse'
-      page:
-        type: integer
-        description: Current page
-      size:
-        type: integer
-        description: Size of the page
-      _links:
-        $ref: '#/definitions/PageLinks'
+      next_page:
+        type: string
+

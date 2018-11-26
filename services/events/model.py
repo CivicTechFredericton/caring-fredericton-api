@@ -1,7 +1,7 @@
 import pendulum
 
 from core.model import BaseModel
-from pynamodb.attributes import UnicodeAttribute
+from pynamodb.attributes import BooleanAttribute, JSONAttribute, UnicodeAttribute
 from services.events import constants
 
 
@@ -40,6 +40,7 @@ class EventModel(BaseModel):
     end_date = DateAttribute()
     start_time = TimeAttribute()
     end_time = TimeAttribute()
+    is_recurring = BooleanAttribute(default=False)
+    recurrence_details = JSONAttribute(null=True)
+    occurrences = JSONAttribute(null=True)
     timezone = UnicodeAttribute(default='AST')
-
-
