@@ -48,6 +48,16 @@ class OrganizationDetailsSchema(OrganizationSchema):
         strict = True
 
 
+class OrganizationUpdateSchema(OrganizationSchema):
+    name = fields.Str()
+    email = fields.Str()
+    phone = fields.Str()
+    address = fields.Nested(AddressSchema)
+
+    class Meta:
+        strict = True
+
+
 class OrganizationVerificationSchema(ma.Schema):
     is_verified = fields.Bool(required=True)
     reason = fields.Str(required=False)
@@ -59,4 +69,5 @@ class OrganizationVerificationSchema(ma.Schema):
 organization_schema = OrganizationSchema()
 organization_list_filters_schema = OrganizationListFiltersSchema()
 organization_details_schema = OrganizationDetailsSchema()
+organization_update_schema = OrganizationUpdateSchema()
 organization_verification_schema = OrganizationVerificationSchema()

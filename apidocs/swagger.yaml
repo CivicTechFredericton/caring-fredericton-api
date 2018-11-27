@@ -51,6 +51,19 @@ paths:
       tags:
         - events
       summary: Returns a list of all the events in the system
+      parameters:
+        - name: start_date
+          in: query
+          description: >
+            Filter value for the start date period of events
+          required: false
+          type: string
+        - name: end_date
+          in: query
+          description: >
+            Filter value for the end date period of events
+          required: false
+          type: string
       responses:
         200:
           description: Paged object of events
@@ -67,11 +80,23 @@ paths:
       - events
       summary: Returns a list of all the events associated with the organization
       parameters:
-      - in: path
-        name: org_id
+      - name: org_id
+        in: path
         description: >
           Organization ID
         required: true
+        type: string
+      - name: start_date
+        in: query
+        description: >
+          Filter value for the start date period of events
+        required: false
+        type: string
+      - name: end_date
+        in: query
+        description: >
+          Filter value for the end date period of events
+        required: false
         type: string
       responses:
         200:

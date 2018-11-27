@@ -6,13 +6,12 @@ from webargs import ValidationError
 
 def validate_recurrence(val):
     if not constants.RecurrenceType.has_value(val):
-        raise ValidationError('Invalid value, must be one of {}'.format(constants.RecurrenceType.list_values()))
+        raise ValidationError('Invalid value, must be one of {}'.format(constants.RecurrenceType.values()))
 
 
 class RecurrenceDetails(ma.Schema):
-    recurrence = fields.Str(required=True, missing=constants.RecurrenceType.DAILY,
-                            validate=validate_recurrence)
-    num_recurrences = fields.Int(missing=constants.MIN_RECURRENCE,
+    recurrence = fields.Str(required=True, validate=validate_recurrence)
+    num_recurrences = fields.Int(required=True,
                                  validate=lambda val: constants.MIN_RECURRENCE <= val <= constants.MAX_RECURRENCE)
     day_of_week = fields.Int(required=False, validate=lambda val: 1 <= val <= 7)
     week_of_month = fields.Int(required=False, validate=lambda val: 1 <= val <= 4)
@@ -21,6 +20,12 @@ class RecurrenceDetails(ma.Schema):
 
     class Meta:
         strict = True
+
+
+class OccurrenceDetails(ma.Schema):
+    occurrence_num = fields.Int(required=True)
+    start_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
+    end_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
 
 
 class EventSchema(ma.Schema):
@@ -40,8 +45,16 @@ class EventSchema(ma.Schema):
 class EventDetailsSchema(EventSchema):
     is_recurring = fields.Bool(missing=False)
     recurrence_details = fields.Nested(RecurrenceDetails, required=False)
-    # occurrences = fields.List(fields.Str(), dump_only=True)
+    occurrences = fields.Nested(OccurrenceDetails, many=True, missing=[], default=[], dump_only=True)
     timezone = fields.Str(dump_only=True)
+
+    class Meta:
+        strict = True
+
+
+class EventFiltersSchema(ma.Schema):
+    start_date = fields.DateTime(required=False, missing=None, format=constants.EVENT_DATE_FORMAT)
+    end_date = fields.DateTime(required=False, missing=None, format=constants.EVENT_DATE_FORMAT)
 
     class Meta:
         strict = True
@@ -49,4 +62,5 @@ class EventDetailsSchema(EventSchema):
 
 event_schema = EventSchema()
 event_details_schema = EventDetailsSchema()
+event_filters_schema = EventFiltersSchema()
 

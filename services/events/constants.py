@@ -10,11 +10,11 @@ MAX_RECURRENCE = 10
 class RecurrenceType(Enum):
     DAILY = 'DAILY'
     WEEKLY = 'WEEKLY'
-    BI_WEEKLY = 'BI_WEEKLY'
+    BI_WEEKLY = 'BI-WEEKLY'
     MONTHLY = 'MONTHLY'
 
     @classmethod
-    def list_values(cls):
+    def values(cls):
         values = [item.value for item in RecurrenceType]
         return ', '.join(values)
 

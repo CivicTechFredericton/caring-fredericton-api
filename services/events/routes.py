@@ -3,32 +3,34 @@ from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 
 from services.events.model import EventModel
-from services.events.resource import event_schema, event_details_schema
-from services.events.utils import get_recurring_events_list, set_occurrences
+from services.events.resource import event_schema, event_details_schema, event_filters_schema
+from services.events.utils import get_recurring_events_list, set_filter_dates, set_occurrences
 from services.organizations.utils import get_organization_from_db
 
 blueprint = Blueprint('events', __name__)
 
 
 @blueprint.route('/events', methods=["GET"])
-def list_events():
+@use_kwargs(event_filters_schema, locations=('query',))
+def list_events(**kwargs):
     """
     List the events in the system agnostic to any owner
     :return: The list of events in the system
     """
     events_list = EventModel.scan()
-    return get_events_response(events_list)
+    return get_events_response(events_list, **kwargs)
 
 
 @blueprint.route('/organizations/<org_id>/events', methods=["GET"])
-def list_events_for_organization(org_id):
+@use_kwargs(event_filters_schema, locations=('query',))
+def list_events_for_organization(org_id, **kwargs):
     """
     Returns the list of events for an organization
     :param org_id: The organization identifier
     :return: The list of events associated to the organization
     """
     events_list = EventModel.scan(EventModel.owner == org_id)
-    return get_events_response(events_list)
+    return get_events_response(events_list, **kwargs)
 
 
 @blueprint.route('/organizations/<org_id>/events', methods=["POST"])
@@ -36,6 +38,7 @@ def list_events_for_organization(org_id):
 def create_organization_event(org_id, **kwargs):
     event_args = {k: v for k, v in kwargs.items() if v is not None}
 
+    # Verify organization exists
     organization = get_organization_from_db(org_id)
     event_args['owner'] = organization.id
 
@@ -68,12 +71,14 @@ def update_organization_event(org_id, event_id, **kwargs):
     return jsonify(event_details_schema.dump(event).data)
 
 
-def get_events_response(events_list):
+def get_events_response(events_list, **kwargs):
     response = []
 
-    # Filter the list of events
+    # Set the filters
+    filter_start_date, filter_end_date = set_filter_dates(kwargs['start_date'], kwargs['end_date'])
+
     for event in events_list:
-        occurrences = get_recurring_events_list(event)
+        occurrences = get_recurring_events_list(event, filter_start_date, filter_end_date)
         for occurrence in occurrences:
             response.append(event_schema.dump(occurrence).data)
 
