@@ -1,4 +1,4 @@
-from core.model import BaseModel
+from core.db.model import BaseModel
 from pynamodb.attributes import BooleanAttribute, JSONAttribute, UnicodeAttribute
 
 

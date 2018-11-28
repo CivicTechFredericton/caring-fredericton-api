@@ -1,11 +1,12 @@
-from core import db, errors
+from core import db
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 
-from services.events.model import EventModel
+from core.db.events import get_event_from_db
+from core.db.events.model import EventModel
+from services.events import get_recurring_events_list, set_filter_dates, set_occurrences
 from services.events.resource import event_schema, event_details_schema, event_filters_schema
-from services.events.utils import get_recurring_events_list, set_filter_dates, set_occurrences
-from services.organizations.utils import get_organization_from_db
+from core.db.organizations import get_organization_from_db
 
 blueprint = Blueprint('events', __name__)
 
@@ -99,11 +100,3 @@ def create_event(**event_args):
     response = jsonify(event_details_schema.dump(event).data)
     response.status_code = 201
     return response
-
-
-def get_event_from_db(event_id, owner):
-    try:
-        return EventModel.get(hash_key=event_id, range_key=owner)
-    except EventModel.DoesNotExist:
-        message = 'Event {} for owner {} does not exist'.format(event_id, owner)
-        raise errors.ResourceValidationError(messages={'event': [message]})
