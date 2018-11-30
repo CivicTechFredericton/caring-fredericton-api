@@ -38,6 +38,10 @@ def get_filter_conditions(conditions):
     return scan_condition
 
 
+def update_item(item, actions):
+    return item.update(actions=actions)
+
+
 def save_with_unique_id(item):
     """
     Save a record in the database using a unique identifier value

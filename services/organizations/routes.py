@@ -7,7 +7,7 @@ from webargs.flaskparser import use_kwargs
 from core.db.organizations import check_for_duplicate_name, get_organization_from_db
 from core.db.organizations.model import OrganizationModel
 from core.db.users.model import UserModel
-from services.organizations import build_filter_condition
+from services.organizations import build_filter_condition, build_update_actions, build_verify_organization_actions
 from services.organizations.resource import organization_details_schema, organization_list_filters_schema,\
     organization_schema, organization_update_schema, organization_verification_schema
 
@@ -75,12 +75,8 @@ def verify_organization(org_id, **kwargs):
     is_verified = kwargs['is_verified']
 
     if is_verified and not organization.is_verified:
-        # Update the verification flag
-        organization.update(
-            actions=[
-                OrganizationModel.is_verified.set(is_verified)
-            ]
-        )
+        actions = build_verify_organization_actions(is_verified)
+        db.update_item(organization, actions)
 
         administrator_details = organization.administrator
         if administrator_details:
@@ -96,10 +92,7 @@ def verify_organization(org_id, **kwargs):
                              last_name=administrator_details['last_name'])
             db.save_with_unique_id(user)
 
-    response = jsonify(organization_details_schema.dump(organization).data)
-    response.status_code = 201
-
-    return response
+    return jsonify(organization_details_schema.dump(organization).data)
 
 
 @blueprint.route('/organizations/<org_id>/', methods=["PUT"])
@@ -107,27 +100,12 @@ def verify_organization(org_id, **kwargs):
 def update_organization(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
 
-    actions = []
     name = kwargs['name']
     if name:
         if organization.name != name:
             check_for_duplicate_name(name)
-        actions.append(OrganizationModel.name.set(name))
 
-    email = kwargs['email']
-    if email:
-        actions.append(OrganizationModel.email.set(email))
-
-    phone = kwargs['phone']
-    if phone:
-        actions.append(OrganizationModel.phone.set(phone))
-
-    address = kwargs['address']
-    if address:
-        actions.append(OrganizationModel.phone.set(address))
-
-    organization.update(
-        actions=actions
-    )
+    actions = build_update_actions(**kwargs)
+    db.update_item(organization, actions)
 
     return jsonify(organization_details_schema.dump(organization).data)
