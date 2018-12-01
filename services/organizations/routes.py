@@ -99,13 +99,7 @@ def verify_organization(org_id, **kwargs):
 @use_kwargs(organization_update_schema, locations=('json',))
 def update_organization(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
-
-    name = kwargs['name']
-    if name:
-        if organization.name != name:
-            check_for_duplicate_name(name)
-
-    actions = build_update_actions(**kwargs)
+    actions = build_update_actions(organization, **kwargs)
     db.update_item(organization, actions)
 
     return jsonify(organization_details_schema.dump(organization).data)

@@ -1,4 +1,5 @@
 from core.db import get_filter_conditions
+from core.db.organizations import check_for_duplicate_name
 from core.db.organizations.model import OrganizationModel
 from webargs import missing
 
@@ -17,27 +18,24 @@ def build_verify_organization_actions(is_verified):
     return [OrganizationModel.is_verified.set(is_verified)]
 
 
-def build_update_actions(**kwargs):
+def build_update_actions(organization, **kwargs):
     actions = []
 
     name = kwargs['name']
-    if name:
+    if name and name != organization.name:
+        check_for_duplicate_name(name)
         actions.append(OrganizationModel.name.set(name))
 
     email = kwargs['email']
-    if email:
+    if email and email != organization.email:
         actions.append(OrganizationModel.email.set(email))
 
     phone = kwargs['phone']
-    if phone:
+    if phone and phone != organization.phone:
         actions.append(OrganizationModel.phone.set(phone))
 
     address = kwargs['address']
-    if address:
+    if address and address != organization.address:
         actions.append(OrganizationModel.address.set(address))
 
     return actions
-
-
-def set_attribute_update(name, value):
-    return f'OrganizationModel.{name}.set({value})'

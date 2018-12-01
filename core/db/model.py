@@ -21,7 +21,7 @@ class BaseModel(Model):
     updated_at = UTCDateTimeAttribute()
     updated_by = UnicodeAttribute()
 
-    def save(self, *args, **kwargs):
+    def save(self, conditional_operator=None, **expected_values):
         timestamp = get_time_now()
         current_user = get_current_user_id()
 
@@ -37,7 +37,7 @@ class BaseModel(Model):
         self.updated_at = timestamp
         self.updated_by = current_user
 
-        return Model.save(self, *args, **kwargs)
+        return Model.save(self, conditional_operator, **expected_values)
 
     def update(self, attributes=None, actions=None, condition=None, conditional_operator=None, **expected_values):
         # Set the updated_at and updated_by values

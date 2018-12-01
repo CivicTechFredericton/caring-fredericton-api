@@ -39,7 +39,10 @@ def get_filter_conditions(conditions):
 
 
 def update_item(item, actions):
-    return item.update(actions=actions)
+    if actions:
+        item.update(actions=actions)
+    else:
+        logger.info('Item not changed on update')
 
 
 def save_with_unique_id(item):
