@@ -1,11 +1,12 @@
-from core import db, errors
+from core import db
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 
-from services.events.model import EventModel
+from core.db.events import get_event_from_db
+from core.db.events.model import EventModel
+from services.events import build_update_actions, get_recurring_events_list, set_filter_dates, set_occurrences
 from services.events.resource import event_schema, event_details_schema, event_filters_schema
-from services.events.utils import get_recurring_events_list, set_filter_dates, set_occurrences
-from services.organizations.utils import get_organization_from_db
+from core.db.organizations import get_organization_from_db
 
 blueprint = Blueprint('events', __name__)
 
@@ -56,17 +57,8 @@ def get_organization_event(org_id, event_id):
 @use_kwargs(event_details_schema, locations=('json',))
 def update_organization_event(org_id, event_id, **kwargs):
     event = get_event_from_db(event_id, org_id)
-    event.update(
-        actions=[
-            EventModel.name.set(kwargs['name']),
-            EventModel.description.set(kwargs['description']),
-            EventModel.start_date.set(kwargs['start_date']),
-            EventModel.end_date.set(kwargs['end_date']),
-            EventModel.start_time.set(kwargs['start_time']),
-            EventModel.end_time.set(kwargs['end_time']),
-            EventModel.updated.set(EventModel.get_current_time())
-        ]
-    )
+    actions = build_update_actions(event, **kwargs)
+    db.update_item(event, actions)
 
     return jsonify(event_details_schema.dump(event).data)
 
@@ -99,11 +91,3 @@ def create_event(**event_args):
     response = jsonify(event_details_schema.dump(event).data)
     response.status_code = 201
     return response
-
-
-def get_event_from_db(event_id, owner):
-    try:
-        return EventModel.get(hash_key=event_id, range_key=owner)
-    except EventModel.DoesNotExist:
-        message = 'Event {} for owner {} does not exist'.format(event_id, owner)
-        raise errors.ResourceValidationError(messages={'event': [message]})

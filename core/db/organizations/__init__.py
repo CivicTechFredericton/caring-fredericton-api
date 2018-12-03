@@ -1,5 +1,5 @@
 from core import errors
-from services.organizations.model import OrganizationModel
+from core.db.organizations.model import OrganizationModel
 
 
 def check_for_duplicate_name(org_name):
