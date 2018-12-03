@@ -5,6 +5,7 @@ from dateutil.relativedelta import relativedelta
 from webargs import missing
 
 from core import errors
+from core.db.events.model import EventModel
 from services.events import constants
 
 
@@ -22,6 +23,41 @@ def set_filter_dates(start_date, end_date):
         return end_date + relativedelta(days=-7), end_date
 
     return start_date, end_date
+
+
+# ------------------------------
+# Handle event update actions
+# ------------------------------
+def build_update_actions(event, **kwargs):
+    actions = []
+
+    name = kwargs['name']
+    if name and name != event.name:
+        actions.append(EventModel.name.set(name))
+
+    description = kwargs['description']
+    if description and description != event.description:
+        actions.append(EventModel.description.set(description))
+
+    start_date = kwargs['start_date']
+    if start_date and start_date != event.start_date:
+        actions.append(EventModel.start_date.set(start_date))
+
+    end_date = kwargs['end_date']
+    if end_date and end_date != event.end_date:
+        actions.append(EventModel.end_date.set(end_date))
+
+    start_time = kwargs['start_time']
+    if start_time and start_time != event.start_time:
+        actions.append(EventModel.start_time.set(start_time))
+
+    end_time = kwargs['end_time']
+    if end_time and end_time != event.end_time:
+        actions.append(EventModel.end_time.set(end_time))
+
+    # TODO: Handle recurrences
+
+    return actions
 
 
 # -------------------------
