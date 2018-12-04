@@ -5,7 +5,6 @@ from dateutil.relativedelta import relativedelta
 from webargs import missing
 
 from core import errors
-from core.db.events.model import EventModel
 from services.events import constants
 
 
@@ -29,6 +28,8 @@ def set_filter_dates(start_date, end_date):
 # Handle event update actions
 # ------------------------------
 def build_update_actions(event, **kwargs):
+    from core.db.events.model import EventModel
+
     actions = []
 
     name = kwargs['name']
