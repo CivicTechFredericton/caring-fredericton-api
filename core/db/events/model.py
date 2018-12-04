@@ -63,6 +63,7 @@ class EventModel(BaseModel):
     owner = UnicodeAttribute(range_key=True)
     name = UnicodeAttribute()
     description = UnicodeAttribute(null=True)
+    categories = ListAttribute(default=lambda: [])
     start_date = DateAttribute()
     end_date = DateAttribute()
     start_time = TimeAttribute()

@@ -63,8 +63,17 @@ def update_organization_event(org_id, event_id, **kwargs):
     return jsonify(event_details_schema.dump(event).data)
 
 
+# ----------------------------------------------------
+# Helper Functions
+# ----------------------------------------------------
 def get_events_response(events_list, **kwargs):
     response = []
+
+    # categories = ['all', 'dinner', 'fund-raiser', 'service']
+    # categories = []
+    # test_list = ['aa', 'dds']
+    # test_list = []
+    # print(len([i for e in test_list for i in categories if e in i]))
 
     # Set the filters
     filter_start_date, filter_end_date = set_filter_dates(kwargs['start_date'], kwargs['end_date'])
@@ -77,9 +86,6 @@ def get_events_response(events_list, **kwargs):
     return jsonify(response)
 
 
-# ----------------------------------------------------
-# Helper Functions
-# ----------------------------------------------------
 def create_event(**event_args):
     # Set the number of occurrences
     set_occurrences(event_args)
