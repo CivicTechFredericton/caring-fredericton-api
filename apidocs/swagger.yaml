@@ -62,7 +62,7 @@ paths:
         - name: end_date
           in: query
           description: >
-            Filter value for the end date period of events in format YYYY-MM-DD
+            Filter value for the end date period of events
           required: false
           type: string
           format: YYYY-MM-DD
