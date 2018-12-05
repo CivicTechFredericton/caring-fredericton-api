@@ -4,7 +4,8 @@ from webargs.flaskparser import use_kwargs
 
 from core.db.events import get_event_from_db
 from core.db.events.model import EventModel
-from services.events import build_update_actions, get_recurring_events_list, set_filter_dates, set_occurrences
+from services.events import build_update_actions, get_recurring_events_list, set_dates_filter, \
+    set_category_filter, set_occurrences
 from services.events.resource import event_schema, event_details_schema, event_filters_schema
 from core.db.organizations import get_organization_from_db
 
@@ -57,7 +58,9 @@ def get_organization_event(org_id, event_id):
 @use_kwargs(event_details_schema, locations=('json',))
 def update_organization_event(org_id, event_id, **kwargs):
     event = get_event_from_db(event_id, org_id)
-    actions = build_update_actions(event, **kwargs)
+
+    event_args = {k: v for k, v in kwargs.items() if v is not None}
+    actions = build_update_actions(event, event_args)
     db.update_item(event, actions)
 
     return jsonify(event_details_schema.dump(event).data)
@@ -69,17 +72,12 @@ def update_organization_event(org_id, event_id, **kwargs):
 def get_events_response(events_list, **kwargs):
     response = []
 
-    # categories = ['all', 'dinner', 'fund-raiser', 'service']
-    # categories = []
-    # test_list = ['aa', 'dds']
-    # test_list = []
-    # print(len([i for e in test_list for i in categories if e in i]))
-
     # Set the filters
-    filter_start_date, filter_end_date = set_filter_dates(kwargs['start_date'], kwargs['end_date'])
+    filter_start_date, filter_end_date = set_dates_filter(kwargs['start_date'], kwargs['end_date'])
+    filter_categories = set_category_filter(kwargs['categories'])
 
     for event in events_list:
-        occurrences = get_recurring_events_list(event, filter_start_date, filter_end_date)
+        occurrences = get_recurring_events_list(event, filter_start_date, filter_end_date, filter_categories)
         for occurrence in occurrences:
             response.append(event_schema.dump(occurrence).data)
 

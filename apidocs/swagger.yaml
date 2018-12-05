@@ -58,12 +58,21 @@ paths:
             Filter value for the start date period of events
           required: false
           type: string
+          format: YYYY-MM-DD
         - name: end_date
           in: query
           description: >
-            Filter value for the end date period of events
+            Filter value for the end date period of events in format YYYY-MM-DD
           required: false
           type: string
+          format: YYYY-MM-DD
+        - name: categories
+          in: query
+          description: >
+            Comma delimited filter value list of category names
+          required: false
+          type: string
+
       responses:
         200:
           description: Paged object of events
@@ -92,10 +101,18 @@ paths:
           Filter value for the start date period of events
         required: false
         type: string
+        format: YYYY-MM-DD
       - name: end_date
         in: query
         description: >
           Filter value for the end date period of events
+        required: false
+        type: string
+        format: YYYY-MM-DD
+      - name: categories
+        in: query
+        description: >
+          Comma delimited filter value list of category names
         required: false
         type: string
       responses:
@@ -555,18 +572,27 @@ definitions:
       description:
         type: string
         description: Description of the event
+      categories:
+        type: array
+        items:
+          type: string
+        description: List of category tag names associated with the event
       start_date:
         type: string
         description: The start date for the event
+        format: YYYY-MM-DD
       end_date:
         type: string
         description: The end date for the event
+        format: YYYY-MM-DD
       start_time:
         type: string
         description: The start time for the event
+        format: HH:MM:SS
       end_time:
         type: string
         description: The end time for the event
+        format: HH:MM:SS
       is_recurring:
         type: boolean
         description: Flag indicating if the event is recurring
@@ -593,18 +619,27 @@ definitions:
       description:
         type: string
         description: Description of the event
+      categories:
+        type: array
+        items:
+          type: string
+        description: List of category tag names associated with the event
       start_date:
         type: string
         description: The start date for the event
+        format: YYYY-MM-DD
       end_date:
         type: string
         description: The end date for the event
+        format: YYYY-MM-DD
       start_time:
         type: string
         description: The start time for the event
+        format: HH:MM:SS
       end_time:
         type: string
         description: The end time for the event
+        format: HH:MM:SS
 
   EventDetailsResponse:
     description: >
@@ -624,18 +659,27 @@ definitions:
       description:
         type: string
         description: Description of the event
+      categories:
+        type: array
+        items:
+          type: string
+        description: List of category tag names associated with the event
       start_date:
         type: string
         description: The start date for the event
+        format: YYYY-MM-DD
       end_date:
         type: string
         description: The end date for the event
+        format: YYYY-MM-DD
       start_time:
         type: string
         description: The start time for the event
+        format: HH:MM:SS
       end_time:
         type: string
         description: The end time for the event
+        format: HH:MM:SS
       is_recurring:
         type: boolean
         description: Flag indicating if the event is recurring

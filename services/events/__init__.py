@@ -11,7 +11,7 @@ from services.events import constants
 # -------------------------
 # Handle filter conditions
 # -------------------------
-def set_filter_dates(start_date, end_date):
+def set_dates_filter(start_date, end_date):
     if not start_date and not end_date:
         today = datetime.today()
         filter_date = datetime(today.year, today.month, today.day)
@@ -24,35 +24,43 @@ def set_filter_dates(start_date, end_date):
     return start_date, end_date
 
 
+def set_category_filter(categories):
+    category_filters = []
+    if categories is not missing:
+        category_filters = categories.split(',')
+
+    return category_filters
+
+
 # ------------------------------
 # Handle event update actions
 # ------------------------------
-def build_update_actions(event, **kwargs):
+def build_update_actions(event, event_args):
     from core.db.events.model import EventModel
 
     actions = []
 
-    name = kwargs['name']
+    name = event_args['name']
     if name and name != event.name:
         actions.append(EventModel.name.set(name))
 
-    description = kwargs['description']
+    description = event_args['description']
     if description and description != event.description:
         actions.append(EventModel.description.set(description))
 
-    start_date = kwargs['start_date']
+    start_date = event_args['start_date']
     if start_date and start_date != event.start_date:
         actions.append(EventModel.start_date.set(start_date))
 
-    end_date = kwargs['end_date']
+    end_date = event_args['end_date']
     if end_date and end_date != event.end_date:
         actions.append(EventModel.end_date.set(end_date))
 
-    start_time = kwargs['start_time']
+    start_time = event_args['start_time']
     if start_time and start_time != event.start_time:
         actions.append(EventModel.start_time.set(start_time))
 
-    end_time = kwargs['end_time']
+    end_time = event_args['end_time']
     if end_time and end_time != event.end_time:
         actions.append(EventModel.end_time.set(end_time))
 
@@ -159,14 +167,21 @@ def define_interval_increments(recurrence):
 # -------------------------
 # List occurrences on read
 # -------------------------
-def get_recurring_events_list(event, start_date, end_date):
+def get_recurring_events_list(event, start_date, end_date, category_filters):
     return [get_recurring_event(event, occurrence) for occurrence in event.occurrences
-            if within_date_range(occurrence, start_date, end_date)]
+            if within_date_range(occurrence, start_date, end_date) and contains_category(event.categories, category_filters)]
 
 
 def within_date_range(occurrence, start_date, end_date):
     return start_date <= occurrence.start_date <= end_date or \
            start_date <= occurrence.end_date <= end_date
+
+
+def contains_category(categories, category_filters):
+    if not category_filters:
+        return True
+
+    return True if set(categories) & set(category_filters) else False
 
 
 def get_recurring_event(event, occurrence):
