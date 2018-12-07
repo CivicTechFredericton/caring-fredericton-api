@@ -31,7 +31,6 @@ Ensure the prerequisites are installed
 ```
 - Python3.7
 - pip (tool for installing Python packages)
-- pip install wheel (Ubuntu 18.04 specific)
 ```
 
 Create virtual env for python3.7 inside project directory:
@@ -46,7 +45,6 @@ Activate newly created environment
 
 Install the required python packages
 ```
-pip install virtualenv
 pip install -r requirements.txt
 ```
 
