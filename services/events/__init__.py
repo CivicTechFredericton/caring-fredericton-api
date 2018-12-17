@@ -48,6 +48,10 @@ def build_update_actions(event, event_args):
     if description and description != event.description:
         actions.append(EventModel.description.set(description))
 
+    categories = event_args['categories']
+    if not are_lists_equal(categories, event.categories):
+        actions.append(EventModel.categories.set(categories))
+
     start_date = event_args['start_date']
     if start_date and start_date != event.start_date:
         actions.append(EventModel.start_date.set(start_date))
@@ -65,8 +69,57 @@ def build_update_actions(event, event_args):
         actions.append(EventModel.end_time.set(end_time))
 
     # TODO: Handle recurrences
+    # is_recurring = event_args['is_recurring']
+    # if is_recurring and is_recurring != event.is_recurring:
+    #     print('True')
+    #
+    # print(check_recurrence_details_changed(event, event_args))
 
     return actions
+
+
+def are_lists_equal(list1, list2):
+    return sorted(list1) == sorted(list2)
+
+
+def check_recurrence_details_changed(event, event_args):
+    # is_recurring = event_args['is_recurring']
+    recurrence_details = event_args['recurrence_details']
+    if recurrence_details:
+        print(recurrence_details['recurrence'])
+        print(event.recurrence_details)
+        # if recurrence_details['num_recurrences'] != event.recurrence_details.num_recurrences or \
+        #         recurrence_details['recurrence'] != event.recurrence_details.recurrence:
+        #     return True
+
+    return False
+
+
+# Handle change to specific occurrences
+# TODO: Handle change to the time
+def update_event_occurrences(event):
+    # Retrieve the list of occurrences from the original event
+    occurrences = event.occurrences
+    from operator import itemgetter
+    # new_list = sorted(occurrences, key=lambda k: k['occurrence_num'])
+    new_list = sorted(occurrences, key=itemgetter('occurrence_num'))
+    for occurrence in new_list:
+        print(occurrence.occurrence_num)
+
+    # Slice the list
+    # from dateutil import parser
+    # print('Start List')
+    # print([x for x in occurrences if x.occurrence_num < 3])
+    # print('Match List')
+    # print([x for x in occurrences if x.occurrence_num == 3])
+    # print('End List')
+    # print([x for x in occurrences if x.occurrence_num > 3])
+
+    # if update_type == 'THIS-EVENT':
+    #     # Update the list of occurrences
+    #
+    # elif update_type == 'REMAINING-EVENTS':
+    pass
 
 
 # -------------------------
@@ -187,6 +240,7 @@ def contains_category(categories, category_filters):
 def get_recurring_event(event, occurrence):
     # Perform a deep copy of the event object so that unique objects are inserted in the list
     new_event = copy.deepcopy(event)
+    new_event.occurrence_num = occurrence.occurrence_num
     new_event.start_date = occurrence.start_date
     new_event.end_date = occurrence.end_date
 
