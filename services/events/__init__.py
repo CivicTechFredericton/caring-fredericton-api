@@ -41,27 +41,36 @@ def build_update_actions(event, event_args):
     actions = []
 
     # Check for changes in the recurrences
-    # reset_occurrences = False
-    is_recurring = event_args['is_recurring']
-    if is_recurring is not missing and is_recurring != event.is_recurring:
-        # reset_occurrences = True
-        actions.append(EventModel.is_recurring.set(is_recurring))
+    reset_occurrences, is_recurring_changed = check_recurrence_details_changed(event, event_args)
+    if is_recurring_changed:
+        actions.append(EventModel.is_recurring.set(event_args['is_recurring']))
 
+    # reset_occurrences = False
+    # is_recurring = event_args['is_recurring']
+    # if is_recurring is not missing and is_recurring != event.is_recurring:
+    #     reset_occurrences = True
+    #     actions.append(EventModel.is_recurring.set(is_recurring))
+    # else:
+    #     event_args['is_recurring'] = event.is_recurring
+    #
+    # # Check to see if the details changed
     # recurrence_details = event_args['recurrence_details']
     # if recurrence_details and recurrence_details != event.recurrence_details:
     #     reset_occurrences = True
-    #
-    # Reset the occurrences
-    # if reset_occurrences:
-    set_occurrences(event_args)
-    actions.append(EventModel.occurrences.set(event_args['occurrences']))
 
-    recurrence_details = event_args['recurrence_details']
-    if recurrence_details and recurrence_details != event.recurrence_details:
-        actions.append(EventModel.recurrence_details.set(event_args['recurrence_details']))
-    else:
-        actions.append(EventModel.recurrence_details.remove())
+    if reset_occurrences:
+        # Reset the occurrences
+        set_occurrences(event_args)
+        actions.append(EventModel.occurrences.set(event_args['occurrences']))
 
+        # Check the updated recurrence details
+        recurrence_details = event_args['recurrence_details']
+        if recurrence_details is not None:
+            actions.append(EventModel.recurrence_details.set(recurrence_details))
+        else:
+            actions.append(EventModel.recurrence_details.remove())
+
+    # Check the remainder of the attributes
     name = event_args['name']
     if name and name != event.name:
         actions.append(EventModel.name.set(name))
@@ -93,21 +102,28 @@ def build_update_actions(event, event_args):
     return actions
 
 
+def check_recurrence_details_changed(event, event_args):
+    # Check for changes in the recurrences
+    reset_occurrences = False
+    is_recurring_changed = False
+
+    is_recurring = event_args['is_recurring']
+    if is_recurring is not missing and is_recurring != event.is_recurring:
+        reset_occurrences = True
+        is_recurring_changed = True
+    else:
+        event_args['is_recurring'] = event.is_recurring
+
+    # Check to see if the details changed
+    recurrence_details = event_args['recurrence_details']
+    if recurrence_details and recurrence_details != event.recurrence_details:
+        reset_occurrences = True
+
+    return reset_occurrences, is_recurring_changed
+
+
 def are_lists_equal(list1, list2):
     return sorted(list1) == sorted(list2)
-
-
-def check_recurrence_details_changed(event, event_args):
-    # is_recurring = event_args['is_recurring']
-    recurrence_details = event_args['recurrence_details']
-    if recurrence_details:
-        print(recurrence_details['recurrence'])
-        print(event.recurrence_details)
-        # if recurrence_details['num_recurrences'] != event.recurrence_details.num_recurrences or \
-        #         recurrence_details['recurrence'] != event.recurrence_details.recurrence:
-        #     return True
-
-    return False
 
 
 # Handle change to specific occurrences
