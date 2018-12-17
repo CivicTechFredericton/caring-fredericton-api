@@ -40,6 +40,28 @@ def build_update_actions(event, event_args):
 
     actions = []
 
+    # Check for changes in the recurrences
+    # reset_occurrences = False
+    is_recurring = event_args['is_recurring']
+    if is_recurring is not missing and is_recurring != event.is_recurring:
+        # reset_occurrences = True
+        actions.append(EventModel.is_recurring.set(is_recurring))
+
+    # recurrence_details = event_args['recurrence_details']
+    # if recurrence_details and recurrence_details != event.recurrence_details:
+    #     reset_occurrences = True
+    #
+    # Reset the occurrences
+    # if reset_occurrences:
+    set_occurrences(event_args)
+    actions.append(EventModel.occurrences.set(event_args['occurrences']))
+
+    recurrence_details = event_args['recurrence_details']
+    if recurrence_details and recurrence_details != event.recurrence_details:
+        actions.append(EventModel.recurrence_details.set(event_args['recurrence_details']))
+    else:
+        actions.append(EventModel.recurrence_details.remove())
+
     name = event_args['name']
     if name and name != event.name:
         actions.append(EventModel.name.set(name))
@@ -49,7 +71,7 @@ def build_update_actions(event, event_args):
         actions.append(EventModel.description.set(description))
 
     categories = event_args['categories']
-    if not are_lists_equal(categories, event.categories):
+    if categories and not are_lists_equal(categories, event.categories):
         actions.append(EventModel.categories.set(categories))
 
     start_date = event_args['start_date']
@@ -67,13 +89,6 @@ def build_update_actions(event, event_args):
     end_time = event_args['end_time']
     if end_time and end_time != event.end_time:
         actions.append(EventModel.end_time.set(end_time))
-
-    # TODO: Handle recurrences
-    # is_recurring = event_args['is_recurring']
-    # if is_recurring and is_recurring != event.is_recurring:
-    #     print('True')
-    #
-    # print(check_recurrence_details_changed(event, event_args))
 
     return actions
 
