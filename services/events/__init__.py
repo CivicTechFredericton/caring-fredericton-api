@@ -45,19 +45,6 @@ def build_update_actions(event, event_args):
     if is_recurring_changed:
         actions.append(EventModel.is_recurring.set(event_args['is_recurring']))
 
-    # reset_occurrences = False
-    # is_recurring = event_args['is_recurring']
-    # if is_recurring is not missing and is_recurring != event.is_recurring:
-    #     reset_occurrences = True
-    #     actions.append(EventModel.is_recurring.set(is_recurring))
-    # else:
-    #     event_args['is_recurring'] = event.is_recurring
-    #
-    # # Check to see if the details changed
-    # recurrence_details = event_args['recurrence_details']
-    # if recurrence_details and recurrence_details != event.recurrence_details:
-    #     reset_occurrences = True
-
     if reset_occurrences:
         # Reset the occurrences
         set_occurrences(event_args)
