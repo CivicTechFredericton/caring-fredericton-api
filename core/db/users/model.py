@@ -6,8 +6,6 @@ class UserEmail(indexes.GlobalSecondaryIndex):
     class Meta:
         simple_name = 'user-email-index'
         projection = indexes.IncludeProjection(['id'])
-        read_capacity_units = 1
-        write_capacity_units = 1
 
     email = attributes.UnicodeAttribute(hash_key=True)
 
