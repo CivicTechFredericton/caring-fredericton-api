@@ -1,7 +1,6 @@
 from core.resource import ma
-from marshmallow import fields
+from marshmallow import fields, ValidationError
 from services.events import constants
-from webargs import ValidationError
 
 
 def validate_recurrence(val):
