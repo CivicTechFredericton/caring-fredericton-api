@@ -87,12 +87,11 @@ def update_event_occurrences(org_id, event_id):
 # Helper Functions
 # ----------------------------------------------------
 def get_events_response(events_list, **kwargs):
-    response = []
-
     # Set the filters
     filter_start_date, filter_end_date = set_dates_filter(kwargs['start_date'], kwargs['end_date'])
     filter_categories = set_category_filter(kwargs['categories'])
 
+    response = []
     for event in events_list:
         occurrences = get_recurring_events_list(event, filter_start_date, filter_end_date, filter_categories)
         for occurrence in occurrences:

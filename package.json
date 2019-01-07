@@ -13,7 +13,7 @@
     "serverless-domain-manager": "2.6.10",
     "serverless-plugin-bind-deployment-id": "1.0.2",
     "serverless-plugin-scripts": "1.0.2",
-    "serverless-wsgi": "1.6.0"
+    "serverless-wsgi": "1.6.1"
   },
   "license": "ISC"
 }

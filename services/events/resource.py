@@ -78,7 +78,7 @@ class EventUpdateSchema(ma.Schema):
 class EventFiltersSchema(ma.Schema):
     start_date = fields.DateTime(required=False, missing=None, format=constants.EVENT_DATE_FORMAT)
     end_date = fields.DateTime(required=False, missing=None, format=constants.EVENT_DATE_FORMAT)
-    categories = fields.Str(required=False)
+    categories = fields.Str(required=False, missing=None)
 
     class Meta:
         strict = True
