@@ -6,7 +6,7 @@ marshmallow==2.17.0
 python-dateutil==2.7.5
 python-json-logger==0.1.10
 PyYAML==4.2b1
-requests==2.20.1
+requests==2.21.0
 pynamodb==3.3.2
 webargs==5.0.0
 virtualenv==16.2.0
