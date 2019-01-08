@@ -64,7 +64,41 @@ def build_update_actions(event, event_args):
     if end_time and end_time != event.end_time:
         actions.append(EventModel.end_time.set(end_time))
 
+    is_recurring = event_args['is_recurring']
+    if is_recurring and is_recurring != event.is_recurring:
+        # insert new recurrences since this option was not enabled
+        set_occurrences(event_args)
+        # TODO 
+        # is_recurring = false, cancel the actual recurrence or the remaining recurrences, think about
+        # is_recurring = true, create new recurrences if doesn't exist any
+        # if recurrences_details changed:
+        # what changes could be? 
+        # 1- change a single reccurence
+        # 2- change everything starting from a specefic reccurence
+        # 3- cancel one or more reccurences
+        # 4- cancel all starting from a specefic reccurence
+    elif not is_recurring and is_recurring != event.is_recurring:
+        # cancel the remaining events 
+        recurrence_details = set_none_recurrence_details()
+         # Populate the occurrences list and last end date
+        last_end_date, occurrences = populate_occurrences(event_args['start_date'],
+                                                      event_args['end_date'],
+                                                      recurrence_details)
+        # event_args['end_date'] = last_end_date
+        actions.append(EventModel.occurrences)
+
+    elif is_recurring and is_recurring == event.is_recurring:
+        # check for recurrences changes  
+        occurrence_num = event_args['occurrence_num']
+        start_date = event_args['start_date']
+        end_date = event_args['end_date']
+        # TODO
+    elif not is_recurring and is_recurring == event.is_recurring:
+        # do nothing
+        pass
+
     # TODO: Handle recurrences
+    # recurrences 
 
     return actions
 
@@ -98,6 +132,11 @@ def set_default_recurrence_details():
         'num_recurrences': constants.MIN_RECURRENCE
     }
 
+def set_none_recurrence_details():
+    return {
+        'recurrence': None,
+        'num_recurrences': 0
+    }
 
 def populate_occurrences(start_date, end_date, recurrence_details):
     day_separation, week_separation, month_separation = define_interval_increments(recurrence_details['recurrence'])
