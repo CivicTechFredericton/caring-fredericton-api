@@ -5,7 +5,7 @@ flask-marshmallow==0.9.0
 marshmallow==2.16.3
 python-dateutil==2.7.5
 python-json-logger==0.1.10
-pyyaml==3.13
+PyYAML==4.2b1
 requests==2.20.1
 pynamodb==3.3.1
 webargs==4.1.2
