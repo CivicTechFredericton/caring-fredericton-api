@@ -2,17 +2,27 @@ from core.resource import ma
 from marshmallow import fields
 
 
-class ContactSchema(ma.Schema):
+class AdminSchema(ma.Schema):
     first_name = fields.Str(required=True)
     last_name = fields.Str(required=True)
     email = fields.Str(required=True)
-    phone = fields.Str(missing="")
 
     class Meta:
         strict = True
 
 
-class OrganizationListSchema(ma.Schema):
+class AddressSchema(ma.Schema):
+    street = fields.Str(required=True)
+    postal_code = fields.Str(required=True)
+    city = fields.Str(required=True)
+    province = fields.Str(required=True)
+    country = fields.Str(required=True)
+
+    class Meta:
+        strict = True
+
+
+class OrganizationListFiltersSchema(ma.Schema):
     is_verified = fields.Bool(required=False)
 
     class Meta:
@@ -22,15 +32,27 @@ class OrganizationListSchema(ma.Schema):
 class OrganizationSchema(ma.Schema):
     id = fields.Str(dump_only=True)
     name = fields.Str(required=True)
-    description = fields.Str(missing="")
+    email = fields.Str(required=True)
+    phone = fields.Str(required=True)
     is_verified = fields.Bool(dump_only=True)
-
+    
     class Meta:
         strict = True
 
 
 class OrganizationDetailsSchema(OrganizationSchema):
-    contact_details = fields.Nested(ContactSchema, required=True)
+    administrator = fields.Nested(AdminSchema, required=True)
+    address = fields.Nested(AddressSchema, required=True)
+
+    class Meta:
+        strict = True
+
+
+class OrganizationUpdateSchema(OrganizationSchema):
+    name = fields.Str()
+    email = fields.Str()
+    phone = fields.Str()
+    address = fields.Nested(AddressSchema)
 
     class Meta:
         strict = True
@@ -45,6 +67,7 @@ class OrganizationVerificationSchema(ma.Schema):
 
 
 organization_schema = OrganizationSchema()
-organization_list_schema = OrganizationListSchema()
+organization_list_filters_schema = OrganizationListFiltersSchema()
 organization_details_schema = OrganizationDetailsSchema()
+organization_update_schema = OrganizationUpdateSchema()
 organization_verification_schema = OrganizationVerificationSchema()

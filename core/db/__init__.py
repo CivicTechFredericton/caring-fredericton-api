@@ -2,9 +2,9 @@ import uuid
 
 from pynamodb import indexes
 from pynamodb.exceptions import PutError
-from services.events.model import EventModel
-from services.organizations.model import OrganizationModel
-from services.users.model import UserModel
+from core.db.events.model import EventModel
+from core.db.organizations.model import OrganizationModel
+from core.db.users.model import UserModel
 
 import logging
 logger = logging.getLogger(__name__)
@@ -26,6 +26,25 @@ def init_models(service_name, stage, host=None):
         logger.debug("Init %s model '%s'", entity_type, model.Meta.index_name)
 
 
+def get_filter_conditions(conditions):
+    scan_condition = None
+
+    for index, condition in enumerate(conditions):
+        if index == 0:
+            scan_condition = condition
+        else:
+            scan_condition = scan_condition & condition
+
+    return scan_condition
+
+
+def update_item(item, actions):
+    if actions:
+        item.update(actions=actions)
+    else:
+        logger.info('Item not changed on update')
+
+
 def save_with_unique_id(item):
     """
     Save a record in the database using a unique identifier value
@@ -34,6 +53,6 @@ def save_with_unique_id(item):
     """
     item.id = str(uuid.uuid4())
     try:
-        item.save(id__null=True)
+        item.save()
     except PutError as e:
         logger.error('Unable to save the item {}'.format(str(e)))

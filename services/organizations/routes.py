@@ -2,13 +2,14 @@ from core import configuration, db, errors
 from core.aws.cognito import create_user, generate_random_password
 from core.aws.ses import SES
 from flask import Blueprint, jsonify
-from webargs import missing
 from webargs.flaskparser import use_kwargs
 
-from services.organizations.model import OrganizationModel
-from services.organizations.resource import organization_details_schema, organization_list_schema,\
-    organization_schema, organization_verification_schema
-from services.users.model import UserModel
+from core.db.organizations import check_for_duplicate_name, get_organization_from_db
+from core.db.organizations.model import OrganizationModel
+from core.db.users.model import UserModel
+from services.organizations import build_filter_condition, build_update_actions, build_verify_organization_actions
+from services.organizations.resource import organization_details_schema, organization_list_filters_schema,\
+    organization_schema, organization_update_schema, organization_verification_schema
 
 import logging
 logger = logging.getLogger(__name__)
@@ -18,12 +19,10 @@ blueprint = Blueprint('organizations', __name__)
 
 @blueprint.route('/register-organization', methods=["POST"])
 @use_kwargs(organization_details_schema, locations=('json',))
-def add_organization(**kwargs):
+def register_organization(**kwargs):
     # TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
     name = kwargs['name']
-    if is_duplicate_name(name):
-        message = 'Organization with name {} already exists'.format(name)
-        raise errors.ResourceValidationError(messages={'name': [message]})
+    check_for_duplicate_name(name)
 
     organization = OrganizationModel(**kwargs)
     db.save_with_unique_id(organization)
@@ -50,13 +49,10 @@ def add_organization(**kwargs):
 
 
 @blueprint.route('/organizations', methods=["GET"])
-@use_kwargs(organization_list_schema, locations=('query',))
+@use_kwargs(organization_list_filters_schema, locations=('query',))
 def list_organizations(**kwargs):
-    is_verified = kwargs['is_verified']
-    if is_verified is missing:
-        organizations = OrganizationModel.scan()
-    else:
-        organizations = OrganizationModel.scan(OrganizationModel.is_verified == is_verified)
+    filter_condition = build_filter_condition(**kwargs)
+    organizations = OrganizationModel.scan(filter_condition)
 
     response = []
 
@@ -79,62 +75,31 @@ def verify_organization(org_id, **kwargs):
     is_verified = kwargs['is_verified']
 
     if is_verified and not organization.is_verified:
-        # Update the verification flag
-        organization.update(
-            actions=[
-                OrganizationModel.is_verified.set(is_verified),
-                OrganizationModel.updated.set(OrganizationModel.get_current_time())
-            ]
-        )
+        actions = build_verify_organization_actions(is_verified)
+        db.update_item(organization, actions)
 
-        # Create the Cognito user for organization's contact
-        contact_details = organization.contact_details
-        if contact_details:
-            email = contact_details['email']
+        administrator_details = organization.administrator
+        if administrator_details:
+            # Create the Cognito user for organization's administrator
+            email = administrator_details['email']
             password = generate_random_password()
             create_user(email, password)
 
             # Create the user record in the database
             user = UserModel(organization_id=organization.id,
                              email=email,
-                             first_name=contact_details['first_name'],
-                             last_name=contact_details['last_name'])
+                             first_name=administrator_details['first_name'],
+                             last_name=administrator_details['last_name'])
             db.save_with_unique_id(user)
-
-    response = jsonify(organization_details_schema.dump(organization).data)
-    response.status_code = 201
-
-    return response
-
-
-@blueprint.route('/organizations/<org_id>/', methods=["PUT"])
-@use_kwargs(organization_schema, locations=('json',))
-def update_organization(org_id, **kwargs):
-    organization = get_organization_from_db(org_id)
-    name = kwargs['name']
-    if organization.name != name:
-        if is_duplicate_name(name):
-            message = 'Organization with name {} already exists'.format(name)
-            raise errors.ResourceValidationError(messages={'name': [message]})
-
-    organization.update(
-        actions=[
-            OrganizationModel.name.set(name),
-            OrganizationModel.description.set(kwargs['description']),
-            OrganizationModel.updated.set(OrganizationModel.get_current_time())
-        ]
-    )
 
     return jsonify(organization_details_schema.dump(organization).data)
 
 
-def is_duplicate_name(org_name):
-    return len(list(OrganizationModel.scan(OrganizationModel.name == org_name))) > 0
+@blueprint.route('/organizations/<org_id>/', methods=["PUT"])
+@use_kwargs(organization_update_schema, locations=('json',))
+def update_organization(org_id, **kwargs):
+    organization = get_organization_from_db(org_id)
+    actions = build_update_actions(organization, **kwargs)
+    db.update_item(organization, actions)
 
-
-def get_organization_from_db(org_id):
-    try:
-        return OrganizationModel.get(hash_key=org_id)
-    except OrganizationModel.DoesNotExist:
-        message = 'Organization {} does not exist'.format(org_id)
-        raise errors.ResourceValidationError(messages={'name': [message]})
+    return jsonify(organization_details_schema.dump(organization).data)

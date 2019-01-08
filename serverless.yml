@@ -66,7 +66,7 @@ provider:
   memorySize: 128
   name: aws
   region: ca-central-1
-  runtime: python3.6
+  runtime: python3.7
   stage: ${opt:stage}
   # The default is 6 seconds. Note: API Gateway current maximum is 30 seconds
   timeout: 6
@@ -241,9 +241,9 @@ resources:
         KeySchema:
         - AttributeName: id
           KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        SSESpecification:
+          SSEEnabled: True
+        BillingMode: PAY_PER_REQUEST
         GlobalSecondaryIndexes:
         - IndexName: ${self:service}-${self:provider.stage}-user-email-index
           KeySchema:
@@ -253,9 +253,6 @@ resources:
             ProjectionType: INCLUDE
             NonKeyAttributes:
               - id
-          ProvisionedThroughput:
-            ReadCapacityUnits: 1
-            WriteCapacityUnits: 1
 
     TableOrganizations:
       Type: AWS::DynamoDB::Table
@@ -268,9 +265,9 @@ resources:
         KeySchema:
         - AttributeName: id
           KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        SSESpecification:
+          SSEEnabled: True
+        BillingMode: PAY_PER_REQUEST
 
     TableEvents:
       Type: AWS::DynamoDB::Table
@@ -280,9 +277,13 @@ resources:
         AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
+        - AttributeName: owner
+          AttributeType: S
         KeySchema:
         - AttributeName: id
           KeyType: HASH
-        ProvisionedThroughput:
-          ReadCapacityUnits: 1
-          WriteCapacityUnits: 1
+        - AttributeName: owner
+          KeyType: RANGE
+        SSESpecification:
+          SSEEnabled: True
+        BillingMode: PAY_PER_REQUEST

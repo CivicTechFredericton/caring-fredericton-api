@@ -1,4 +1,4 @@
-from core.model import BaseModel
+from core.db.model import BaseModel
 from pynamodb import attributes, indexes
 
 

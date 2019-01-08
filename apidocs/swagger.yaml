@@ -51,9 +51,73 @@ paths:
       tags:
         - events
       summary: Returns a list of all the events in the system
+      parameters:
+        - name: start_date
+          in: query
+          description: >
+            Filter value for the start date period of events
+          required: false
+          type: string
+          format: YYYY-MM-DD
+        - name: end_date
+          in: query
+          description: >
+            Filter value for the end date period of events
+          required: false
+          type: string
+          format: YYYY-MM-DD
+        - name: categories
+          in: query
+          description: >
+            Comma delimited filter value list of category names
+          required: false
+          type: string
+
       responses:
         200:
-          description: Paged object of organizations
+          description: Paged object of events
+          schema:
+            $ref: '#/definitions/PagedEvent'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+
+  /organizations/<org_id>/events:
+    get:
+      tags:
+      - events
+      summary: Returns a list of all the events associated with the organization
+      parameters:
+      - name: org_id
+        in: path
+        description: >
+          Organization ID
+        required: true
+        type: string
+      - name: start_date
+        in: query
+        description: >
+          Filter value for the start date period of events
+        required: false
+        type: string
+        format: YYYY-MM-DD
+      - name: end_date
+        in: query
+        description: >
+          Filter value for the end date period of events
+        required: false
+        type: string
+        format: YYYY-MM-DD
+      - name: categories
+        in: query
+        description: >
+          Comma delimited filter value list of category names
+        required: false
+        type: string
+      responses:
+        200:
+          description: Paged object of events
           schema:
             $ref: '#/definitions/PagedEvent'
         401:
@@ -65,6 +129,12 @@ paths:
         - events
       summary: Creates a new event in the system for an organization
       parameters:
+      - in: path
+        name: org_id
+        description: >
+          Organization ID
+        required: true
+        type: string
       - in: body
         name: body
         description: >
@@ -76,11 +146,74 @@ paths:
         201:
           description: The event was created in the system
           schema:
-            $ref: '#/definitions/EventResponse'
+            $ref: '#/definitions/EventDetailsResponse'
         422:
           description: Missing required parameters
+
+  /organizations/<org_id>/events/<event_id>:
+    get:
+      tags:
+        - events
+      summary: Gets the details of an existing event
+      parameters:
+        - in: path
+          name: org_id
+          description: >
+            Organization ID
+          required: true
+          type: string
+        - in: path
+          name: event_id
+          description: >
+            Event ID
+          required: true
+          type: string
+      responses:
+        200:
+          description: Event found
+          schema:
+            $ref: '#/definitions/EventDetailsResponse'
+        401:
+          description: Authentication error
           schema:
             $ref: '#/definitions/AuthError'
+        422:
+          description: Event for the organization does not exist in the system
+    put:
+      tags:
+        - events
+      summary: Updates an existing event
+      parameters:
+        - in: path
+          name: org_id
+          description: >
+            Organization ID
+          required: true
+          type: string
+        - in: path
+          name: event_id
+          description: >
+            Event ID
+          required: true
+          type: string
+        - in: body
+          name: body
+          description: >
+            Event request details
+          required: true
+          schema:
+            $ref: "#/definitions/EventRequest"
+      responses:
+        200:
+          description: Event details updated
+          schema:
+            $ref: '#/definitions/EventDetailsResponse'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+        422:
+          description: Event for the organization does not exist in the system
 
   /organizations:
     get:
@@ -110,15 +243,44 @@ paths:
         - organizations
       summary: Returns the details for an organization
       parameters:
-      - name: org_id
-        in: path
+      - in: path
+        name: org_id
         description: >
-          ID of organization for verification
+          Organization ID
         required: true
         type: string
       responses:
         200:
           description: Organization details
+          schema:
+            $ref: '#/definitions/OrganizationDetailsResponse'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+        422:
+          description: Organization does not exist in the system
+    put:
+      tags:
+        - organizations
+      summary: Update the details of an organization
+      parameters:
+      - in: path
+        name: org_id
+        description: >
+          Organization ID
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: >
+          Verification details
+        required: true
+        schema:
+          $ref: "#/definitions/VerificationDetails"
+      responses:
+        200:
+          description: Organization details updated
           schema:
             $ref: '#/definitions/OrganizationDetailsResponse'
         401:
@@ -134,10 +296,10 @@ paths:
         - organizations
       summary: Marks the organization as verified in the system
       parameters:
-      - name: org_id
-        in: path
+      - in: path
+        name: org_id
         description: >
-          ID of organization for verification
+          Organization ID
         required: true
         type: string
       - in: body
@@ -181,6 +343,9 @@ paths:
           description: Missing required parameters
 
 definitions:
+  # -------------------------------------
+  # Auth Definitions
+  # -------------------------------------
   AuthRequest:
     description: >
       Request object that includes user details for authentication
@@ -221,7 +386,37 @@ definitions:
       message:
         type: string
 
-  ContactDetails:
+  # -------------------------------------
+  # Organization Definitions
+  # -------------------------------------
+  Address:
+    description: >
+      organization address
+    type: object
+    required:
+      - street
+      - postal_code
+      - city
+      - province
+      - country
+    properties:
+      street:
+        type: string
+        description: Street
+      postal_code:
+        type: string
+        description: Postal code
+      city:
+        type: string
+        description: City
+      province:
+        type: string
+        description: Province
+      country:
+        type: string
+        description: Country
+
+  AdministratorDetails:
     description: >
       Contact details for an organization
     type: object
@@ -239,9 +434,105 @@ definitions:
       email:
         type: string
         description: Organization's contact email address
+
+  OrganizationRequest:
+    description: >
+      Request object that includes details for registering a new organization
+    type: object
+    required:
+    - name
+    - email
+    - phone
+    - administrator
+    - address
+    properties:
+      name:
+        type: string
+        description: Name of the organization
+      description:
+        type: string
+        description: Description of the organization
+      email:
+        type: string
+        description: Email for the organization
       phone:
         type: string
-        description: Organization's contact phone number
+        description: Phone number for the organization
+      administrator:
+        allOf:
+        - $ref: '#/definitions/AdministratorDetails'
+      address:
+        allOf:
+        - $ref: '#/definitions/Address'
+
+  OrganizationResponse:
+    description: >
+      Response object that includes basic details of the organization; used in list responses
+    type: object
+    properties:
+      id:
+        type: string
+        description: ID of the organization as a UUID
+        readOnly: true
+      name:
+        type: string
+        description: Name of the organization
+      email:
+        type: string
+        description: Organization email
+      phone:
+        type: string
+        description: Organization phone number
+      is_verified:
+        type: boolean
+        readOnly: true
+
+  OrganizationDetailsResponse:
+    description: >
+      Response object that includes the details of an organization
+    type: object
+    properties:
+      id:
+        type: string
+        description: ID of the organization as a UUID
+        readOnly: true
+      name:
+        type: string
+        description: Name of the organization
+      phone:
+        type: string
+        description: Organization phone number
+      email:
+        type: string
+        description: Organization email
+      administrator_details:
+        allOf:
+        - $ref: '#/definitions/AdministratorDetails'
+      address:
+        allOf:
+        - $ref: '#/definitions/Address'
+      is_verified:
+        type: boolean
+        readOnly: true
+
+  PagedOrganization:
+    description: >
+      Page of organization resources
+    type: object
+    properties:
+      objects:
+        type: array
+        description: Organizations array for page
+        items:
+          $ref: '#/definitions/OrganizationResponse'
+      page:
+        type: integer
+        description: Current page
+      size:
+        type: integer
+        description: Size of the page
+      _links:
+        $ref: '#/definitions/PageLinks'
 
   VerificationDetails:
     description: >
@@ -258,6 +549,9 @@ definitions:
         type: string
         description: Detailed reason if the request is not verified
 
+  # -------------------------------------
+  # Event Definitions
+  # -------------------------------------
   EventRequest:
     description: >
       Request object that includes details for an event
@@ -272,112 +566,129 @@ definitions:
       name:
         type: string
         description: Name of the event
+      owner:
+        type: string
+        description: Owner identifier for the event
       description:
         type: string
         description: Description of the event
+      categories:
+        type: array
+        items:
+          type: string
+        description: List of category tag names associated with the event
       start_date:
         type: string
         description: The start date for the event
+        format: YYYY-MM-DD
       end_date:
         type: string
         description: The end date for the event
+        format: YYYY-MM-DD
       start_time:
         type: string
         description: The start time for the event
+        format: HH:MM:SS
       end_time:
         type: string
         description: The end time for the event
+        format: HH:MM:SS
+      is_recurring:
+        type: boolean
+        description: Flag indicating if the event is recurring
+        default: false
+      recurrence_details:
+        allOf:
+        - $ref: '#/definitions/RecurrenceDetails'
 
   EventResponse:
     description: >
-      Response object containing the event details
+      Response object containing the base event information
     type: object
     properties:
+      id:
+        type: string
+        description: ID of the event as a UUID
+        readOnly: true
       name:
         type: string
         description: Name of the event
+      owner:
+        type: string
+        description: Owner identifier for the event
       description:
         type: string
         description: Description of the event
+      categories:
+        type: array
+        items:
+          type: string
+        description: List of category tag names associated with the event
       start_date:
         type: string
         description: The start date for the event
+        format: YYYY-MM-DD
       end_date:
         type: string
         description: The end date for the event
+        format: YYYY-MM-DD
       start_time:
         type: string
         description: The start time for the event
+        format: HH:MM:SS
       end_time:
         type: string
         description: The end time for the event
+        format: HH:MM:SS
+
+  EventDetailsResponse:
+    description: >
+      Response object containing the detailed event information
+    type: object
+    properties:
+      id:
+        type: string
+        description: ID of the event as a UUID
+        readOnly: true
+      name:
+        type: string
+        description: Name of the event
+      owner:
+        type: string
+        description: Owner identifier for the event
+      description:
+        type: string
+        description: Description of the event
+      categories:
+        type: array
+        items:
+          type: string
+        description: List of category tag names associated with the event
+      start_date:
+        type: string
+        description: The start date for the event
+        format: YYYY-MM-DD
+      end_date:
+        type: string
+        description: The end date for the event
+        format: YYYY-MM-DD
+      start_time:
+        type: string
+        description: The start time for the event
+        format: HH:MM:SS
+      end_time:
+        type: string
+        description: The end time for the event
+        format: HH:MM:SS
+      is_recurring:
+        type: boolean
+        description: Flag indicating if the event is recurring
+      recurrence_details:
+        allOf:
+        - $ref: '#/definitions/RecurrenceDetails'
       timezone:
         type: string
         description: Timezone for the event as it was created
-
-  OrganizationRequest:
-    description: >
-      Request object that includes details for registering a new organization
-    type: object
-    required:
-      - name
-    properties:
-      name:
-        type: string
-        description: Name of the organization
-      description:
-        type: string
-        description: Description of the organization
-      contact_details:
-        allOf:
-          - $ref: '#/definitions/ContactDetails'
-
-  OrganizationResponse:
-    description: >
-      Response object that includes basic details of the organization; used in list responses
-    type: object
-    properties:
-      id:
-        type: string
-        description: ID of the organization as a UUID
-      name:
-        type: string
-        description: Name of the organization
-      description:
-        type: string
-        description: Organization description
-      is_verified:
-        type: boolean
-        readOnly: true
-
-  OrganizationDetailsResponse:
-    description: >
-      Response object that includes the details of an organization
-    type: object
-    properties:
-      id:
-        type: string
-        description: ID of the organization as a UUID
-      name:
-        type: string
-        description: Name of the organization
-      description:
-        type: string
-        description: Organization description
-      contact_details:
-        allOf:
-          - $ref: '#/definitions/ContactDetails'
-      is_verified:
-        type: boolean
-        readOnly: true
-
-  PageLinks:
-      description: >
-        Links included in paged responses for navigation
-      type: object
-      properties:
-        next_page:
-          type: string
 
   PagedEvent:
     description: >
@@ -398,21 +709,28 @@ definitions:
       _links:
         $ref: '#/definitions/PageLinks'
 
-  PagedOrganization:
+  RecurrenceDetails:
     description: >
-      Page of organization resources
+      Details pertaining to the event's recurrence information
+    type: object
+    required:
+    - recurrence
+    properties:
+      recurrence:
+        type: string
+        description: The event recurrence option (DAILY, WEEKLY, BI_WEEKLY, MONTHLY)
+      num_recurrences:
+        type: integer
+        description: The number of times the event is set to recur
+
+  # -------------------------------------
+  # Common Page Definitions
+  # -------------------------------------
+  PageLinks:
+    description: >
+      Links included in paged responses for navigation
     type: object
     properties:
-      objects:
-        type: array
-        description: Organizations array for page
-        items:
-          $ref: '#/definitions/OrganizationResponse'
-      page:
-        type: integer
-        description: Current page
-      size:
-        type: integer
-        description: Size of the page
-      _links:
-        $ref: '#/definitions/PageLinks'
+      next_page:
+        type: string
+

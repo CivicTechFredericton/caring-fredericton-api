@@ -22,7 +22,7 @@ class SES:
         self.source_email = 'no-reply@%s' % hosted_zone_name
 
     def send_email(self, recipients, subject, body, attachment_name=None, encoded_contents=None):
-        logger.info('Sending email', extra={'to addresses': recipients})
+        logger.info('Sending email to ', extra={'to_addresses': recipients})
         try:
             if attachment_name is None:
                 self.send_email_without_attachment(recipients, subject, body)
