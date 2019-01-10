@@ -19,7 +19,7 @@ def deep_merge(source, destination):
     return destination
 
 
-def retrieve_value_from_args(key_name, kwargs_list):
+def retrieve_value_from_args(kwargs_list, key_name):
     if key_name in kwargs_list:
         return kwargs_list[key_name]
 

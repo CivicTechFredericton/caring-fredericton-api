@@ -58,31 +58,31 @@ def build_update_actions(event, event_args):
             actions.append(EventModel.recurrence_details.remove())
 
     # Check the remainder of the attributes
-    name = retrieve_value_from_args('name', event_args)
+    name = retrieve_value_from_args(event_args, 'name')
     if name and name != event.name:
         actions.append(EventModel.name.set(name))
 
-    description = retrieve_value_from_args('description', event_args)
+    description = retrieve_value_from_args(event_args, 'description')
     if description and description != event.description:
         actions.append(EventModel.description.set(description))
 
-    categories = retrieve_value_from_args('categories', event_args)
+    categories = retrieve_value_from_args(event_args, 'categories')
     if categories and not are_lists_equal(categories, event.categories):
         actions.append(EventModel.categories.set(categories))
 
-    start_date = retrieve_value_from_args('start_date', event_args)
+    start_date = retrieve_value_from_args(event_args, 'start_date')
     if start_date and start_date != event.start_date:
         actions.append(EventModel.start_date.set(start_date))
 
-    end_date = retrieve_value_from_args('end_date', event_args)
+    end_date = retrieve_value_from_args(event_args, 'end_date')
     if end_date and end_date != event.end_date:
         actions.append(EventModel.end_date.set(end_date))
 
-    start_time = retrieve_value_from_args('start_time', event_args)
+    start_time = retrieve_value_from_args(event_args, 'start_time')
     if start_time and start_time != event.start_time:
         actions.append(EventModel.start_time.set(start_time))
 
-    end_time = retrieve_value_from_args('end_time', event_args)
+    end_time = retrieve_value_from_args(event_args, 'end_time')
     if end_time and end_time != event.end_time:
         actions.append(EventModel.end_time.set(end_time))
 
@@ -94,7 +94,7 @@ def check_recurrence_details_changed(event, event_args):
     reset_occurrences = False
     is_recurring_changed = False
 
-    is_recurring = retrieve_value_from_args('is_recurring', event_args)
+    is_recurring = retrieve_value_from_args(event_args, 'is_recurring')
     if is_recurring is not None and is_recurring != event.is_recurring:
         reset_occurrences = True
         is_recurring_changed = True
@@ -102,7 +102,7 @@ def check_recurrence_details_changed(event, event_args):
         event_args['is_recurring'] = event.is_recurring
 
     # Check to see if the details changed
-    recurrence_details = retrieve_value_from_args('recurrence_details', event_args)
+    recurrence_details = retrieve_value_from_args(event_args, 'recurrence_details')
     if recurrence_details and recurrence_details != event.recurrence_details:
         reset_occurrences = True
 
@@ -146,7 +146,7 @@ def update_event_occurrences(event):
 def set_occurrences(event_args):
     # Check to see if the recurrence details is set
     if event_args['is_recurring']:
-        recurrence_details = retrieve_value_from_args('recurrence_details', event_args)
+        recurrence_details = retrieve_value_from_args(event_args, 'recurrence_details')
         if recurrence_details is None:
             message = 'Missing data for required field when is_recurring is true'
             raise errors.ResourceValidationError(messages={'recurrence_details': [message]})
