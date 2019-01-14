@@ -24,6 +24,7 @@ class RecurrenceDetails(ma.Schema):
 
 class OccurrenceDetails(ma.Schema):
     occurrence_num = fields.Int(required=True)
+    is_still_on = fields.Bool(missing=True, default=True)
     start_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
     end_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
 

@@ -66,6 +66,7 @@ def build_update_actions(event, event_args):
 
     is_recurring = event_args['is_recurring']
     if is_recurring and is_recurring != event.is_recurring:
+        actions.append(EventModel.is_recurring.set(is_recurring))
         # insert new recurrences since this option was not enabled
         set_occurrences(event_args)
         # TODO 
@@ -78,21 +79,26 @@ def build_update_actions(event, event_args):
         # 3- cancel one or more reccurences
         # 4- cancel all starting from a specefic reccurence
     elif not is_recurring and is_recurring != event.is_recurring:
+        actions.append(EventModel.is_recurring.set(is_recurring))
         # cancel the remaining events 
-        recurrence_details = set_none_recurrence_details()
-         # Populate the occurrences list and last end date
-        last_end_date, occurrences = populate_occurrences(event_args['start_date'],
-                                                      event_args['end_date'],
-                                                      recurrence_details)
-        # event_args['end_date'] = last_end_date
-        actions.append(EventModel.occurrences)
+        today = datetime.now()
+        recurrence_details = event.recurrence_details
+        num_recurrences = recurrence_details.num_recurrences
+        occurrenses = event.occurrences
+        for occurrence in occurrenses:
+            if occurrence.start_date >= today:
+                occurrence.is_still_on = False
+
+        actions.append(EventModel.occurrences.set(occurrences))
 
     elif is_recurring and is_recurring == event.is_recurring:
-        # check for recurrences changes  
-        occurrence_num = event_args['occurrence_num']
-        start_date = event_args['start_date']
-        end_date = event_args['end_date']
-        # TODO
+        # check for reccurrences changes  
+        recurrence_details = event_args['recurrence_details']
+        # check for occurrenses changes
+        occurrences = event_args['occurrences']
+
+        actions.append(EventModel.recurrence_details.set(recurrence_details))
+        actions.append(EventModel.occurrences.set(occurrences))
     elif not is_recurring and is_recurring == event.is_recurring:
         # do nothing
         pass
@@ -125,17 +131,10 @@ def set_occurrences(event_args):
     event_args['end_date'] = last_end_date
     event_args['occurrences'] = occurrences
 
-
 def set_default_recurrence_details():
     return {
         'recurrence': constants.RecurrenceType.DAILY.value,
         'num_recurrences': constants.MIN_RECURRENCE
-    }
-
-def set_none_recurrence_details():
-    return {
-        'recurrence': None,
-        'num_recurrences': 0
     }
 
 def populate_occurrences(start_date, end_date, recurrence_details):
