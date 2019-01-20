@@ -7,6 +7,8 @@ info:
     These API are used for interacting with information used for the Caring
     Calendar in compliance with standard REST specifications.
   version: 1.0.0
+servers:
+  - url: 'https://api.caringfredericton.com/'
 paths:
   /api/login:
     post:
@@ -216,6 +218,48 @@ paths:
           description: Event for the organization does not exist in the system
       requestBody:
         $ref: '#/components/requestBodies/EventRequest'
+  /organizations/<org_id>/events/<event_id>/occurrence/<occurence>:
+    get:
+      tags:
+        - organizations
+      summary: Returns the specific details for an event occurrence
+      parameters:
+        - in: path
+          name: org_id
+          description: |
+            Organization ID
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: event_id
+          description: |
+            Event ID
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: occurrence
+          description: |
+            Event ID
+          required: true
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Event occurrence found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventOccurrenceDetailsResponse'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+        '422':
+          description: Event for the organization does not exist in the system
   /organizations:
     get:
       tags:
@@ -353,8 +397,6 @@ paths:
         description: |
           Organization registration request details
         required: true
-servers:
-  - url: 'https://api.caringfredericton.com/'
 components:
   requestBodies:
     VerificationDetails:
@@ -666,6 +708,57 @@ components:
         name:
           type: string
           description: Name of the event
+        owner:
+          type: string
+          description: Owner identifier for the event
+        description:
+          type: string
+          description: Description of the event
+        categories:
+          type: array
+          items:
+            type: string
+          description: List of category tag names associated with the event
+        start_date:
+          type: string
+          description: The start date for the event
+          format: YYYY-MM-DD
+        end_date:
+          type: string
+          description: The end date for the event
+          format: YYYY-MM-DD
+        start_time:
+          type: string
+          description: The start time for the event
+          format: 'HH:MM:SS'
+        end_time:
+          type: string
+          description: The end time for the event
+          format: 'HH:MM:SS'
+        is_recurring:
+          type: boolean
+          description: Flag indicating if the event is recurring
+        recurrence_details:
+          allOf:
+            - $ref: '#/components/schemas/RecurrenceDetails'
+        timezone:
+          type: string
+          description: Timezone for the event as it was created
+    EventOccurrenceDetailsResponse:
+      description: |
+        Response object containing the detailed event information for an occurrence
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the event as a UUID
+          readOnly: true
+        name:
+          type: string
+          description: Name of the event
+        occurrence_num:
+          type: integer
+          description: Specific occurrence of the event based on recurrence details
         owner:
           type: string
           description: Owner identifier for the event

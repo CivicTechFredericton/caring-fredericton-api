@@ -4,10 +4,10 @@ from webargs.flaskparser import use_kwargs
 
 from core.db.events import get_event_from_db
 from core.db.events.model import EventModel
-from services.events import build_update_actions, get_recurring_events_list, set_dates_filter, \
-    set_category_filter, set_occurrences
+from services.events import build_update_actions, get_event_occurrence, get_recurring_events_list, \
+    set_dates_filter, set_category_filter, set_occurrences
 from services.events.resource import event_details_schema, event_filters_schema, \
-    event_list_schema, event_update_schema
+    event_list_schema, event_occurrence_details_schema, event_update_schema
 from core.db.organizations import get_organization_from_db
 
 blueprint = Blueprint('events', __name__)
@@ -50,9 +50,16 @@ def create_organization_event(org_id, **kwargs):
 
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["GET"])
 def get_organization_event(org_id, event_id):
-    # TODO: Handle specific occurrence lookup
     event = get_event_from_db(event_id, org_id)
+    # occurrence = get_event_occurrence(event)
     return jsonify(event_details_schema.dump(event).data)
+
+
+@blueprint.route('/organizations/<org_id>/events/<event_id>/occurrence/<int:occurrence>', methods=["GET"])
+def get_event_occurrence_details(org_id, event_id, occurrence):
+    event = get_event_from_db(event_id, org_id)
+    occurrence = get_event_occurrence(event, occurrence)
+    return jsonify(event_occurrence_details_schema.dump(occurrence).data)
 
 
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["PUT"])
@@ -67,13 +74,14 @@ def update_organization_event(org_id, event_id, **kwargs):
     return jsonify(event_details_schema.dump(event).data)
 
 
-@blueprint.route('/organizations/<org_id>/events/<event_id>/change-occurrence', methods=["PUT"])
+@blueprint.route('/organizations/<org_id>/events/<event_id>/change-occurrence', methods=["PUT", "PATCH"])
 def update_event_occurrences(org_id, event_id):
     event = get_event_from_db(event_id, org_id)
     from services.events import update_event_occurrences
     update_event_occurrences(event)
 
     # Read in the updated event details
+
     # occurrence_option = 'THIS_EVENT'
     # occurrence_option = 'REMAINING_EVENTS'
     # new_start_date, new_end_date, new start_time, new_end_time

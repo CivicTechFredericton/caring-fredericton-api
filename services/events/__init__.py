@@ -32,6 +32,15 @@ def set_category_filter(categories):
 
 
 # ------------------------------
+# Event retrieval actions
+# ------------------------------
+def get_event_occurrence(event, occurrence_num):
+    occurrences = event.occurrences
+    occurrence = next((x for x in occurrences if x.occurrence_num == occurrence_num), None)
+    return get_recurring_event(event, occurrence) if occurrence else None
+
+
+# ------------------------------
 # Handle event update actions
 # ------------------------------
 def build_update_actions(event, event_args):
@@ -69,6 +78,7 @@ def build_update_actions(event, event_args):
     if categories and not are_lists_equal(categories, event.categories):
         actions.append(EventModel.categories.set(categories))
 
+    # TODO: Work with the occurrence record
     start_date = event_args.get('start_date')
     if start_date and start_date != event.start_date:
         actions.append(EventModel.start_date.set(start_date))
@@ -238,8 +248,9 @@ def define_interval_increments(recurrence):
 # List occurrences on read
 # -------------------------
 def get_recurring_events_list(event, start_date, end_date, category_filters):
-    return [get_recurring_event(event, occurrence) for occurrence in event.occurrences
-            if within_date_range(occurrence, start_date, end_date) and contains_category(event.categories, category_filters)]
+    return [get_recurring_event(event, occurrence) for occurrence in event.occurrences]
+            # if within_date_range(occurrence, start_date, end_date)
+            # and contains_category(event.categories, category_filters)]
 
 
 def within_date_range(occurrence, start_date, end_date):

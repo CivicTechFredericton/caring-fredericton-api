@@ -21,18 +21,12 @@ class RecurrenceDetails(ma.Schema):
         strict = True
 
 
-# class OccurrenceDetails(ma.Schema):
-#     occurrence_num = fields.Int(required=True)
-#     start_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
-#     end_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
-
-
 class EventSchema(ma.Schema):
     id = fields.Str(dump_only=True)
     owner = fields.Str(dump_only=True)
     name = fields.Str(required=True)
     description = fields.Str(missing="")
-    categories = fields.List(fields.Str, missing=[], default=[])
+    categories = fields.List(fields.Str, missing=[])
     start_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
     end_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
     start_time = fields.DateTime(required=True, format=constants.EVENT_TIME_FORMAT)
@@ -52,18 +46,23 @@ class EventListSchema(EventSchema):
 class EventDetailsSchema(EventSchema):
     is_recurring = fields.Bool(missing=False)
     recurrence_details = fields.Nested(RecurrenceDetails, required=False)
-    # occurrences = fields.Nested(OccurrenceDetails, many=True, missing=[], default=[], dump_only=True)
     timezone = fields.Str(dump_only=True)
 
     class Meta:
         strict = True
 
 
+class EventOccurrenceDetailsSchema(EventDetailsSchema):
+    occurrence_num = fields.Int(dump_only=True)
+
+    class Meta:
+        strict = True
+
+
 class EventUpdateSchema(ma.Schema):
-    # update_type = fields.Str(missing='THIS-EVENT')
     name = fields.Str(required=False)
     description = fields.Str(required=False)
-    categories = fields.List(fields.Str, missing=[], default=[])
+    categories = fields.List(fields.Str, missing=[])
     start_date = fields.DateTime(required=False, format=constants.EVENT_DATE_FORMAT)
     end_date = fields.DateTime(required=False, format=constants.EVENT_DATE_FORMAT)
     start_time = fields.DateTime(required=False, format=constants.EVENT_TIME_FORMAT)
@@ -86,6 +85,7 @@ class EventFiltersSchema(ma.Schema):
 
 event_list_schema = EventListSchema()
 event_details_schema = EventDetailsSchema()
+event_occurrence_details_schema = EventOccurrenceDetailsSchema()
 event_filters_schema = EventFiltersSchema()
 event_update_schema = EventUpdateSchema()
 
