@@ -9,8 +9,8 @@
     "rollback": "serverless rollback"
   },
   "dependencies": {
-    "serverless": "1.35.1",
-    "serverless-domain-manager": "2.6.10",
+    "serverless": "1.36.1",
+    "serverless-domain-manager": "2.6.12",
     "serverless-plugin-bind-deployment-id": "1.0.2",
     "serverless-plugin-scripts": "1.0.2",
     "serverless-wsgi": "1.6.1"
