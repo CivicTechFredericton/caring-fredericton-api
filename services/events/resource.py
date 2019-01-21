@@ -8,6 +8,11 @@ def validate_recurrence(val):
         raise ValidationError('Invalid value, must be one of {}'.format(constants.RecurrenceType.values()))
 
 
+def validate_update_type(val):
+    if not constants.UpdateType.has_value(val):
+        raise ValidationError('Invalid value, must be one of {}'.format(constants.UpdateType.values()))
+
+
 class RecurrenceDetails(ma.Schema):
     recurrence = fields.Str(required=True, validate=validate_recurrence)
     num_recurrences = fields.Int(required=True,
@@ -63,12 +68,33 @@ class EventUpdateSchema(ma.Schema):
     name = fields.Str(required=False)
     description = fields.Str(required=False)
     categories = fields.List(fields.Str, missing=[])
-    start_date = fields.DateTime(required=False, format=constants.EVENT_DATE_FORMAT)
-    end_date = fields.DateTime(required=False, format=constants.EVENT_DATE_FORMAT)
-    start_time = fields.DateTime(required=False, format=constants.EVENT_TIME_FORMAT)
-    end_time = fields.DateTime(required=False, format=constants.EVENT_TIME_FORMAT)
-    is_recurring = fields.Bool(required=False)
-    recurrence_details = fields.Nested(RecurrenceDetails, required=False)
+    start_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
+    end_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
+    start_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
+    end_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
+    is_recurring = fields.Bool()
+    recurrence_details = fields.Nested(RecurrenceDetails)
+
+    class Meta:
+        strict = True
+
+
+class UpdateDetails(ma.Schema):
+    update_type = fields.Str(required=True, validate=validate_update_type)
+    occurrence_num = fields.Int(missing=1)
+
+
+class EventOccurrenceUpdateSchema(ma.Schema):
+    update_details = fields.Nested(UpdateDetails, required=True)
+    # name = fields.Str(required=True)
+    # description = fields.Str(missing="")
+    # categories = fields.List(fields.Str, missing=[])
+    # start_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
+    # end_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
+    # start_time = fields.DateTime(required=True, format=constants.EVENT_TIME_FORMAT)
+    # end_time = fields.DateTime(required=True, format=constants.EVENT_TIME_FORMAT)
+    # is_recurring = fields.Bool()
+    # recurrence_details = fields.Nested(RecurrenceDetails)
 
     class Meta:
         strict = True
@@ -85,7 +111,8 @@ class EventFiltersSchema(ma.Schema):
 
 event_list_schema = EventListSchema()
 event_details_schema = EventDetailsSchema()
-event_occurrence_details_schema = EventOccurrenceDetailsSchema()
 event_filters_schema = EventFiltersSchema()
+event_occurrence_details_schema = EventOccurrenceDetailsSchema()
+event_occurrence_update_schema = EventOccurrenceUpdateSchema()
 event_update_schema = EventUpdateSchema()
 

@@ -2,8 +2,9 @@ import copy
 
 from datetime import datetime
 from dateutil.relativedelta import relativedelta
+from operator import itemgetter
 
-from core import errors
+from core import db, errors
 from services.events import constants
 
 
@@ -124,29 +125,108 @@ def are_lists_equal(list1, list2):
 
 # Handle change to specific occurrences
 # TODO: Handle change to the time
-def update_event_occurrences(event):
-    # Retrieve the list of occurrences from the original event
+def update_event_occurrences(event, event_args):
+    update_details = event_args.get('update_details')
+    if update_details is None:
+        message = 'Missing update_details values'
+        raise errors.ResourceValidationError(messages={'update_details': [message]})
+
+    occurrence_num = update_details['occurrence_num']
+
+    update_type = update_details['update_type']
+    if update_type == constants.UpdateType.ALL.value:
+        actions = build_update_actions(event, event_args)
+        db.update_item(event, actions)
+
+    if update_type == constants.UpdateType.ONE_TIME.value:
+        actions = get_original_event_actions(event, occurrence_num)
+        db.update_item(event, actions)
+
+        # Create a new record with the one time recurrence
+        # TODO: Populate with original model values and adjust based on optional arguments
+        event_args['is_recurring'] = False
+        create_event(**event_args)
+
+        # Create a new record with original details and remaining recurrences
+        remaining_events_args = get_remaining_events_arguments(event, occurrence_num)
+        create_event(**remaining_events_args)
+
+    if update_type == constants.UpdateType.REMAINING.value:
+        actions = get_original_event_actions(event, occurrence_num)
+        db.update_item(event, actions)
+
+        remaining_events_args = get_remaining_events_arguments(event, occurrence_num)
+        create_event(**remaining_events_args)
+
+
+def get_original_event_actions(event, occurrence_num):
+    """
+    Adjust the original record to end prior to the specified occurrence
+    :param event:
+    :param occurrence_num:
+    :return:
+    """
+    update_event_args = {}
+
     occurrences = event.occurrences
-    from operator import itemgetter
-    # new_list = sorted(occurrences, key=lambda k: k['occurrence_num'])
-    new_list = sorted(occurrences, key=itemgetter('occurrence_num'))
-    for occurrence in new_list:
-        print(occurrence.occurrence_num)
+    original_events = sorted([x for x in occurrences if x.occurrence_num < occurrence_num],
+                             key=itemgetter('occurrence_num'))
+    if original_events:
+        original_start_occurrence = original_events[0]
+        update_event_args['start_date'] = original_start_occurrence.start_date
+        update_event_args['end_date'] = original_start_occurrence.end_date
 
-    # Slice the list
-    # from dateutil import parser
-    # print('Start List')
-    # print([x for x in occurrences if x.occurrence_num < 3])
-    # print('Match List')
-    # print([x for x in occurrences if x.occurrence_num == 3])
-    # print('End List')
-    # print([x for x in occurrences if x.occurrence_num > 3])
+        set_recurrence_details(update_event_args, len(original_events), event.recurrence_details.recurrence)
 
-    # if update_type == 'THIS-EVENT':
-    #     # Update the list of occurrences
-    #
-    # elif update_type == 'REMAINING-EVENTS':
-    pass
+    return build_update_actions(event, update_event_args)
+
+
+def get_remaining_events_arguments(event, occurrence_num):
+    remaining_events_args = {}
+
+    occurrences = event.occurrences
+    remaining_events = [x for x in occurrences if x.occurrence_num > occurrence_num]
+    if remaining_events:
+        start_remaining_occurrence = remaining_events[0]
+        # TODO: Build argument list from model
+        remaining_events_args['owner'] = event.owner
+        remaining_events_args['name'] = event.name
+        remaining_events_args['description'] = event.description
+        remaining_events_args['categories'] = event.categories
+        remaining_events_args['start_date'] = start_remaining_occurrence.start_date
+        remaining_events_args['end_date'] = start_remaining_occurrence.end_date
+        remaining_events_args['start_time'] = event.start_time
+        remaining_events_args['end_time'] = event.end_time
+
+        set_recurrence_details(remaining_events_args, len(remaining_events), event.recurrence_details.recurrence)
+
+    return remaining_events_args
+
+
+def set_recurrence_details(event_args, num_recurrences, original_recurrence_value):
+    if num_recurrences == 1:
+        event_args['is_recurring'] = False
+    else:
+        event_args['is_recurring'] = True
+        event_args['recurrence_details'] = {
+            'recurrence': original_recurrence_value,
+            'num_recurrences': num_recurrences
+        }
+
+
+# -------------------------
+# Event creation
+# -------------------------
+def create_event(**event_args):
+    # Set the number of occurrences
+    set_occurrences(event_args)
+
+    # Save the object
+    from core.db.events.model import EventModel
+    event = EventModel(**event_args)
+    db.save_with_unique_id(event)
+
+    return event
 
 
 # -------------------------
@@ -248,9 +328,9 @@ def define_interval_increments(recurrence):
 # List occurrences on read
 # -------------------------
 def get_recurring_events_list(event, start_date, end_date, category_filters):
-    return [get_recurring_event(event, occurrence) for occurrence in event.occurrences]
-            # if within_date_range(occurrence, start_date, end_date)
-            # and contains_category(event.categories, category_filters)]
+    return [get_recurring_event(event, occurrence) for occurrence in event.occurrences
+            if within_date_range(occurrence, start_date, end_date)
+            and contains_category(event.categories, category_filters)]
 
 
 def within_date_range(occurrence, start_date, end_date):
