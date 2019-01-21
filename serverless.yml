@@ -113,7 +113,7 @@ functions:
           method: POST
           path: /api/login
           cors: true
-
+e
   swagger:
     name: ${self:service}-${self:provider.stage}-swagger
     handler: handlers/swagger.handler
