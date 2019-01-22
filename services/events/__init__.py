@@ -138,6 +138,7 @@ def update_event_occurrences(event, event_args):
         actions = build_update_actions(event, event_args)
         db.update_item(event, actions)
 
+    # TODO: Link together separated models
     if update_type == constants.UpdateType.ONE_TIME.value:
         actions = get_original_event_actions(event, occurrence_num)
         db.update_item(event, actions)
