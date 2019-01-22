@@ -83,6 +83,9 @@ class UpdateDetails(ma.Schema):
     update_type = fields.Str(required=True, validate=validate_update_type)
     occurrence_num = fields.Int(missing=1)
 
+    class Meta:
+        strict = True
+
 
 class EventOccurrenceUpdateSchema(ma.Schema):
     update_details = fields.Nested(UpdateDetails, required=True)
