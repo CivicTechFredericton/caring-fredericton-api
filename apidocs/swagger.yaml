@@ -1,51 +1,38 @@
-# For the complete swagger spec, go here: https://goo.gl/ArFXhH
-# It is important to understand all of the components that go into a
-# swagger doc.  It is the documentation for your API.  A proper swagger
-# doc can be plugged into swagger-ui (https://goo.gl/UmNFcn) and give a
-# beautiful page describing your API.
-swagger: '2.0'
+openapi: 3.0.2
 info:
   title: Caring Calendar API
   description: >
     # Caring Calendar REST API
 
-    These API are used for interacting with information used for the Caring Calendar in
-    compliance with standard REST specifications.
-
-  version: "1.0.0"
-
-host: api.caringfredericton.com
-schemes:
-  - https
-basePath: /
-produces:
-  - application/json
-consumes:
-  - application/json
+    These API are used for interacting with information used for the Caring
+    Calendar in compliance with standard REST specifications.
+  version: 1.0.0
+servers:
+  - url: 'https://api.caringfredericton.com/'
 paths:
-  # API endpoint for retrieving an authentication token
   /api/login:
     post:
       tags:
         - external-api
       summary: Retrieve user token
-      parameters:
-      - in: body
-        name: body
-        description: "User authentication request details"
-        required: true
-        schema:
-          $ref: "#/definitions/AuthRequest"
       responses:
-        200:
+        '200':
           description: Auth token for the API user
-          schema:
-            $ref: '#/definitions/AuthResponse'
-        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '401':
           description: Invalid username and password combination
-        422:
-          description: Missing parameters, user not found, or account locked
-
+        '422':
+          description: 'Missing parameters, user not found, or account locked'
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/AuthRequest'
+        description: User authentication request details
+        required: true
   /events:
     get:
       tags:
@@ -54,102 +41,112 @@ paths:
       parameters:
         - name: start_date
           in: query
-          description: >
+          description: |
             Filter value for the start date period of events
           required: false
-          type: string
-          format: YYYY-MM-DD
+          schema:
+            type: string
+            format: YYYY-MM-DD
         - name: end_date
           in: query
-          description: >
+          description: |
             Filter value for the end date period of events
           required: false
-          type: string
-          format: YYYY-MM-DD
+          schema:
+            type: string
+            format: YYYY-MM-DD
         - name: categories
           in: query
-          description: >
+          description: |
             Comma delimited filter value list of category names
           required: false
-          type: string
-
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: Paged object of events
-          schema:
-            $ref: '#/definitions/PagedEvent'
-        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedEvent'
+        '401':
           description: Authentication error
-          schema:
-            $ref: '#/definitions/AuthError'
-
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
   /organizations/<org_id>/events:
     get:
       tags:
-      - events
+        - events
       summary: Returns a list of all the events associated with the organization
       parameters:
-      - name: org_id
-        in: path
-        description: >
-          Organization ID
-        required: true
-        type: string
-      - name: start_date
-        in: query
-        description: >
-          Filter value for the start date period of events
-        required: false
-        type: string
-        format: YYYY-MM-DD
-      - name: end_date
-        in: query
-        description: >
-          Filter value for the end date period of events
-        required: false
-        type: string
-        format: YYYY-MM-DD
-      - name: categories
-        in: query
-        description: >
-          Comma delimited filter value list of category names
-        required: false
-        type: string
+        - name: org_id
+          in: path
+          description: |
+            Organization ID
+          required: true
+          schema:
+            type: string
+        - name: start_date
+          in: query
+          description: |
+            Filter value for the start date period of events
+          required: false
+          schema:
+            type: string
+            format: YYYY-MM-DD
+        - name: end_date
+          in: query
+          description: |
+            Filter value for the end date period of events
+          required: false
+          schema:
+            type: string
+            format: YYYY-MM-DD
+        - name: categories
+          in: query
+          description: |
+            Comma delimited filter value list of category names
+          required: false
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: Paged object of events
-          schema:
-            $ref: '#/definitions/PagedEvent'
-        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedEvent'
+        '401':
           description: Authentication error
-          schema:
-            $ref: '#/definitions/AuthError'
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
     post:
       tags:
         - events
       summary: Creates a new event in the system for an organization
       parameters:
-      - in: path
-        name: org_id
-        description: >
-          Organization ID
-        required: true
-        type: string
-      - in: body
-        name: body
-        description: >
-          Event request details
-        required: true
-        schema:
-          $ref: "#/definitions/EventRequest"
-      responses:
-        201:
-          description: The event was created in the system
+        - in: path
+          name: org_id
+          description: |
+            Organization ID
+          required: true
           schema:
-            $ref: '#/definitions/EventDetailsResponse'
-        422:
+            type: string
+      responses:
+        '201':
+          description: The event was created in the system
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetailsResponse'
+        '422':
           description: Missing required parameters
-
+      requestBody:
+        $ref: '#/components/requestBodies/EventRequest'
   /organizations/<org_id>/events/<event_id>:
     get:
       tags:
@@ -158,26 +155,32 @@ paths:
       parameters:
         - in: path
           name: org_id
-          description: >
+          description: |
             Organization ID
           required: true
-          type: string
+          schema:
+            type: string
         - in: path
           name: event_id
-          description: >
+          description: |
             Event ID
           required: true
-          type: string
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: Event found
-          schema:
-            $ref: '#/definitions/EventDetailsResponse'
-        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetailsResponse'
+        '401':
           description: Authentication error
-          schema:
-            $ref: '#/definitions/AuthError'
-        422:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+        '422':
           description: Event for the organization does not exist in the system
     put:
       tags:
@@ -186,551 +189,647 @@ paths:
       parameters:
         - in: path
           name: org_id
-          description: >
+          description: |
             Organization ID
           required: true
-          type: string
+          schema:
+            type: string
         - in: path
           name: event_id
-          description: >
+          description: |
             Event ID
           required: true
-          type: string
-        - in: body
-          name: body
-          description: >
-            Event request details
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Event details updated
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetailsResponse'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+        '422':
+          description: Event for the organization does not exist in the system
+      requestBody:
+        $ref: '#/components/requestBodies/EventRequest'
+  /organizations/<org_id>/events/<event_id>/occurrence/<occurence>:
+    get:
+      tags:
+        - organizations
+      summary: Returns the specific details for an event occurrence
+      parameters:
+        - in: path
+          name: org_id
+          description: |
+            Organization ID
           required: true
           schema:
-            $ref: "#/definitions/EventRequest"
+            type: string
+        - in: path
+          name: event_id
+          description: |
+            Event ID
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: occurrence
+          description: |
+            Event ID
+          required: true
+          schema:
+            type: integer
       responses:
-        200:
-          description: Event details updated
-          schema:
-            $ref: '#/definitions/EventDetailsResponse'
-        401:
+        '200':
+          description: Event occurrence found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventOccurrenceDetailsResponse'
+        '401':
           description: Authentication error
-          schema:
-            $ref: '#/definitions/AuthError'
-        422:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+        '422':
           description: Event for the organization does not exist in the system
-
   /organizations:
     get:
       tags:
         - organizations
       summary: Returns a list of all the organizations in the system
       parameters:
-      - name: is_verified
-        in: query
-        description: >
-          Filter value on organization's verification status
-        required: false
-        type: boolean
+        - name: is_verified
+          in: query
+          description: |
+            Filter value on organization's verification status
+          required: false
+          schema:
+            type: boolean
       responses:
-        200:
+        '200':
           description: Paged object of organizations
-          schema:
-            $ref: '#/definitions/PagedOrganization'
-        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedOrganization'
+        '401':
           description: Authentication error
-          schema:
-            $ref: '#/definitions/AuthError'
-
-  /organizations/<org_id>:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+  /organizations/:
     get:
       tags:
         - organizations
       summary: Returns the details for an organization
       parameters:
-      - in: path
-        name: org_id
-        description: >
-          Organization ID
-        required: true
-        type: string
+        - in: path
+          name: org_id
+          description: |
+            Organization ID
+          required: true
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: Organization details
-          schema:
-            $ref: '#/definitions/OrganizationDetailsResponse'
-        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDetailsResponse'
+        '401':
           description: Authentication error
-          schema:
-            $ref: '#/definitions/AuthError'
-        422:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+        '422':
           description: Organization does not exist in the system
     put:
       tags:
         - organizations
       summary: Update the details of an organization
       parameters:
-      - in: path
-        name: org_id
-        description: >
-          Organization ID
-        required: true
-        type: string
-      - in: body
-        name: body
-        description: >
-          Verification details
-        required: true
-        schema:
-          $ref: "#/definitions/VerificationDetails"
+        - in: path
+          name: org_id
+          description: |
+            Organization ID
+          required: true
+          schema:
+            type: string
       responses:
-        200:
+        '200':
           description: Organization details updated
-          schema:
-            $ref: '#/definitions/OrganizationDetailsResponse'
-        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDetailsResponse'
+        '401':
           description: Authentication error
-          schema:
-            $ref: '#/definitions/AuthError'
-        422:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+        '422':
           description: Organization does not exist in the system
-
+      requestBody:
+        $ref: '#/components/requestBodies/VerificationDetails'
   /organizations/<org_id>/verify:
     post:
       tags:
         - organizations
       summary: Marks the organization as verified in the system
       parameters:
-      - in: path
-        name: org_id
-        description: >
-          Organization ID
-        required: true
-        type: string
-      - in: body
-        name: body
-        description: >
-          Verification details
-        required: true
-        schema:
-          $ref: "#/definitions/VerificationDetails"
+        - in: path
+          name: org_id
+          description: |
+            Organization ID
+          required: true
+          schema:
+            type: string
       responses:
-        201:
+        '201':
           description: The verification request was successful
-          schema:
-            $ref: '#/definitions/OrganizationDetailsResponse'
-        401:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDetailsResponse'
+        '401':
           description: Authentication error
-          schema:
-            $ref: '#/definitions/AuthError'
-        422:
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+        '422':
           description: Organization does not exist in the system
-
+      requestBody:
+        $ref: '#/components/requestBodies/VerificationDetails'
   /register-organization:
     post:
       tags:
         - external-api
       summary: Sends a registration request for an organization
-      parameters:
-      - in: body
-        name: body
-        description: >
+      responses:
+        '201':
+          description: >-
+            The request was accepted in the system pending verification by the
+            System Adminstrator
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/OrganizationDetailsResponse'
+        '422':
+          description: Missing required parameters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/OrganizationRequest'
+        description: |
           Organization registration request details
         required: true
-        schema:
-          $ref: "#/definitions/OrganizationRequest"
-      responses:
-        201:
-          description: The request was accepted in the system pending verification by the System Adminstrator
+components:
+  requestBodies:
+    VerificationDetails:
+      content:
+        application/json:
           schema:
-            $ref: '#/definitions/OrganizationDetailsResponse'
-        422:
-          description: Missing required parameters
-
-definitions:
-  # -------------------------------------
-  # Auth Definitions
-  # -------------------------------------
-  AuthRequest:
-    description: >
-      Request object that includes user details for authentication
-    type: object
-    required:
-      - username
-      - password
-    properties:
-      username:
-        type: string
-        description: Username of the system user
-      password:
-        type: string
-        description: Password of the system user
-
-  AuthResponse:
-    description: >
-      Response object that includes an auth token for the API user
-    type: object
-    properties:
-       authToken:
+            $ref: '#/components/schemas/VerificationDetails'
+      description: |
+        Verification details
+      required: true
+    EventRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EventRequest'
+      description: |
+        Event request details
+      required: true
+  schemas:
+    AuthRequest:
+      description: |
+        Request object that includes user details for authentication
+      type: object
+      required:
+        - username
+        - password
+      properties:
+        username:
+          type: string
+          description: Username of the system user
+        password:
+          type: string
+          description: Password of the system user
+    AuthResponse:
+      description: |
+        Response object that includes an auth token for the API user
+      type: object
+      properties:
+        authToken:
           type: string
           readOnly: true
-
-  AuthError:
-    description: >
-      Response received when an authorization error has occured. This can be
-      received when:
-      * a malformed or expired Authorization token is submitted
-      * the user is requesting an unauthorized route
-    type: object
-    properties:
-      code:
-        type: string
-        enum:
-          - error.jwt.expired
-          - error.jwt.invalid_signature
-      message:
-        type: string
-
-  # -------------------------------------
-  # Organization Definitions
-  # -------------------------------------
-  Address:
-    description: >
-      organization address
-    type: object
-    required:
-      - street
-      - postal_code
-      - city
-      - province
-      - country
-    properties:
-      street:
-        type: string
-        description: Street
-      postal_code:
-        type: string
-        description: Postal code
-      city:
-        type: string
-        description: City
-      province:
-        type: string
-        description: Province
-      country:
-        type: string
-        description: Country
-
-  AdministratorDetails:
-    description: >
-      Contact details for an organization
-    type: object
-    required:
-      - first_name
-      - last_name
-      - email
-    properties:
-      first_name:
-        type: string
-        description: Organization's contact first name
-      last_name:
-        type: string
-        description: Organization's contact last name
-      email:
-        type: string
-        description: Organization's contact email address
-
-  OrganizationRequest:
-    description: >
-      Request object that includes details for registering a new organization
-    type: object
-    required:
-    - name
-    - email
-    - phone
-    - administrator
-    - address
-    properties:
-      name:
-        type: string
-        description: Name of the organization
-      description:
-        type: string
-        description: Description of the organization
-      email:
-        type: string
-        description: Email for the organization
-      phone:
-        type: string
-        description: Phone number for the organization
-      administrator:
-        allOf:
-        - $ref: '#/definitions/AdministratorDetails'
-      address:
-        allOf:
-        - $ref: '#/definitions/Address'
-
-  OrganizationResponse:
-    description: >
-      Response object that includes basic details of the organization; used in list responses
-    type: object
-    properties:
-      id:
-        type: string
-        description: ID of the organization as a UUID
-        readOnly: true
-      name:
-        type: string
-        description: Name of the organization
-      email:
-        type: string
-        description: Organization email
-      phone:
-        type: string
-        description: Organization phone number
-      is_verified:
-        type: boolean
-        readOnly: true
-
-  OrganizationDetailsResponse:
-    description: >
-      Response object that includes the details of an organization
-    type: object
-    properties:
-      id:
-        type: string
-        description: ID of the organization as a UUID
-        readOnly: true
-      name:
-        type: string
-        description: Name of the organization
-      phone:
-        type: string
-        description: Organization phone number
-      email:
-        type: string
-        description: Organization email
-      administrator_details:
-        allOf:
-        - $ref: '#/definitions/AdministratorDetails'
-      address:
-        allOf:
-        - $ref: '#/definitions/Address'
-      is_verified:
-        type: boolean
-        readOnly: true
-
-  PagedOrganization:
-    description: >
-      Page of organization resources
-    type: object
-    properties:
-      objects:
-        type: array
-        description: Organizations array for page
-        items:
-          $ref: '#/definitions/OrganizationResponse'
-      page:
-        type: integer
-        description: Current page
-      size:
-        type: integer
-        description: Size of the page
-      _links:
-        $ref: '#/definitions/PageLinks'
-
-  VerificationDetails:
-    description: >
-      Verification details for a requested action (for example: verify organization details)
-    type:
-      object
-    required:
-      - is_verified
-    properties:
-      is_verified:
-        type: boolean
-        description: Flag indicating verification status
-      reason:
-        type: string
-        description: Detailed reason if the request is not verified
-
-  # -------------------------------------
-  # Event Definitions
-  # -------------------------------------
-  EventRequest:
-    description: >
-      Request object that includes details for an event
-    type: object
-    required:
-    - name
-    - start_date
-    - end_date
-    - start_time
-    - end_time
-    properties:
-      name:
-        type: string
-        description: Name of the event
-      owner:
-        type: string
-        description: Owner identifier for the event
-      description:
-        type: string
-        description: Description of the event
-      categories:
-        type: array
-        items:
+    AuthError:
+      description: >
+        Response received when an authorization error has occured. This can be
+        received when: * a malformed or expired Authorization token is submitted
+        * the user is requesting an unauthorized route
+      type: object
+      properties:
+        code:
           type: string
-        description: List of category tag names associated with the event
-      start_date:
-        type: string
-        description: The start date for the event
-        format: YYYY-MM-DD
-      end_date:
-        type: string
-        description: The end date for the event
-        format: YYYY-MM-DD
-      start_time:
-        type: string
-        description: The start time for the event
-        format: HH:MM:SS
-      end_time:
-        type: string
-        description: The end time for the event
-        format: HH:MM:SS
-      is_recurring:
-        type: boolean
-        description: Flag indicating if the event is recurring
-        default: false
-      recurrence_details:
-        allOf:
-        - $ref: '#/definitions/RecurrenceDetails'
-
-  EventResponse:
-    description: >
-      Response object containing the base event information
-    type: object
-    properties:
-      id:
-        type: string
-        description: ID of the event as a UUID
-        readOnly: true
-      name:
-        type: string
-        description: Name of the event
-      owner:
-        type: string
-        description: Owner identifier for the event
-      description:
-        type: string
-        description: Description of the event
-      categories:
-        type: array
-        items:
+          enum:
+            - error.jwt.expired
+            - error.jwt.invalid_signature
+        message:
           type: string
-        description: List of category tag names associated with the event
-      start_date:
-        type: string
-        description: The start date for the event
-        format: YYYY-MM-DD
-      end_date:
-        type: string
-        description: The end date for the event
-        format: YYYY-MM-DD
-      start_time:
-        type: string
-        description: The start time for the event
-        format: HH:MM:SS
-      end_time:
-        type: string
-        description: The end time for the event
-        format: HH:MM:SS
-
-  EventDetailsResponse:
-    description: >
-      Response object containing the detailed event information
-    type: object
-    properties:
-      id:
-        type: string
-        description: ID of the event as a UUID
-        readOnly: true
-      name:
-        type: string
-        description: Name of the event
-      owner:
-        type: string
-        description: Owner identifier for the event
-      description:
-        type: string
-        description: Description of the event
-      categories:
-        type: array
-        items:
+    Address:
+      description: |
+        organization address
+      type: object
+      required:
+        - street
+        - postal_code
+        - city
+        - province
+        - country
+      properties:
+        street:
           type: string
-        description: List of category tag names associated with the event
-      start_date:
-        type: string
-        description: The start date for the event
-        format: YYYY-MM-DD
-      end_date:
-        type: string
-        description: The end date for the event
-        format: YYYY-MM-DD
-      start_time:
-        type: string
-        description: The start time for the event
-        format: HH:MM:SS
-      end_time:
-        type: string
-        description: The end time for the event
-        format: HH:MM:SS
-      is_recurring:
-        type: boolean
-        description: Flag indicating if the event is recurring
-      recurrence_details:
-        allOf:
-        - $ref: '#/definitions/RecurrenceDetails'
-      timezone:
-        type: string
-        description: Timezone for the event as it was created
-
-  PagedEvent:
-    description: >
-      Page of organization resources
-    type: object
-    properties:
-      objects:
-        type: array
-        description: Events array for page
-        items:
-          $ref: '#/definitions/EventResponse'
-      page:
-        type: integer
-        description: Current page
-      size:
-        type: integer
-        description: Size of the page
-      _links:
-        $ref: '#/definitions/PageLinks'
-
-  RecurrenceDetails:
-    description: >
-      Details pertaining to the event's recurrence information
-    type: object
-    required:
-    - recurrence
-    properties:
-      recurrence:
-        type: string
-        description: The event recurrence option (DAILY, WEEKLY, BI_WEEKLY, MONTHLY)
-      num_recurrences:
-        type: integer
-        description: The number of times the event is set to recur
-
-  # -------------------------------------
-  # Common Page Definitions
-  # -------------------------------------
-  PageLinks:
-    description: >
-      Links included in paged responses for navigation
-    type: object
-    properties:
-      next_page:
-        type: string
-
+          description: Street
+        postal_code:
+          type: string
+          description: Postal code
+        city:
+          type: string
+          description: City
+        province:
+          type: string
+          description: Province
+        country:
+          type: string
+          description: Country
+    AdministratorDetails:
+      description: |
+        Contact details for an organization
+      type: object
+      required:
+        - first_name
+        - last_name
+        - email
+      properties:
+        first_name:
+          type: string
+          description: Organization's contact first name
+        last_name:
+          type: string
+          description: Organization's contact last name
+        email:
+          type: string
+          description: Organization's contact email address
+    OrganizationRequest:
+      description: |
+        Request object that includes details for registering a new organization
+      type: object
+      required:
+        - name
+        - email
+        - phone
+        - administrator
+        - address
+      properties:
+        name:
+          type: string
+          description: Name of the organization
+        description:
+          type: string
+          description: Description of the organization
+        email:
+          type: string
+          description: Email for the organization
+        phone:
+          type: string
+          description: Phone number for the organization
+        administrator:
+          allOf:
+            - $ref: '#/components/schemas/AdministratorDetails'
+        address:
+          allOf:
+            - $ref: '#/components/schemas/Address'
+    OrganizationResponse:
+      description: >
+        Response object that includes basic details of the organization; used in
+        list responses
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the organization as a UUID
+          readOnly: true
+        name:
+          type: string
+          description: Name of the organization
+        email:
+          type: string
+          description: Organization email
+        phone:
+          type: string
+          description: Organization phone number
+        is_verified:
+          type: boolean
+          readOnly: true
+    OrganizationDetailsResponse:
+      description: |
+        Response object that includes the details of an organization
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the organization as a UUID
+          readOnly: true
+        name:
+          type: string
+          description: Name of the organization
+        phone:
+          type: string
+          description: Organization phone number
+        email:
+          type: string
+          description: Organization email
+        administrator_details:
+          allOf:
+            - $ref: '#/components/schemas/AdministratorDetails'
+        address:
+          allOf:
+            - $ref: '#/components/schemas/Address'
+        is_verified:
+          type: boolean
+          readOnly: true
+    PagedOrganization:
+      description: |
+        Page of organization resources
+      type: object
+      properties:
+        objects:
+          type: array
+          description: Organizations array for page
+          items:
+            $ref: '#/components/schemas/OrganizationResponse'
+        page:
+          type: integer
+          description: Current page
+        size:
+          type: integer
+          description: Size of the page
+        _links:
+          $ref: '#/components/schemas/PageLinks'
+    VerificationDetails:
+      description: >
+        Verification details for a requested action (for example: verify
+        organization details)
+      type: object
+      required:
+        - is_verified
+      properties:
+        is_verified:
+          type: boolean
+          description: Flag indicating verification status
+        reason:
+          type: string
+          description: Detailed reason if the request is not verified
+    EventRequest:
+      description: |
+        Request object that includes details for an event
+      type: object
+      required:
+        - name
+        - start_date
+        - end_date
+        - start_time
+        - end_time
+      properties:
+        name:
+          type: string
+          description: Name of the event
+        owner:
+          type: string
+          description: Owner identifier for the event
+        description:
+          type: string
+          description: Description of the event
+        categories:
+          type: array
+          items:
+            type: string
+          description: List of category tag names associated with the event
+        start_date:
+          type: string
+          description: The start date for the event
+          format: YYYY-MM-DD
+        end_date:
+          type: string
+          description: The end date for the event
+          format: YYYY-MM-DD
+        start_time:
+          type: string
+          description: The start time for the event
+          format: 'HH:MM:SS'
+        end_time:
+          type: string
+          description: The end time for the event
+          format: 'HH:MM:SS'
+        is_recurring:
+          type: boolean
+          description: Flag indicating if the event is recurring
+          default: false
+        recurrence_details:
+          allOf:
+            - $ref: '#/components/schemas/RecurrenceDetails'
+    EventResponse:
+      description: |
+        Response object containing the base event information
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the event as a UUID
+          readOnly: true
+        occurence_num:
+          type: integer
+          description: Specific occurrence of the event based on recurrence details
+        name:
+          type: string
+          description: Name of the event
+        owner:
+          type: string
+          description: Owner identifier for the event
+        description:
+          type: string
+          description: Description of the event
+        categories:
+          type: array
+          items:
+            type: string
+          description: List of category tag names associated with the event
+        start_date:
+          type: string
+          description: The start date for the event
+          format: YYYY-MM-DD
+        end_date:
+          type: string
+          description: The end date for the event
+          format: YYYY-MM-DD
+        start_time:
+          type: string
+          description: The start time for the event
+          format: 'HH:MM:SS'
+        end_time:
+          type: string
+          description: The end time for the event
+          format: 'HH:MM:SS'
+    EventDetailsResponse:
+      description: |
+        Response object containing the detailed event information
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the event as a UUID
+          readOnly: true
+        name:
+          type: string
+          description: Name of the event
+        owner:
+          type: string
+          description: Owner identifier for the event
+        description:
+          type: string
+          description: Description of the event
+        categories:
+          type: array
+          items:
+            type: string
+          description: List of category tag names associated with the event
+        start_date:
+          type: string
+          description: The start date for the event
+          format: YYYY-MM-DD
+        end_date:
+          type: string
+          description: The end date for the event
+          format: YYYY-MM-DD
+        start_time:
+          type: string
+          description: The start time for the event
+          format: 'HH:MM:SS'
+        end_time:
+          type: string
+          description: The end time for the event
+          format: 'HH:MM:SS'
+        is_recurring:
+          type: boolean
+          description: Flag indicating if the event is recurring
+        recurrence_details:
+          allOf:
+            - $ref: '#/components/schemas/RecurrenceDetails'
+        timezone:
+          type: string
+          description: Timezone for the event as it was created
+    EventOccurrenceDetailsResponse:
+      description: |
+        Response object containing the detailed event information for an occurrence
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the event as a UUID
+          readOnly: true
+        name:
+          type: string
+          description: Name of the event
+        occurrence_num:
+          type: integer
+          description: Specific occurrence of the event based on recurrence details
+        owner:
+          type: string
+          description: Owner identifier for the event
+        description:
+          type: string
+          description: Description of the event
+        categories:
+          type: array
+          items:
+            type: string
+          description: List of category tag names associated with the event
+        start_date:
+          type: string
+          description: The start date for the event
+          format: YYYY-MM-DD
+        end_date:
+          type: string
+          description: The end date for the event
+          format: YYYY-MM-DD
+        start_time:
+          type: string
+          description: The start time for the event
+          format: 'HH:MM:SS'
+        end_time:
+          type: string
+          description: The end time for the event
+          format: 'HH:MM:SS'
+        is_recurring:
+          type: boolean
+          description: Flag indicating if the event is recurring
+        recurrence_details:
+          allOf:
+            - $ref: '#/components/schemas/RecurrenceDetails'
+        timezone:
+          type: string
+          description: Timezone for the event as it was created
+    PagedEvent:
+      description: |
+        Page of organization resources
+      type: object
+      properties:
+        objects:
+          type: array
+          description: Events array for page
+          items:
+            $ref: '#/components/schemas/EventResponse'
+        page:
+          type: integer
+          description: Current page
+        size:
+          type: integer
+          description: Size of the page
+        _links:
+          $ref: '#/components/schemas/PageLinks'
+    RecurrenceDetails:
+      description: |
+        Details pertaining to the event's recurrence information
+      type: object
+      required:
+        - recurrence
+      properties:
+        recurrence:
+          type: string
+          description: 'The event recurrence option (DAILY, WEEKLY, BI_WEEKLY, MONTHLY)'
+        num_recurrences:
+          type: integer
+          description: The number of times the event is set to recur
+    PageLinks:
+      description: |
+        Links included in paged responses for navigation
+      type: object
+      properties:
+        next_page:
+          type: string

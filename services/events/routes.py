@@ -4,9 +4,10 @@ from webargs.flaskparser import use_kwargs
 
 from core.db.events import get_event_from_db
 from core.db.events.model import EventModel
-from services.events import build_update_actions, get_recurring_events_list, set_dates_filter, \
-    set_category_filter, set_occurrences
-from services.events.resource import event_schema, event_details_schema, event_filters_schema
+from services.events import build_update_actions, create_event, get_event_occurrence, get_recurring_events_list, \
+    set_dates_filter, set_category_filter, update_event_occurrences
+from services.events.resource import event_details_schema, event_filters_schema, \
+    event_list_schema, event_occurrence_details_schema, event_occurrence_update_schema, event_update_schema
 from core.db.organizations import get_organization_from_db
 
 blueprint = Blueprint('events', __name__)
@@ -44,25 +45,48 @@ def create_organization_event(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
     event_args['owner'] = organization.id
 
-    return create_event(**event_args)
+    event = create_event(**event_args)
+    response = jsonify(event_details_schema.dump(event).data)
+    response.status_code = 201
+
+    return response
 
 
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["GET"])
 def get_organization_event(org_id, event_id):
-    # TODO: Handle specific occurrence lookup
     event = get_event_from_db(event_id, org_id)
+    # occurrence = get_event_occurrence(event)
     return jsonify(event_details_schema.dump(event).data)
 
 
-@blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["PUT"])
-@use_kwargs(event_details_schema, locations=('json',))
-def update_organization_event(org_id, event_id, **kwargs):
+@blueprint.route('/organizations/<org_id>/events/<event_id>/occurrence/<int:occurrence>', methods=["GET"])
+def get_event_occurrence_details(org_id, event_id, occurrence):
     event = get_event_from_db(event_id, org_id)
+    occurrence = get_event_occurrence(event, occurrence)
+    return jsonify(event_occurrence_details_schema.dump(occurrence).data)
 
+
+@blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["PUT"])
+@use_kwargs(event_update_schema, locations=('json',))
+def update_organization_event(org_id, event_id, **kwargs):
     event_args = {k: v for k, v in kwargs.items() if v is not None}
+
+    event = get_event_from_db(event_id, org_id)
     actions = build_update_actions(event, event_args)
     db.update_item(event, actions)
 
+    return jsonify(event_details_schema.dump(event).data)
+
+
+@blueprint.route('/organizations/<org_id>/events/<event_id>/change-occurrence', methods=["PUT"])
+@use_kwargs(event_occurrence_update_schema, locations=('json',))
+def update_organization_event_occurrences(org_id, event_id, **kwargs):
+    event_args = {k: v for k, v in kwargs.items() if v is not None}
+
+    event = get_event_from_db(event_id, org_id)
+    update_event_occurrences(event, event_args)
+
+    # TODO: Update response
     return jsonify(event_details_schema.dump(event).data)
 
 
@@ -70,28 +94,14 @@ def update_organization_event(org_id, event_id, **kwargs):
 # Helper Functions
 # ----------------------------------------------------
 def get_events_response(events_list, **kwargs):
-    response = []
-
     # Set the filters
     filter_start_date, filter_end_date = set_dates_filter(kwargs['start_date'], kwargs['end_date'])
     filter_categories = set_category_filter(kwargs['categories'])
 
+    response = []
     for event in events_list:
         occurrences = get_recurring_events_list(event, filter_start_date, filter_end_date, filter_categories)
         for occurrence in occurrences:
-            response.append(event_schema.dump(occurrence).data)
+            response.append(event_list_schema.dump(occurrence).data)
 
     return jsonify(response)
-
-
-def create_event(**event_args):
-    # Set the number of occurrences
-    set_occurrences(event_args)
-
-    # Save the object
-    event = EventModel(**event_args)
-    db.save_with_unique_id(event)
-
-    response = jsonify(event_details_schema.dump(event).data)
-    response.status_code = 201
-    return response

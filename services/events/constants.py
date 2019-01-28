@@ -21,3 +21,19 @@ class RecurrenceType(Enum):
     @classmethod
     def has_value(cls, value):
         return any(value == item.value for item in cls)
+
+
+@unique
+class UpdateType(Enum):
+    ONE_TIME = 'ONE-TIME'
+    ALL = 'ALL'
+    REMAINING = 'REMAINING'
+
+    @classmethod
+    def values(cls):
+        values = [item.value for item in UpdateType]
+        return ', '.join(values)
+
+    @classmethod
+    def has_value(cls, value):
+        return any(value == item.value for item in cls)

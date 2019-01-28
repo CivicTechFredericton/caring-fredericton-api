@@ -114,15 +114,6 @@ functions:
           path: /api/login
           cors: true
 
-  registration:
-    name: ${self:service}-${self:provider.stage}-registration
-    handler: wsgi.handler
-    events:
-      - http:
-          method: POST
-          path: /register-organization
-          cors: true
-
   swagger:
     name: ${self:service}-${self:provider.stage}-swagger
     handler: handlers/swagger.handler
@@ -141,6 +132,10 @@ functions:
     name: ${self:service}-${self:provider.stage}-api
     handler: wsgi.handler
     events:
+      - http:
+          method: POST
+          path: /register-organization
+          cors: true
       - http:
           method: any
           path: /{proxy+}

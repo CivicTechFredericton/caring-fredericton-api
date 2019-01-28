@@ -48,7 +48,7 @@ class OrganizationDetailsSchema(OrganizationSchema):
         strict = True
 
 
-class OrganizationUpdateSchema(OrganizationSchema):
+class OrganizationUpdateSchema(ma.Schema):
     name = fields.Str()
     email = fields.Str()
     phone = fields.Str()
