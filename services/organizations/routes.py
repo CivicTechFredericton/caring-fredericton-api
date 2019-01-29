@@ -32,11 +32,12 @@ def register_organization(**kwargs):
     try:
         ses = SES()
         # TODO: Format email message
+        verification_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}/validation/{organization.id}"
         ses.send_email(recipients=recipients,
                        subject='New Organization Request',
                        body='New organization request for {}.  Please go to {} to verify the request.'.format(
                            name,
-                           'https://dev-api.caringcalendar.com/verify'
+                           verification_url
                        ))
     except errors.SESError:
         # TODO: In addition to logging message include in response message indicating that the email failed to send

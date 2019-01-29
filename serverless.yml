@@ -10,6 +10,7 @@ provider:
   environment:
     SERVICE_NAME: ${self:service}
     STAGE: ${self:provider.stage}
+    UI_DOMAIN_NAME: ${self:custom.ui_domain_name}
     COGNITO_USER_POOL_USERS_ID:
       Ref: CognitoUserPoolUsers
     COGNITO_USER_POOL_USERS_ARN:
@@ -96,6 +97,7 @@ custom:
       Ref: Stage
   default_deletion_policy: Delete
   default_domain_name: ${self:provider.stage}-api.caringfredericton.com
+  ui_domain_name: https://${self:provider.stage}-www.caringfredericton.com
   env: ${file(configs/${self:provider.stage}.yaml)}
   scripts:
     hooks:
@@ -130,7 +132,7 @@ functions:
 
   api:
     name: ${self:service}-${self:provider.stage}-api
-    handler: wsgi.handler
+    handler: wsgi_handler.handler
     events:
       - http:
           method: POST
@@ -172,6 +174,7 @@ resources:
             EmailSubject: Your temporary password
             EmailMessage: |
               Your username is {username} and temporary password is {####}.
+              Please go to ${self:custom.ui_domain_name}/login to update your password.
         AutoVerifiedAttributes:
           - email
         EmailVerificationMessage: |
