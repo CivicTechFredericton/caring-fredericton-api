@@ -132,7 +132,7 @@ paths:
       - in: path
         name: org_id
         description: >
-          Organization ID
+          Organization ID. The Organization must be verified. 
         required: true
         type: string
       - in: body
