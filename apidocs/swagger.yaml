@@ -131,13 +131,13 @@ paths:
       parameters:
       - in: path
         name: org_id
-        description: >
+        description: |
           Organization ID. The Organization must be verified. 
         required: true
         type: string
       - in: body
         name: body
-        description: >
+        description: |
           Event request details
         required: true
         schema:
