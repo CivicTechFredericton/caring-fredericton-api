@@ -129,13 +129,19 @@ paths:
         - events
       summary: Creates a new event in the system for an organization
       parameters:
-        - in: path
-          name: org_id
-          description: |
-            Organization ID
-          required: true
-          schema:
-            type: string
+      - in: path
+        name: org_id
+        description: >
+          Organization ID. The Organization must be verified. 
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: >
+          Event request details
+        required: true
+        schema:
+          $ref: "#/definitions/EventRequest"
       responses:
         '201':
           description: The event was created in the system

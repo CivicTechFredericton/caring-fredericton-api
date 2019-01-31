@@ -8,7 +8,7 @@ from services.events import build_update_actions, create_event, get_event_occurr
     set_dates_filter, set_category_filter, update_event_occurrences
 from services.events.resource import event_details_schema, event_filters_schema, \
     event_list_schema, event_occurrence_details_schema, event_occurrence_update_schema, event_update_schema
-from core.db.organizations import get_organization_from_db
+from core.db.organizations import get_verified_organization_from_db
 
 blueprint = Blueprint('events', __name__)
 
@@ -41,8 +41,9 @@ def list_events_for_organization(org_id, **kwargs):
 def create_organization_event(org_id, **kwargs):
     event_args = {k: v for k, v in kwargs.items() if v is not None}
 
-    # Verify organization exists
-    organization = get_organization_from_db(org_id)
+    # Return organization, check that it exists and is verified
+    organization = get_verified_organization_from_db(org_id)
+
     event_args['owner'] = organization.id
 
     event = create_event(**event_args)
