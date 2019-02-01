@@ -116,23 +116,32 @@ functions:
           path: /api/login
           cors: true
 
-  events_list:
-    name: ${self:service}-${self:provider.stage}-events-list
-    handler: handlers/guest/events.handler
+  registered_organizations:
+    name: ${self:service}-${self:provider.stage}-registered-organizations
+    handler: handlers/guest/organizations.handler
     events:
       - http:
           method: GET
-          path: /events2
+          path: /organizations2
           cors: true
-    integration: lambda
-    request:
-      template:
-        application/json: |
-          '{
-            "start_date" : "$input.params(''start_date'')",
-            "end_date": "$input.params(''end_date'')",
-            "categories": "$input.params(''categories'')",
-          }'
+
+#  events_list:
+#    name: ${self:service}-${self:provider.stage}-events-list
+#    handler: handlers/guest/events.handler
+#    events:
+#      - http:
+#          method: GET
+#          path: /events2
+#          cors: true
+#    integration: lambda
+#    request:
+#      template:
+#        application/json: |
+#          '{
+#            "start_date" : "$input.params(''start_date'')",
+#            "end_date": "$input.params(''end_date'')",
+#            "categories": "$input.params(''categories'')",
+#          }'
 
   swagger:
     name: ${self:service}-${self:provider.stage}-swagger
@@ -156,6 +165,10 @@ functions:
           method: POST
           path: /register-organization
           cors: true
+#      - http:
+#          method: GET
+#          path: /organizations
+#          cors: true
       - http:
           method: any
           path: /{proxy+}

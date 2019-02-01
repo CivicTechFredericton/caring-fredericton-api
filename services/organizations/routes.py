@@ -7,7 +7,7 @@ from webargs.flaskparser import use_kwargs
 from core.db.organizations import check_for_duplicate_name, get_organization_from_db
 from core.db.organizations.model import OrganizationModel
 from core.db.users.model import UserModel
-from services.organizations import build_filter_condition, build_update_actions, build_verify_organization_actions
+from services.organizations import build_update_actions, build_verify_organization_actions
 from services.organizations.resource import organization_details_schema, organization_list_filters_schema,\
     organization_schema, organization_update_schema, organization_verification_schema
 
@@ -49,18 +49,18 @@ def register_organization(**kwargs):
     return response
 
 
-@blueprint.route('/organizations', methods=["GET"])
-@use_kwargs(organization_list_filters_schema, locations=('query',))
-def list_organizations(**kwargs):
-    filter_condition = build_filter_condition(**kwargs)
-    organizations = OrganizationModel.scan(filter_condition)
-
-    response = []
-
-    for org in organizations:
-        response.append(organization_schema.dump(org).data)
-
-    return jsonify(response)
+# @blueprint.route('/organizations', methods=["GET"])
+# @use_kwargs(organization_list_filters_schema, locations=('query',))
+# def list_organizations(**kwargs):
+#     filter_condition = build_filter_condition(**kwargs)
+#     organizations = OrganizationModel.scan(filter_condition)
+#
+#     response = []
+#
+#     for org in organizations:
+#         response.append(organization_schema.dump(org).data)
+#
+#     return jsonify(response)
 
 
 @blueprint.route('/organizations/<org_id>', methods=["GET"])
