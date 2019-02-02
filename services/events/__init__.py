@@ -11,6 +11,17 @@ from services.events import constants
 # -------------------------
 # Handle filter conditions
 # -------------------------
+def build_list_events_scan_condition(org_id):
+    from core.db.events.model import EventModel
+
+    conditions = []
+
+    if org_id is not None:
+        conditions.append(EventModel.owner == org_id)
+
+    return db.get_scan_condition(conditions)
+
+
 def set_dates_filter(start_date, end_date):
     if not start_date and not end_date:
         today = datetime.today()

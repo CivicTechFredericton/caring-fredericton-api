@@ -26,7 +26,7 @@ def init_models(service_name, stage, host=None):
         logger.debug("Init %s model '%s'", entity_type, model.Meta.index_name)
 
 
-def get_filter_conditions(conditions):
+def get_scan_condition(conditions):
     scan_condition = None
 
     for index, condition in enumerate(conditions):

@@ -1,8 +1,9 @@
 import json
-import os
+# import os
 
 from core.db.organizations import OrganizationModel
-from services.public.resource import organization_list_schema
+from handlers.api_utils import set_dynamo_table_name
+from handlers.organizations import organization_list_schema
 
 
 def handler(event, context):
@@ -10,10 +11,7 @@ def handler(event, context):
     List the registered organizations
     :return: The list of events in the system
     """
-    service_name = os.environ['SERVICE_NAME']
-    stage_name = os.environ['STAGE']
-    OrganizationModel.Meta.table_name = \
-        '{}-{}-{}'.format(service_name, stage_name, OrganizationModel.Meta.simple_name)
+    set_dynamo_table_name(OrganizationModel)
 
     organizations = OrganizationModel.scan(OrganizationModel.is_verified == True)
     response_list = [organization_list_schema.dump(org).data for org in organizations]

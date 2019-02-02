@@ -4,8 +4,8 @@ from webargs.flaskparser import use_kwargs
 
 from core.db.events import get_event_from_db
 from core.db.events.model import EventModel
-from services.events import build_update_actions, create_event, get_event_occurrence, get_recurring_events_list, \
-    set_dates_filter, set_category_filter, update_event_occurrences
+from services.events import build_list_events_scan_condition, build_update_actions, create_event, \
+    get_event_occurrence, get_recurring_events_list, set_dates_filter, set_category_filter, update_event_occurrences
 from services.events.resource import event_details_schema, event_filters_schema, \
     event_list_schema, event_occurrence_details_schema, event_occurrence_update_schema, event_update_schema
 from core.db.organizations import get_verified_organization_from_db
@@ -13,26 +13,12 @@ from core.db.organizations import get_verified_organization_from_db
 blueprint = Blueprint('events', __name__)
 
 
-@blueprint.route('/events', methods=["GET"])
-@use_kwargs(event_filters_schema, locations=('query',))
-def list_events(**kwargs):
-    """
-    List the events in the system agnostic to any owner
-    :return: The list of events in the system
-    """
-    events_list = EventModel.scan()
-    return get_events_response(events_list, **kwargs)
-
-
+@blueprint.route('/events', defaults={'org_id': None}, methods=["GET"])
 @blueprint.route('/organizations/<org_id>/events', methods=["GET"])
 @use_kwargs(event_filters_schema, locations=('query',))
-def list_events_for_organization(org_id, **kwargs):
-    """
-    Returns the list of events for an organization
-    :param org_id: The organization identifier
-    :return: The list of events associated to the organization
-    """
-    events_list = EventModel.scan(EventModel.owner == org_id)
+def list_events(org_id, **kwargs):
+    scan_condition = build_list_events_scan_condition(org_id)
+    events_list = EventModel.scan(scan_condition)
     return get_events_response(events_list, **kwargs)
 
 
@@ -56,7 +42,6 @@ def create_organization_event(org_id, **kwargs):
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["GET"])
 def get_organization_event(org_id, event_id):
     event = get_event_from_db(event_id, org_id)
-    # occurrence = get_event_occurrence(event)
     return jsonify(event_details_schema.dump(event).data)
 
 
