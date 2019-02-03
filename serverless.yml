@@ -191,6 +191,10 @@ functions:
           cors: true
       - http:
           method: GET
+          path: /list-organizations
+          cors: true
+      - http:
+          method: GET
           path: /list-events
           cors: true
       - http:
@@ -199,12 +203,8 @@ functions:
           cors: true
       - http:
           method: GET
-          path: /list-organizations
+          path: /organizations/<org_id>/events/<event_id>/event-details
           cors: true
-#      - http:
-#          method: GET
-#          path: /organizations/<org_id>/events/<event_id>/occurrence/<occurrence>/event-details
-#          cors: true
       - http:
           method: any
           path: /{proxy+}
@@ -215,9 +215,6 @@ resources:
     #===================================================================
     # API Gateway
     #===================================================================
-    # This resource is here so we can specifically define methods other
-    # than the default / and /{proxy+} so that they show up in
-    # CloudWatch separately for monitoring purposes.
     Stage:
       Type: AWS::ApiGateway::Stage
       Properties:

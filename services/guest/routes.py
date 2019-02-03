@@ -9,10 +9,10 @@ from core.db.events import get_event_from_db
 from core.db.events.model import EventModel
 from core.db.organizations import OrganizationModel
 from services.events import get_event_occurrence
-from services.events.resource import event_filters_schema, event_details_schema, event_occurrence_details_schema
+from services.events.resource import event_filters_schema, event_occurrence_details_schema
 from services.events.routes import get_events_response
 from services.guest import build_list_events_scan_condition
-from services.guest.resource import organization_list_schema
+from services.guest.resource import event_details_filter_schema, organization_list_schema
 
 blueprint = Blueprint('guest', __name__)
 
@@ -42,10 +42,12 @@ def list_events(org_id, **kwargs):
     return get_events_response(events_list, **kwargs)
 
 
-# @blueprint.route('/organizations/<org_id>/events/<event_id>/event-details', methods=["GET"])
-# def get_organization_event(org_id, event_id):
-#     event = get_event_from_db(event_id, org_id)
-#     return jsonify(event_details_schema.dump(event).data)
+@blueprint.route('/organizations/<org_id>/events/<event_id>/event-details', methods=["GET"])
+@use_kwargs(event_details_filter_schema, locations=('query',))
+def get_organization_event(org_id, event_id, **kwargs):
+    event = get_event_from_db(event_id, org_id)
+    occurrence = get_event_occurrence(event, kwargs.get('occurrence_num'))
+    return jsonify(event_occurrence_details_schema.dump(occurrence).data)
 
 
 @blueprint.route('/organizations/<org_id>/events/<event_id>/occurrence/<int:occurrence>/event-details', methods=["GET"])

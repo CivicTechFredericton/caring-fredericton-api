@@ -10,4 +10,12 @@ class OrganizationListSchema(ma.Schema):
         strict = True
 
 
+class EventDetailsFilterSchema(ma.Schema):
+    occurrence_num = fields.Int(missing=1)
+
+    class Meta:
+        strict = True
+
+
 organization_list_schema = OrganizationListSchema()
+event_details_filter_schema = EventDetailsFilterSchema()
