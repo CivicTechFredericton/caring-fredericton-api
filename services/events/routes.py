@@ -64,6 +64,18 @@ def update_organization_event(org_id, event_id, **kwargs):
     return jsonify(event_details_schema.dump(event).data)
 
 
+@blueprint.route('/organizations/<org_id>/events/<event_id>', methods=['DELETE'])
+def cancel_organization_event(org_id, event_id):
+    event = get_event_from_db(event_id, org_id)
+    # TODO: Soft delete vs hard delete?
+    event.delete()
+
+    # TODO: Update the response
+    response = jsonify(event_details_schema.dump(event).data)
+    response.status_code = 201
+    return response
+
+
 @blueprint.route('/organizations/<org_id>/events/<event_id>/change-occurrence', methods=["PUT"])
 @use_kwargs(event_occurrence_update_schema, locations=('json',))
 def update_organization_event_occurrences(org_id, event_id, **kwargs):
