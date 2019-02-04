@@ -13,7 +13,7 @@ def get_organization_from_db(org_id):
         return OrganizationModel.get(hash_key=org_id)
     except OrganizationModel.DoesNotExist:
         message = 'Organization {} does not exist'.format(org_id)
-        raise errors.ResourceValidationError(messages={'name': [message]})
+        raise errors.ResourceNotFoundError(messages={'name': [message]})
 
 
 def get_verified_organization_from_db(org_id):

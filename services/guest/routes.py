@@ -50,9 +50,9 @@ def get_organization_event(org_id, event_id, **kwargs):
     return jsonify(event_occurrence_details_schema.dump(occurrence).data)
 
 
-@blueprint.route('/organizations/<org_id>/events/<event_id>/occurrence/<int:occurrence>/event-details', methods=["GET"])
-def get_event_occurrence_details(org_id, event_id, occurrence):
-    event = get_event_from_db(event_id, org_id)
-    occurrence = get_event_occurrence(event, occurrence)
-    return jsonify(event_occurrence_details_schema.dump(occurrence).data)
+# @blueprint.route('/organizations/<org_id>/events/<event_id>/occurrence/<int:occurrence>/event-details', methods=["GET"])
+# def get_event_occurrence_details(org_id, event_id, occurrence):
+#     event = get_event_from_db(event_id, org_id)
+#     occurrence = get_event_occurrence(event, occurrence)
+#     return jsonify(event_occurrence_details_schema.dump(occurrence).data)
 

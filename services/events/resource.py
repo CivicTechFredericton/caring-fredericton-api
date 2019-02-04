@@ -112,8 +112,16 @@ class EventFiltersSchema(ma.Schema):
         strict = True
 
 
+class EventDetailsFilterSchema(ma.Schema):
+    occurrence_num = fields.Int(missing=1)
+
+    class Meta:
+        strict = True
+
+
 event_list_schema = EventListSchema()
 event_details_schema = EventDetailsSchema()
+event_details_filter_schema = EventDetailsFilterSchema()
 event_filters_schema = EventFiltersSchema()
 event_occurrence_details_schema = EventOccurrenceDetailsSchema()
 event_occurrence_update_schema = EventOccurrenceUpdateSchema()

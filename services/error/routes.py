@@ -10,8 +10,18 @@ def handle_error(error):
     return jsonify(ERROR_SCHEMA.dump(error).data), error.status_code
 
 
+@blueprint.app_errorhandler(errors.BadRequestError)
+def handle_bad_request_error(error):
+    return jsonify(error.to_dict()), error.status_code
+
+
 @blueprint.app_errorhandler(errors.ResourceValidationError)
-def handle_invalid_usage(error):
+def handle_resource_validation_error(error):
+    return jsonify(error.to_dict()), error.status_code
+
+
+@blueprint.app_errorhandler(errors.ResourceNotFoundError)
+def handle_resource_not_found_error(error):
     return jsonify(error.to_dict()), error.status_code
 
 
