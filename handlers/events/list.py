@@ -1,5 +1,4 @@
 import json
-# import os
 
 from dateutil import parser
 from core.db.events import EventModel
@@ -14,12 +13,7 @@ def handler(event, context):
     :return: The list of events in the system
     """
     set_dynamo_table_name(EventModel)
-    # service_name = os.environ['SERVICE_NAME']
-    # stage_name = os.environ['STAGE']
-    # EventModel.Meta.table_name = \
-    #     '{}-{}-{}'.format(service_name, stage_name, EventModel.Meta.simple_name)
 
-    # query_params = event['queryStringParameters']
     query_params = event.get('queryStringParameters', {})
     # query_params = event.get('queryString', {})
 

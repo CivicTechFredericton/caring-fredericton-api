@@ -17,12 +17,10 @@ from services.guest.resource import event_details_filter_schema, organization_li
 blueprint = Blueprint('guest', __name__)
 
 
-# TODO: Remove duplicates from organizations and events routes
-
 # -------------------------
 # Organization End Points
 # -------------------------
-@blueprint.route('/list-organizations', methods=["GET"])
+@blueprint.route('/guest-view/organizations', methods=["GET"])
 def list_verified_organizations():
     organizations = OrganizationModel.scan(OrganizationModel.is_verified == True)
     response = [organization_list_schema.dump(org).data for org in organizations]
@@ -33,8 +31,8 @@ def list_verified_organizations():
 # -------------------------
 # Events End Points
 # -------------------------
-@blueprint.route('/list-events', defaults={'org_id': None}, methods=["GET"])
-@blueprint.route('/organizations/<org_id>/list-events', methods=["GET"])
+@blueprint.route('/guest-view/events', defaults={'org_id': None}, methods=["GET"])
+@blueprint.route('/guest-view/organizations/<org_id>/events', methods=["GET"])
 @use_kwargs(event_filters_schema, locations=('query',))
 def list_events(org_id, **kwargs):
     scan_condition = build_list_events_scan_condition(org_id)
@@ -42,17 +40,10 @@ def list_events(org_id, **kwargs):
     return get_events_response(events_list, **kwargs)
 
 
-@blueprint.route('/organizations/<org_id>/events/<event_id>/event-details', methods=["GET"])
+@blueprint.route('/guest-view/organizations/<org_id>/events/<event_id>', methods=["GET"])
 @use_kwargs(event_details_filter_schema, locations=('query',))
 def get_organization_event(org_id, event_id, **kwargs):
     event = get_event_from_db(event_id, org_id)
     occurrence = get_event_occurrence(event, kwargs.get('occurrence_num'))
     return jsonify(event_occurrence_details_schema.dump(occurrence).data)
-
-
-# @blueprint.route('/organizations/<org_id>/events/<event_id>/occurrence/<int:occurrence>/event-details', methods=["GET"])
-# def get_event_occurrence_details(org_id, event_id, occurrence):
-#     event = get_event_from_db(event_id, org_id)
-#     occurrence = get_event_occurrence(event, occurrence)
-#     return jsonify(event_occurrence_details_schema.dump(occurrence).data)
 

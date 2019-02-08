@@ -25,7 +25,6 @@ def handler(event, context):
                 'Access-Control-Allow-Origin': '*',
                 'Access-Control-Allow-Credentials': True,
             },
-            # 'body': {'items': event_occurrence_details_schema.dump(occurrence).data}
             'body': event_occurrence_details_schema.dump(occurrence).data
         }
     except DoesNotExist:

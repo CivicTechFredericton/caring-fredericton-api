@@ -189,26 +189,34 @@ functions:
           method: POST
           path: /register-organization
           cors: true
+#      - http:
+#          method: GET
+#          path: /list-organizations
+#          cors: true
+#      - http:
+#          method: GET
+#          path: /list-events
+#          cors: true
+#      - http:
+#          method: GET
+#          path: /organizations/<org_id>/list-events
+#          cors: true
+#      - http:
+#          method: GET
+#          path: /organizations/<org_id>/events/<event_id>/event-details
+#          cors: true
       - http:
-          method: GET
-          path: /list-organizations
-          cors: true
-      - http:
-          method: GET
-          path: /list-events
-          cors: true
-      - http:
-          method: GET
-          path: /organizations/<org_id>/list-events
-          cors: true
-      - http:
-          method: GET
-          path: /organizations/<org_id>/events/<event_id>/event-details
+          method: any
+          path: /guest-view/{proxy+}
           cors: true
       - http:
           method: any
           path: /{proxy+}
           cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: CognitoAuthorizer
 
 resources:
   Resources:
@@ -281,11 +289,11 @@ resources:
           - Fn::GetAtt: [CognitoUserPoolUsers, Arn]
 
     # Augments the compiled function cf json
-    ApiGatewayMethodProxyVarAny:
-      Properties:
-        AuthorizationType: COGNITO_USER_POOLS
-        AuthorizerId:
-          Ref: CognitoAuthorizer
+#    ApiGatewayMethodProxyVarAny:
+#      Properties:
+#        AuthorizationType: COGNITO_USER_POOLS
+#        AuthorizerId:
+#          Ref: CognitoAuthorizer
 
     #===================================================================
     # DynamoDB

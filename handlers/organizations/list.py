@@ -1,5 +1,4 @@
 import json
-# import os
 
 from core.db.organizations import OrganizationModel
 from handlers.api_utils import set_dynamo_table_name
