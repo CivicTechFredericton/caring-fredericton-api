@@ -1,8 +1,7 @@
 from core.db import get_filter_conditions
-from core.db.users import check_for_duplicate_name
-from core.db.user.model import UserModel 
+from core.db.users import check_for_duplicate_user
+from core.db.users.model import UserModel 
 from webargs import missing
-
 
 def build_filter_condition(**kwargs):
     conditions = []
