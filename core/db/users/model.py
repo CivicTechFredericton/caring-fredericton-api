@@ -15,9 +15,8 @@ class UserModel(BaseModel):
         simple_name = 'user'
 
     id = attributes.UnicodeAttribute(hash_key=True)
-    username = attributes.UnicodeAttribute()
-    organization_id = attributes.UnicodeAttribute()
     email = attributes.UnicodeAttribute()
+    organization_id = attributes.UnicodeAttribute(null=True) # not assigned to an org by default
     first_name = attributes.UnicodeAttribute()
     last_name = attributes.UnicodeAttribute()
     active = attributes.BooleanAttribute(default=True)
