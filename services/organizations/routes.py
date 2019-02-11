@@ -54,11 +54,7 @@ def register_organization(**kwargs):
 def list_organizations(**kwargs):
     scan_condition = build_scan_condition(**kwargs)
     organizations = OrganizationModel.scan(scan_condition)
-
-    response = []
-
-    for org in organizations:
-        response.append(organization_schema.dump(org).data)
+    response = [organization_schema.dump(org).data for org in organizations]
 
     return jsonify(response)
 

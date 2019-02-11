@@ -33,6 +33,157 @@ paths:
               $ref: '#/components/schemas/AuthRequest'
         description: User authentication request details
         required: true
+  /guest-view/organizations:
+    get:
+      tags:
+        - guest-view
+      summary: Returns a list of all registered and verified organizations
+      responses:
+        '200':
+          description: Paged object of organizations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedGuestOrganization'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+  /guest-view/events:
+    get:
+      tags:
+        - guest-view
+      summary: Returns a list of all the registered events
+      parameters:
+        - name: start_date
+          in: query
+          description: |
+            Filter value for the start date period of events
+          required: false
+          schema:
+            type: string
+            format: YYYY-MM-DD
+        - name: end_date
+          in: query
+          description: |
+            Filter value for the end date period of events
+          required: false
+          schema:
+            type: string
+            format: YYYY-MM-DD
+        - name: categories
+          in: query
+          description: |
+            Comma delimited filter value list of category names
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paged object of events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedEvent'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+  /guest-view/organizations/<org_id>/events:
+    get:
+      tags:
+        - guest-view
+      summary: Returns a list of created events associated with the organization
+      parameters:
+        - name: org_id
+          in: path
+          description: |
+            Organization ID
+          required: true
+          schema:
+            type: string
+        - name: start_date
+          in: query
+          description: |
+            Filter value for the start date period of events
+          required: false
+          schema:
+            type: string
+            format: YYYY-MM-DD
+        - name: end_date
+          in: query
+          description: |
+            Filter value for the end date period of events
+          required: false
+          schema:
+            type: string
+            format: YYYY-MM-DD
+        - name: categories
+          in: query
+          description: |
+            Comma delimited filter value list of category names
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paged object of events
+          content:
+             application/json:
+              schema:
+                $ref: '#/components/schemas/PagedEvent'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+  /guest-view/organizations/<org_id>/events/<event_id>:
+    get:
+      tags:
+        - guest-view
+      summary: Gets the details of a registered event
+      parameters:
+        - name: org_id
+          in: path
+          description: |
+            Organization ID
+          required: true
+          schema:
+            type: string
+        - name: event_id
+          in: path
+          description: |
+            Event ID
+          required: true
+          schema:
+            type: string
+        - name: occurrence_num
+          in: query
+          description: |
+            Specific occurrence number for retrieval
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Event found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetailsResponse'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+        '404':
+          description: Event for the organization does not exist in the system
   /events:
     get:
       tags:
@@ -525,6 +676,18 @@ components:
         address:
           allOf:
             - $ref: '#/components/schemas/Address'
+    OrganizationGuestResponse:
+      description: >
+        Response object that is used for the guest view of the organizations
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the organization as a UUID
+          readOnly: true
+        name:
+          type: string
+          description: Name of the organization
     OrganizationResponse:
       description: >
         Response object that includes basic details of the organization; used in
@@ -574,6 +737,24 @@ components:
         is_verified:
           type: boolean
           readOnly: true
+    PagedGuestOrganization:
+      description: |
+        Page of organization resources for guest view
+      type: object
+      properties:
+        objects:
+          type: array
+          description: Organizations array for page
+          items:
+            $ref: '#/components/schemas/OrganizationGuestResponse'
+        page:
+          type: integer
+          description: Current page
+        size:
+          type: integer
+          description: Size of the page
+        _links:
+          $ref: '#/components/schemas/PageLinks'
     PagedOrganization:
       description: |
         Page of organization resources
