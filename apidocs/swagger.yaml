@@ -27,12 +27,7 @@ paths:
         '422':
           description: 'Missing parameters, user not found, or account locked'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AuthRequest'
-        description: User authentication request details
-        required: true
+        $ref: '#/components/requestBodies/AuthDetails'
   /guest-view/organizations:
     get:
       tags:
@@ -550,6 +545,13 @@ paths:
         required: true
 components:
   requestBodies:
+    AuthDetails:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthRequest'
+      description: User authentication request details
+      required: true
     VerificationDetails:
       content:
         application/json:
