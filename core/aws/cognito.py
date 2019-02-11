@@ -90,7 +90,7 @@ def generate_random_password():
     return new_pass
 
 
-def create_user(username, password, suppress=False):
+def create_cognito_user(username, password, suppress=False):
     args = {
         'Username': username,
         'TemporaryPassword': password

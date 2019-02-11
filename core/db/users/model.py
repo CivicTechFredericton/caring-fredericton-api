@@ -19,7 +19,7 @@ class UserModel(BaseModel):
     organization_id = attributes.UnicodeAttribute(null=True) # not assigned to an org by default
     first_name = attributes.UnicodeAttribute()
     last_name = attributes.UnicodeAttribute()
-    active = attributes.BooleanAttribute(default=True)
+    active = attributes.BooleanAttribute(default=False)
     user_email_index = UserEmail()
 
     def save(self, *args, **kwargs):

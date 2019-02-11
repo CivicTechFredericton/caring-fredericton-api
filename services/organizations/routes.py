@@ -1,5 +1,5 @@
 from core import configuration, db, errors
-from core.aws.cognito import create_user, generate_random_password
+from core.aws.cognito import create_cognito_user, generate_random_password
 from core.aws.ses import SES
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
@@ -80,7 +80,7 @@ def verify_organization(org_id, **kwargs):
             # Create the Cognito user for organization's administrator
             email = administrator_details['email']
             password = generate_random_password()
-            create_user(email, password)
+            create_cognito_user(email, password)
 
             # Create the user record in the database
             user = UserModel(organization_id=organization.id,
