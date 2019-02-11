@@ -1,21 +1,26 @@
 from core.resource import ma
 from marshmallow import fields
 
-class UserEntrySchema(ma.Schema):
+# common public user info fields for all stages
+class BasicUserSchema(ma.Schema):
     email = fields.Email(required=True)
-    password = fields.Str(required=True)
     first_name = fields.Str(required=True)
     last_name = fields.Str(required=True)
     
     class Meta:
         strict = True
 
-class UserDisplaySchema(ma.Schema):
+# fields needed to register a user  
+class UserRegistrationSchema(BasicUserSchema):
+    password = fields.Str(required=True)
+    
+    class Meta:
+        strict = True
+
+# collection of all public fields for display  
+class UserDisplaySchema(BasicUserSchema):
     id = fields.Str(dump_only=True)
-    email = fields.Email(dump_only=True)
     organization_id = fields.Str(dump_only=True)
-    first_name = fields.Str(dump_only=True)
-    last_name = fields.Str(dump_only=True)	
     active = fields.Bool(dump_only=True)
     
     class Meta:
@@ -26,6 +31,6 @@ class UserListFiltersSchema(ma.Schema):
     class Meta:
         strict = True
 
-user_entry_schema = UserEntrySchema()
+user_registration_schema = UserRegistrationSchema()
 user_display_schema = UserDisplaySchema()
 user_list_filter_schema = UserListFiltersSchema()

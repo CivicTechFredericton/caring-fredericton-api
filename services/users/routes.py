@@ -7,7 +7,7 @@ from core.db.users import create_user
 from core.db.users.model import UserModel
 
 from services.users import build_filter_condition
-from services.users.resource import user_entry_schema, user_display_schema, user_list_filter_schema
+from services.users.resource import user_registration_schema, user_display_schema, user_list_filter_schema
 
 import logging
 logger = logging.getLogger(__name__)
@@ -16,14 +16,14 @@ blueprint = Blueprint('users', __name__)
 
 
 @blueprint.route('/register-user', methods=["POST"])
-@use_kwargs(user_entry_schema, locations=('json',))
+@use_kwargs(user_registration_schema, locations=('json',))
 def register_user(**kwargs):
 
     # create user entries in db and cognito 
     user = create_user(kwargs)
 
     # print a nice response (leave out password) 
-    response = jsonify(user_entry_schema.dump(user).data)
+    response = jsonify(user_registration_schema.dump(user).data)
     response.status_code = 201
 
     return response

@@ -1,5 +1,4 @@
 from core import configuration, db, errors
-from core.aws.cognito import create_cognito_user, generate_random_password
 from core.aws.ses import SES
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
@@ -7,6 +6,8 @@ from webargs.flaskparser import use_kwargs
 from core.db.organizations import check_for_duplicate_name, get_organization_from_db
 from core.db.organizations.model import OrganizationModel
 from core.db.users.model import UserModel
+from core.db.users import get_user_by_email, get_user_by_id
+
 from services.organizations import build_filter_condition, build_update_actions, build_verify_organization_actions
 from services.organizations.resource import organization_details_schema, organization_list_filters_schema,\
     organization_schema, organization_update_schema, organization_verification_schema
@@ -24,6 +25,17 @@ def register_organization(**kwargs):
     name = kwargs['name']
     check_for_duplicate_name(name)
 
+	# get the admin user with the specified email address  
+    # this also checks that there is a valid user with this email
+    admin_email = kwargs['administrator_email']
+    admin_user = get_user_by_email(admin_email)
+
+    # set the administrator id to the admin users's email
+    # the org will be added to the admin user's account when verified
+    kwargs['administrator_id'] = admin_user.id
+
+    # create the organization
+    kwargs.pop('administrator_email')
     organization = OrganizationModel(**kwargs)
     db.save_with_unique_id(organization)
 
@@ -57,6 +69,7 @@ def list_organizations(**kwargs):
     response = []
 
     for org in organizations:
+        
         response.append(organization_schema.dump(org).data)
 
     return jsonify(response)
@@ -78,19 +91,11 @@ def verify_organization(org_id, **kwargs):
         actions = build_verify_organization_actions(is_verified)
         db.update_item(organization, actions)
 
-        administrator_details = organization.administrator
-        if administrator_details:
-            # Create the Cognito user for organization's administrator
-            email = administrator_details['email']
-            password = generate_random_password()
-            create_cognito_user(email, password)
-
-            # Create the user record in the database
-            user = UserModel(organization_id=organization.id,
-                             email=email,
-                             first_name=administrator_details['first_name'],
-                             last_name=administrator_details['last_name'])
-            db.save_with_unique_id(user)
+        # we've verified the organization and ensured that the admin user 
+        # is a valid user so add the organization to 
+        admin = get_user_by_id(organization.administrator_id)
+        admin['organization_id'] = organization.id
+        admin.save()
 
     return jsonify(organization_details_schema.dump(organization).data)
 

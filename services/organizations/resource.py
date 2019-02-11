@@ -2,15 +2,6 @@ from core.resource import ma
 from marshmallow import fields
 
 
-class AdminSchema(ma.Schema):
-    first_name = fields.Str(required=True)
-    last_name = fields.Str(required=True)
-    email = fields.Str(required=True)
-
-    class Meta:
-        strict = True
-
-
 class AddressSchema(ma.Schema):
     street = fields.Str(required=True)
     postal_code = fields.Str(required=True)
@@ -40,8 +31,9 @@ class OrganizationSchema(ma.Schema):
         strict = True
 
 
+# administrator is now specified by email  
 class OrganizationDetailsSchema(OrganizationSchema):
-    administrator = fields.Nested(AdminSchema, required=True)
+    administrator_email = fields.Email(required=True)
     address = fields.Nested(AddressSchema, required=True)
 
     class Meta:
