@@ -92,7 +92,7 @@ def verify_organization(org_id, **kwargs):
     return jsonify(organization_details_schema.dump(organization).data)
 
 
-@blueprint.route('/organizations/<org_id>/', methods=["PUT"])
+@blueprint.route('/organizations/<org_id>', methods=["PUT"])
 @use_kwargs(organization_update_schema, locations=('json',))
 def update_organization(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
