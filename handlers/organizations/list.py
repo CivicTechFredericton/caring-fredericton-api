@@ -1,6 +1,6 @@
 import json
 
-from core.db.organizations import OrganizationModel
+from core.db.organizations.model import OrganizationModel
 from handlers.api_utils import set_dynamo_table_name
 from handlers.organizations import organization_list_schema
 

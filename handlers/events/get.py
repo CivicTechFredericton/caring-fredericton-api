@@ -19,14 +19,16 @@ def handler(event, context):
         found_event = EventModel.get(hash_key=event_id, range_key=owner)
         occurrence = get_event_occurrence(found_event, occurrence)
 
-        return {
-            'statusCode': 200,
-            'headers': {
-                'Access-Control-Allow-Origin': '*',
-                'Access-Control-Allow-Credentials': True,
-            },
-            'body': event_occurrence_details_schema.dump(occurrence).data
-        }
+        return event_occurrence_details_schema.dump(occurrence).data
+
+        # return {
+        #     'statusCode': 200,
+        #     'headers': {
+        #         'Access-Control-Allow-Origin': '*',
+        #         'Access-Control-Allow-Credentials': True,
+        #     },
+        #     'body': event_occurrence_details_schema.dump(occurrence).data
+        # }
     except DoesNotExist:
         message = 'Event {} for owner {} does not exist'.format(event_id, owner)
         return {

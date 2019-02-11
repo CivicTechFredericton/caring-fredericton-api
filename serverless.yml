@@ -116,6 +116,19 @@ functions:
           path: /api/login
           cors: true
 
+#  get_organization:
+#    name: ${self:service}-${self:provider.stage}-get-organization
+#    handler: handlers/organizations/get.handler
+#    events:
+#      - http:
+#          method: GET
+#          path: /api/organizations/{org_id}
+#          cors: true
+#          integration: lambda
+#          request:
+#            parameters:
+#              paths:
+#                org_id: true
 #  registered_organizations:
 #    name: ${self:service}-${self:provider.stage}-registered-organizations
 #    handler: handlers/organizations/list.handler
