@@ -116,70 +116,6 @@ functions:
           path: /api/login
           cors: true
 
-#  get_organization:
-#    name: ${self:service}-${self:provider.stage}-get-organization
-#    handler: handlers/organizations/get.handler
-#    events:
-#      - http:
-#          method: GET
-#          path: /api/organizations/{org_id}
-#          cors: true
-#          integration: lambda
-#          request:
-#            parameters:
-#              paths:
-#                org_id: true
-#  registered_organizations:
-#    name: ${self:service}-${self:provider.stage}-registered-organizations
-#    handler: handlers/organizations/list.handler
-#    events:
-#      - http:
-#          method: GET
-#          path: /api/organizations
-#          cors: true
-
-#  events_list:
-#    name: ${self:service}-${self:provider.stage}-events-list
-#    handler: handlers/events/list.handler
-#    events:
-#      - http:
-#          method: GET
-#          path: /api/events
-#          cors: true
-#          # integration: lambda
-#          request:
-#            parameters:
-#              querystrings:
-#                org_id: false,
-#                start_date: false,
-#                end_date: false,
-#                categories: false
-##          request:
-##            template:
-##              application/json: |
-##                '{
-##                  "org_id" : "$input.params(''org_id'')",
-##                  "start_date" : "$input.params(''start_date'')",
-##                  "end_date": "$input.params(''end_date'')",
-##                  "categories": "$input.params(''categories'')"
-##                }'
-
-#  event-details:
-#    name: ${self:service}-${self:provider.stage}-event-details
-#    handler: handlers/events/get.handler
-#    events:
-#      - http:
-#          method: GET
-#          path: /api/organizations/{org_id}/events/{event_id}/occurrence/{occurrence}
-#          cors: true
-#          integration: lambda
-#          request:
-#            parameters:
-#              paths:
-#                org_id: true,
-#                event_id: true,
-#                occurrence: true
-
   swagger:
     name: ${self:service}-${self:provider.stage}-swagger
     handler: handlers/swagger.handler
@@ -202,22 +138,6 @@ functions:
           method: POST
           path: /register-organization
           cors: true
-#      - http:
-#          method: GET
-#          path: /list-organizations
-#          cors: true
-#      - http:
-#          method: GET
-#          path: /list-events
-#          cors: true
-#      - http:
-#          method: GET
-#          path: /organizations/<org_id>/list-events
-#          cors: true
-#      - http:
-#          method: GET
-#          path: /organizations/<org_id>/events/<event_id>/event-details
-#          cors: true
       - http:
           method: any
           path: /guest-view/{proxy+}
@@ -300,13 +220,6 @@ resources:
         Type: COGNITO_USER_POOLS
         ProviderARNs:
           - Fn::GetAtt: [CognitoUserPoolUsers, Arn]
-
-    # Augments the compiled function cf json
-#    ApiGatewayMethodProxyVarAny:
-#      Properties:
-#        AuthorizationType: COGNITO_USER_POOLS
-#        AuthorizerId:
-#          Ref: CognitoAuthorizer
 
     #===================================================================
     # DynamoDB
