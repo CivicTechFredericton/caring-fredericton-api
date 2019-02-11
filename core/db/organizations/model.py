@@ -10,6 +10,6 @@ class OrganizationModel(BaseModel):
     name = UnicodeAttribute()
     email = UnicodeAttribute()
     phone = UnicodeAttribute()
-    administrator = JSONAttribute(null=True)
+    administrator_id = UnicodeAttribute() 
     address = JSONAttribute(null=True)
     is_verified = BooleanAttribute(default=False)

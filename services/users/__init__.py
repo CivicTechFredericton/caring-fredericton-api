@@ -1,5 +1,4 @@
 from core.db import get_filter_conditions
-from core.db.users import check_for_duplicate_user
 from core.db.users.model import UserModel 
 from webargs import missing
 
