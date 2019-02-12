@@ -120,7 +120,7 @@ functions:
     events:
       - http:
           method: POST
-          path: /register-organization
+          path: /users/register
           cors: true
 
   swagger:

@@ -15,7 +15,7 @@ logger = logging.getLogger(__name__)
 blueprint = Blueprint('users', __name__)
 
 
-@blueprint.route('/register-user', methods=["POST"])
+@blueprint.route('/users/register', methods=["POST"])
 @use_kwargs(user_registration_schema, locations=('json',))
 def register_user(**kwargs):
 

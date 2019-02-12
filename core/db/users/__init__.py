@@ -5,22 +5,31 @@ from core.aws.cognito import create_cognito_user, generate_random_password
 
 # get a user by email
 def get_user_by_email(user_email):
-    user = UserModels.scan(UserModel.email == user_email)
+    users = list(UserModel.scan(UserModel.email == user_email))
     
-    if(user == []):
+    if(users == []):
         message = 'User with email {} does not exist'.format(user_email)
         raise errors.ResourceValidationError(messages={'email': [message]})
 
-    return user
+    if(len(users) ):
+        message = 'More than one user with email {}'.format(user_email)
+        raise errors.ResourceValidationError(messages={'email': [message]})
+
+	# convert from list to single instance
+    return users[0]
 
 def get_user_by_id(user_id):
-    user = UserModels.scan(UserModel.id == user_id)
+    users = list(UserModel.scan(UserModel.id == user_id))
 
-    if(user == []):
+    if(users == []):
         message = 'User with id {} does not exist'.format(user_id)
         raise errors.ResourceValidationError(messages={'id': [message]})
 
-    return user
+    if(len(users)>1 ):
+        message = 'More than one user with id {}'.format(user_id)
+        raise errors.ResourceValidationError(messages={'id': [message]})
+
+    return user[0]
   
 # TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
 def check_duplicate_user_email(user_email):
@@ -38,8 +47,9 @@ def create_user(user_args):
     check_duplicate_user_email(email)
 	
     # Create the Cognito user for organization's administrator
-    # TODO: add password strength checks if neeed
-    password = user_args['password'] 
+    # TODO: add password strength checks if needed
+    password = user_args['password']
+    # password = generate_random_password() 
     create_cognito_user(email, password)
 
     # Create the user model (remove the password from the input args since we don't 
