@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 blueprint = Blueprint('organizations', __name__)
 
 
-@blueprint.route('/register-organization', methods=["POST"])
+@blueprint.route('/organizations/register', methods=["POST"])
 @use_kwargs(organization_details_schema, locations=('json',))
 def register_organization(**kwargs):
     # TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
