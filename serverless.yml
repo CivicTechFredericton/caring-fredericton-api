@@ -51,6 +51,7 @@ provider:
       Action:
         - dynamodb:DescribeTable
         - dynamodb:GetItem
+        - dynamodb:DeleteItem
         - dynamodb:PutItem
         - dynamodb:Scan
         - dynamodb:UpdateItem
