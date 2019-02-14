@@ -27,12 +27,158 @@ paths:
         '422':
           description: 'Missing parameters, user not found, or account locked'
       requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/AuthRequest'
-        description: User authentication request details
-        required: true
+        $ref: '#/components/requestBodies/AuthDetails'
+  /guest-view/organizations:
+    get:
+      tags:
+        - guest-view
+      summary: Returns a list of all registered and verified organizations
+      responses:
+        '200':
+          description: Paged object of organizations
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedGuestOrganization'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+  /guest-view/events:
+    get:
+      tags:
+        - guest-view
+      summary: Returns a list of all the registered events
+      parameters:
+        - name: start_date
+          in: query
+          description: |
+            Filter value for the start date period of events
+          required: false
+          schema:
+            type: string
+            format: YYYY-MM-DD
+        - name: end_date
+          in: query
+          description: |
+            Filter value for the end date period of events
+          required: false
+          schema:
+            type: string
+            format: YYYY-MM-DD
+        - name: categories
+          in: query
+          description: |
+            Comma delimited filter value list of category names
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paged object of events
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/PagedEvent'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+  /guest-view/organizations/<org_id>/events:
+    get:
+      tags:
+        - guest-view
+      summary: Returns a list of created events associated with the organization
+      parameters:
+        - name: org_id
+          in: path
+          description: |
+            Organization ID
+          required: true
+          schema:
+            type: string
+        - name: start_date
+          in: query
+          description: |
+            Filter value for the start date period of events
+          required: false
+          schema:
+            type: string
+            format: YYYY-MM-DD
+        - name: end_date
+          in: query
+          description: |
+            Filter value for the end date period of events
+          required: false
+          schema:
+            type: string
+            format: YYYY-MM-DD
+        - name: categories
+          in: query
+          description: |
+            Comma delimited filter value list of category names
+          required: false
+          schema:
+            type: string
+      responses:
+        '200':
+          description: Paged object of events
+          content:
+             application/json:
+              schema:
+                $ref: '#/components/schemas/PagedEvent'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+  /guest-view/organizations/<org_id>/events/<event_id>:
+    get:
+      tags:
+        - guest-view
+      summary: Gets the details of a registered event
+      parameters:
+        - name: org_id
+          in: path
+          description: |
+            Organization ID
+          required: true
+          schema:
+            type: string
+        - name: event_id
+          in: path
+          description: |
+            Event ID
+          required: true
+          schema:
+            type: string
+        - name: occurrence_num
+          in: query
+          description: |
+            Specific occurrence number for retrieval
+          required: false
+          schema:
+            type: integer
+      responses:
+        '200':
+          description: Event found
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/EventDetailsResponse'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+        '404':
+          description: Event for the organization does not exist in the system
   /events:
     get:
       tags:
@@ -129,19 +275,18 @@ paths:
         - events
       summary: Creates a new event in the system for an organization
       parameters:
-      - in: path
-        name: org_id
-        description: >
-          Organization ID. The Organization must be verified. 
-        required: true
-        type: string
-      - in: body
-        name: body
-        description: >
-          Event request details
-        required: true
-        schema:
-          $ref: "#/definitions/EventRequest"
+        - name: org_id
+          in: path
+          description: |
+            Organization ID.
+          required: true
+          schema:
+            type: string
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/requestBodies/EventRequest'
       responses:
         '201':
           description: The event was created in the system
@@ -151,28 +296,33 @@ paths:
                 $ref: '#/components/schemas/EventDetailsResponse'
         '422':
           description: Missing required parameters
-      requestBody:
-        $ref: '#/components/requestBodies/EventRequest'
   /organizations/<org_id>/events/<event_id>:
     get:
       tags:
         - events
       summary: Gets the details of an existing event
       parameters:
-        - in: path
-          name: org_id
+        - name: org_id
+          in: path
           description: |
             Organization ID
           required: true
           schema:
             type: string
-        - in: path
-          name: event_id
+        - name: event_id
+          in: path
           description: |
             Event ID
           required: true
           schema:
             type: string
+        - name: occurrence_num
+          in: query
+          description: |
+            Specific occurrence number for retrieval
+          required: false
+          schema:
+            type: integer
       responses:
         '200':
           description: Event found
@@ -186,7 +336,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthError'
-        '422':
+        '404':
           description: Event for the organization does not exist in the system
     put:
       tags:
@@ -220,15 +370,14 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthError'
-        '422':
+        '404':
           description: Event for the organization does not exist in the system
       requestBody:
         $ref: '#/components/requestBodies/EventRequest'
-  /organizations/<org_id>/events/<event_id>/occurrence/<occurence>:
-    get:
+    delete:
       tags:
-        - organizations
-      summary: Returns the specific details for an event occurrence
+        - events
+      summary: Cancels an existing event
       parameters:
         - in: path
           name: org_id
@@ -244,28 +393,19 @@ paths:
           required: true
           schema:
             type: string
-        - in: path
-          name: occurrence
-          description: |
-            Event ID
-          required: true
-          schema:
-            type: integer
       responses:
-        '200':
-          description: Event occurrence found
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/EventOccurrenceDetailsResponse'
-        '401':
-          description: Authentication error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuthError'
-        '422':
-          description: Event for the organization does not exist in the system
+          '200':
+            description: Event cancelled
+          '401':
+            description: Authentication error
+            content:
+              application/json:
+                schema:
+                  $ref: '#/components/schemas/AuthError'
+          '400':
+            description: Error cancelling the event
+          '404':
+            description: Event for the organization does not exist in the system
   /organizations:
     get:
       tags:
@@ -292,7 +432,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthError'
-  /organizations/:
+  /organizations/<org_id>:
     get:
       tags:
         - organizations
@@ -318,7 +458,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthError'
-        '422':
+        '404':
           description: Organization does not exist in the system
     put:
       tags:
@@ -345,7 +485,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthError'
-        '422':
+        '404':
           description: Organization does not exist in the system
       requestBody:
         $ref: '#/components/requestBodies/VerificationDetails'
@@ -375,7 +515,7 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthError'
-        '422':
+        '404':
           description: Organization does not exist in the system
       requestBody:
         $ref: '#/components/requestBodies/VerificationDetails'
@@ -405,6 +545,13 @@ paths:
         required: true
 components:
   requestBodies:
+    AuthDetails:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/AuthRequest'
+      description: User authentication request details
+      required: true
     VerificationDetails:
       content:
         application/json:
@@ -531,6 +678,18 @@ components:
         address:
           allOf:
             - $ref: '#/components/schemas/Address'
+    OrganizationGuestResponse:
+      description: >
+        Response object that is used for the guest view of the organizations
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the organization as a UUID
+          readOnly: true
+        name:
+          type: string
+          description: Name of the organization
     OrganizationResponse:
       description: >
         Response object that includes basic details of the organization; used in
@@ -580,6 +739,24 @@ components:
         is_verified:
           type: boolean
           readOnly: true
+    PagedGuestOrganization:
+      description: |
+        Page of organization resources for guest view
+      type: object
+      properties:
+        objects:
+          type: array
+          description: Organizations array for page
+          items:
+            $ref: '#/components/schemas/OrganizationGuestResponse'
+        page:
+          type: integer
+          description: Current page
+        size:
+          type: integer
+          description: Size of the page
+        _links:
+          $ref: '#/components/schemas/PageLinks'
     PagedOrganization:
       description: |
         Page of organization resources

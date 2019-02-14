@@ -51,6 +51,7 @@ provider:
       Action:
         - dynamodb:DescribeTable
         - dynamodb:GetItem
+        - dynamodb:DeleteItem
         - dynamodb:PutItem
         - dynamodb:Scan
         - dynamodb:UpdateItem
@@ -140,17 +141,22 @@ functions:
           cors: true
       - http:
           method: any
+          path: /guest-view/{proxy+}
+          cors: true
+      - http:
+          method: any
           path: /{proxy+}
           cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: CognitoAuthorizer
 
 resources:
   Resources:
     #===================================================================
     # API Gateway
     #===================================================================
-    # This resource is here so we can specifically define methods other
-    # than the default / and /{proxy+} so that they show up in
-    # CloudWatch separately for monitoring purposes.
     Stage:
       Type: AWS::ApiGateway::Stage
       Properties:
@@ -215,13 +221,6 @@ resources:
         Type: COGNITO_USER_POOLS
         ProviderARNs:
           - Fn::GetAtt: [CognitoUserPoolUsers, Arn]
-
-    # Augments the compiled function cf json
-    ApiGatewayMethodProxyVarAny:
-      Properties:
-        AuthorizationType: COGNITO_USER_POOLS
-        AuthorizerId:
-          Ref: CognitoAuthorizer
 
     #===================================================================
     # DynamoDB

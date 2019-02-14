@@ -4,14 +4,6 @@
 
 # Temp files
 __pycache__
-node_modules
-npm-debug.log
-*.pyc
-.serverless
-.test.py.swp
-
-# Temp files
-__pycache__
 venv*
 node_modules
 npm-debug.log

@@ -1,16 +1,16 @@
-from core.db import get_filter_conditions
+from core.db import get_scan_condition
 from core.db.organizations import check_for_duplicate_name
 from core.db.organizations.model import OrganizationModel
 
 
-def build_filter_condition(**kwargs):
+def build_scan_condition(**kwargs):
     conditions = []
 
     is_verified = kwargs.get('is_verified')
     if is_verified is not None:
         conditions.append(OrganizationModel.is_verified == is_verified)
 
-    return get_filter_conditions(conditions)
+    return get_scan_condition(conditions)
 
 
 def build_verify_organization_actions(is_verified):
