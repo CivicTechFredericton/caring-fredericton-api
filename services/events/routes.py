@@ -4,11 +4,13 @@ from webargs.flaskparser import use_kwargs
 
 from core.db.events import remove_event_from_db, get_event_from_db
 from core.db.events.model import EventModel
-from services.events import build_list_events_scan_condition, build_update_actions, create_event, \
-    get_event_occurrence, get_recurring_events_list, set_dates_filter, set_category_filter, update_event_occurrences
+from core.db.organizations import get_verified_organization_from_db
+from services.events import build_list_events_scan_condition, \
+    get_event_occurrence, get_recurring_events_list, set_dates_filter, set_category_filter
+from services.events.create_utils import create_event
 from services.events.resource import event_details_schema, event_details_filter_schema, event_filters_schema, \
     event_list_schema, event_occurrence_details_schema, event_occurrence_update_schema, event_update_schema
-from core.db.organizations import get_verified_organization_from_db
+from services.events.update_utils import build_update_actions
 
 blueprint = Blueprint('events', __name__)
 
@@ -64,16 +66,16 @@ def cancel_organization_event(org_id, event_id):
     return '', 204
 
 
-@blueprint.route('/organizations/<org_id>/events/<event_id>/change-occurrence', methods=["PUT"])
-@use_kwargs(event_occurrence_update_schema, locations=('json',))
-def update_organization_event_occurrences(org_id, event_id, **kwargs):
-    event_args = {k: v for k, v in kwargs.items() if v is not None}
-
-    event = get_event_from_db(event_id, org_id)
-    update_event_occurrences(event, event_args)
-
-    # TODO: Update response
-    return jsonify(event_details_schema.dump(event).data)
+# @blueprint.route('/organizations/<org_id>/events/<event_id>/change-occurrence', methods=["PUT"])
+# @use_kwargs(event_occurrence_update_schema, locations=('json',))
+# def update_organization_event_occurrences(org_id, event_id, **kwargs):
+#     event_args = {k: v for k, v in kwargs.items() if v is not None}
+#
+#     event = get_event_from_db(event_id, org_id)
+#     update_event_occurrences(event, event_args)
+#
+#     # TODO: Update response
+#     return jsonify(event_details_schema.dump(event).data)
 
 
 # ----------------------------------------------------

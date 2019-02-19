@@ -55,9 +55,8 @@ class OccurrenceDetail(MapAttribute):
 
 
 class EventModel(BaseModel):
-    class Meta:
+    class Meta(BaseModel.Meta):
         simple_name = 'event'
-        region = BaseModel.Meta.default_region
 
     id = UnicodeAttribute(hash_key=True)
     owner = UnicodeAttribute(range_key=True)
