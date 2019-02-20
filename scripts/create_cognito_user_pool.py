@@ -6,6 +6,8 @@ import boto3
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
+PREFIX = 'caring-fred'
+
 # =======================================================================
 # Read input parameters
 # =======================================================================
@@ -29,8 +31,7 @@ region = session.region_name
 # Set variables
 # =======================================================================
 stage = args['stage']
-prefix = 'caring-fred'
-user_pool_name = '{}-{}-users'.format(prefix, stage)
+user_pool_name = '{}-{}-users'.format(PREFIX, stage)
 app_client_name = 'users'
 
 # -----------------------------------------------------------------------

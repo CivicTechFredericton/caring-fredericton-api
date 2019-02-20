@@ -22,7 +22,7 @@ Ensure the prerequisites are installed
 
 Install the NPM dependencies
 ```
-npm install
+npm ci
 ```
 
 ### Python Dependencies ###
