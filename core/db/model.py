@@ -1,8 +1,8 @@
 import json
-import os
 
 from datetime import datetime
 from core.auth import get_current_user_id
+from core.configuration import get_region_name
 from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, UTCDateTimeAttribute
 
@@ -26,7 +26,7 @@ class ModelEncoder(json.JSONEncoder):
 class BaseModel(Model):
     class Meta:
         abstract = True
-        region = os.getenv('AWS_REGION', 'ca-central-1')
+        region = get_region_name()
 
     created_at = UTCDateTimeAttribute()
     created_by = UnicodeAttribute()

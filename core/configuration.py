@@ -36,3 +36,10 @@ def get_setting(name):
 
 def set_setting(name, value):
     settings[name] = value
+
+
+def get_region_name():
+    if 'AWS_REGION' in os.environ:
+        return os.environ['AWS_REGION']
+
+    return 'ca-central-1'
