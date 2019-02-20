@@ -94,16 +94,6 @@ def create_user(username, password, suppress=False):
     args = {
         'Username': username,
         'TemporaryPassword': password
-        # 'UserAttributes': [
-        #     {
-        #         'Name': 'email',
-        #         'Value': username
-        #     },
-        #     {
-        #         'Name': 'email_verified',
-        #         'Value': 'True'
-        #     },
-        # ]
     }
 
     if suppress:

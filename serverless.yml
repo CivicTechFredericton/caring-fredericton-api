@@ -10,6 +10,7 @@ provider:
   environment:
     SERVICE_NAME: ${self:service}
     STAGE: ${self:provider.stage}
+    UI_DOMAIN_NAME: ${self:custom.ui_domain_name}
     COGNITO_USER_POOL_USERS_ID:
       Ref: CognitoUserPoolUsers
     COGNITO_USER_POOL_USERS_ARN:
@@ -50,6 +51,7 @@ provider:
       Action:
         - dynamodb:DescribeTable
         - dynamodb:GetItem
+        - dynamodb:DeleteItem
         - dynamodb:PutItem
         - dynamodb:Scan
         - dynamodb:UpdateItem
@@ -96,6 +98,7 @@ custom:
       Ref: Stage
   default_deletion_policy: Delete
   default_domain_name: ${self:provider.stage}-api.caringfredericton.com
+  ui_domain_name: https://${self:provider.stage}-www.caringfredericton.com
   env: ${file(configs/${self:provider.stage}.yaml)}
   scripts:
     hooks:
@@ -114,15 +117,6 @@ functions:
           path: /api/login
           cors: true
 
-  registration:
-    name: ${self:service}-${self:provider.stage}-registration
-    handler: wsgi.handler
-    events:
-      - http:
-          method: POST
-          path: /register-organization
-          cors: true
-
   swagger:
     name: ${self:service}-${self:provider.stage}-swagger
     handler: handlers/swagger.handler
@@ -139,21 +133,30 @@ functions:
 
   api:
     name: ${self:service}-${self:provider.stage}-api
-    handler: wsgi.handler
+    handler: wsgi_handler.handler
     events:
+      - http:
+          method: POST
+          path: /register-organization
+          cors: true
+      - http:
+          method: any
+          path: /guest-view/{proxy+}
+          cors: true
       - http:
           method: any
           path: /{proxy+}
           cors: true
+          authorizer:
+            type: COGNITO_USER_POOLS
+            authorizerId:
+              Ref: CognitoAuthorizer
 
 resources:
   Resources:
     #===================================================================
     # API Gateway
     #===================================================================
-    # This resource is here so we can specifically define methods other
-    # than the default / and /{proxy+} so that they show up in
-    # CloudWatch separately for monitoring purposes.
     Stage:
       Type: AWS::ApiGateway::Stage
       Properties:
@@ -177,6 +180,7 @@ resources:
             EmailSubject: Your temporary password
             EmailMessage: |
               Your username is {username} and temporary password is {####}.
+              Please go to ${self:custom.ui_domain_name}/login to update your password.
         AutoVerifiedAttributes:
           - email
         EmailVerificationMessage: |
@@ -217,13 +221,6 @@ resources:
         Type: COGNITO_USER_POOLS
         ProviderARNs:
           - Fn::GetAtt: [CognitoUserPoolUsers, Arn]
-
-    # Augments the compiled function cf json
-    ApiGatewayMethodProxyVarAny:
-      Properties:
-        AuthorizationType: COGNITO_USER_POOLS
-        AuthorizerId:
-          Ref: CognitoAuthorizer
 
     #===================================================================
     # DynamoDB

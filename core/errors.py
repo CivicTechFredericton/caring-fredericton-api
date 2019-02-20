@@ -1,5 +1,4 @@
 from http.client import INTERNAL_SERVER_ERROR, BAD_REQUEST, NOT_FOUND, UNPROCESSABLE_ENTITY
-from werkzeug import exceptions
 
 
 class HttpError(Exception):
@@ -20,17 +19,29 @@ class HttpError(Exception):
         super().__init__(self.message)
 
 
+class BadRequestError(HttpError):
+    status_code = BAD_REQUEST
+
+    def __init__(self, messages):
+        self.data = {'messages': messages}
+        super().__init__()
+
+    def to_dict(self):
+        return self.data
+
+
 class ResourceNotFoundError(HttpError):
     status_code = NOT_FOUND
-    message = 'Resource not found error'
+
+    def __init__(self, messages):
+        self.data = {'messages': messages}
+        super().__init__()
+
+    def to_dict(self):
+        return self.data
 
 
-class ResourceReadonly(HttpError):
-    status_code = BAD_REQUEST
-    message = 'Resource is read-only'
-
-
-class ResourceValidationError(exceptions.UnprocessableEntity):
+class ResourceValidationError(HttpError):
     status_code = UNPROCESSABLE_ENTITY
 
     def __init__(self, messages):

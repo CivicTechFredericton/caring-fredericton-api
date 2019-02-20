@@ -1,5 +1,8 @@
+import json
+
 from datetime import datetime
 from core.auth import get_current_user_id
+from core.configuration import get_region_name
 from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, UTCDateTimeAttribute
 
@@ -11,10 +14,19 @@ def get_time_now():
     return datetime.utcnow()
 
 
+class ModelEncoder(json.JSONEncoder):
+    def default(self, obj):
+        if hasattr(obj, 'attribute_values'):
+            return obj.attribute_values
+        elif isinstance(obj, datetime.datetime):
+            return obj.isoformat()
+        return json.JSONEncoder.default(self, obj)
+
+
 class BaseModel(Model):
     class Meta:
         abstract = True
-        default_region = 'ca-central-1'
+        region = get_region_name()
 
     created_at = UTCDateTimeAttribute()
     created_by = UnicodeAttribute()
@@ -45,3 +57,6 @@ class BaseModel(Model):
         actions.append(BaseModel.updated_by.set(get_current_user_id()))
 
         return Model.update(self, attributes, actions, condition, conditional_operator, **expected_values)
+
+    def to_dict(self):
+        return json.loads(json.dumps(self, cls=ModelEncoder))
