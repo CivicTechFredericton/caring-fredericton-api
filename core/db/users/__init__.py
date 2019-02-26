@@ -1,5 +1,6 @@
 from core import errors
 from core.db.users.model import UserModel 
+from core import db 
 
 from core.aws.cognito import create_cognito_user, generate_random_password 
 
@@ -40,7 +41,7 @@ def check_duplicate_user_email(user_email):
 # create cognito and user db entries for a given user from a dictionary
 # email, password, first_name, last_name are required fields 
 # returns a persisted UserModel
-def create_user(user_args):
+def create_user(**user_args):
 
 	# check for duplicates using the email as a public unique ID
     email = user_args['email']
@@ -56,7 +57,7 @@ def create_user(user_args):
     # store it in DynamoDB)
     user_args.pop('password')
 
-    user = UserModel(user_args)
+    user = UserModel(**user_args)
     db.save_with_unique_id(user)
 
     return user	

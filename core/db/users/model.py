@@ -26,5 +26,5 @@ class UserModel(BaseModel):
     user_email_index = UserEmail()
 
     def save(self, *args, **kwargs):
-        self.username = self.email = self.email.lower()
+        self.email = str(self.email).lower()
         super().save(*args, **kwargs)

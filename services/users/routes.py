@@ -20,7 +20,7 @@ blueprint = Blueprint('users', __name__)
 def register_user(**kwargs):
 
     # create user entries in db and cognito 
-    user = create_user(kwargs)
+    user = create_user(**kwargs)
 
     # print a nice response (leave out password) 
     response = jsonify(user_registration_schema.dump(user).data)
