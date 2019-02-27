@@ -1005,10 +1005,16 @@ components:
       properties:
         recurrence:
           type: string
-          description: 'The event recurrence option (DAILY, WEEKLY, BI_WEEKLY, MONTHLY)'
+          description: 'The event recurrence option (DAILY, WEEKLY, BI_WEEKLY, MONTHLY, NWEEKDAY)'
         num_recurrences:
           type: integer
           description: The number of times the event is set to recur
+        nday:
+          type: integer
+          description: The specified day [1-7] that the event is set to recur
+        nweek:
+          type: integer
+          description: The specified week of the month [1,2,3,-1] that the event is set to recur
     PageLinks:
       description: |
         Links included in paged responses for navigation

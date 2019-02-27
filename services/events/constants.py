@@ -4,7 +4,8 @@ EVENT_DATE_FORMAT = '%Y-%m-%d'
 EVENT_TIME_FORMAT = '%H:%M:%S'
 MIN_RECURRENCE = 1
 MAX_RECURRENCE = 10
-
+NDAY = 0
+NWEEK = 0
 
 @unique
 class RecurrenceType(Enum):
@@ -12,6 +13,7 @@ class RecurrenceType(Enum):
     WEEKLY = 'WEEKLY'
     BI_WEEKLY = 'BI-WEEKLY'
     MONTHLY = 'MONTHLY'
+    NWEEKDAY = 'NWEEKDAY'
 
     @classmethod
     def values(cls):

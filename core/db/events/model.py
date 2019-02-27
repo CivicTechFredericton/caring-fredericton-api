@@ -20,6 +20,8 @@ class RecurrenceTypeEnumUnicodeAttribute(UnicodeAttribute):
 class RecurrenceDetails(MapAttribute):
     recurrence = RecurrenceTypeEnumUnicodeAttribute()
     num_recurrences = NumberAttribute()
+    nday = NumberAttribute(default=0)
+    nweek = NumberAttribute(default=0)
 
 
 class DateAttribute(UnicodeAttribute):
