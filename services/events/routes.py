@@ -15,6 +15,13 @@ from services.events.update_utils import build_update_actions
 blueprint = Blueprint('events', __name__)
 
 
+@blueprint.route('/organizations/<org_id>/events/<event_id>/alloccurrences', methods=["GET"])
+def get_all_event_occurrence_details(org_id, event_id):
+    event = get_event_from_db(event_id, org_id)
+    occurrences = get_all_occ_from_event_response(event)
+    return occurrences
+
+
 @blueprint.route('/events', defaults={'org_id': None}, methods=["GET"])
 @blueprint.route('/organizations/<org_id>/events', methods=["GET"])
 @use_kwargs(event_filters_schema, locations=('query',))
@@ -91,5 +98,13 @@ def get_events_response(events_list, **kwargs):
         occurrences = get_recurring_events_list(event, filter_start_date, filter_end_date, filter_categories)
         for occurrence in occurrences:
             response.append(event_list_schema.dump(occurrence).data)
+
+    return jsonify(response)
+
+
+def get_all_occ_from_event_response(event):
+    response = []
+    for occurrence in event.occurrences:
+        response.append(event_list_schema.dump(occurrence).data)
 
     return jsonify(response)

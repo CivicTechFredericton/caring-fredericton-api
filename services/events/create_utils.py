@@ -2,6 +2,7 @@ from dateutil.relativedelta import relativedelta, MO, TU, WE, TH, FR, SA, SU
 from core import errors
 from core.db import save_with_unique_id
 from core.db.events.model import EventModel
+from datetime import datetime as dt
 
 
 # -------------------------
@@ -35,13 +36,20 @@ def set_occurrences(event_args):
         event_args['recurrence_details'] = None
         recurrence_details = set_default_recurrence_details()
 
-    # Populate the occurrences list and last end date
-    last_end_date, occurrences = populate_occurrences(event_args['start_date'],
-                                                      event_args['end_date'],
-                                                      recurrence_details)
+    if recurrence_details['num_recurrences'] != 0:
+        # Populate the occurrences list and last end date when recurrence number is specified
+        last_end_date, occurrences = populate_occurrences(event_args['start_date'],
+                                                          event_args['end_date'],
+                                                          recurrence_details)
+        event_args['end_date'] = last_end_date
+        event_args['occurrences'] = occurrences
 
-    event_args['end_date'] = last_end_date
-    event_args['occurrences'] = occurrences
+    if recurrence_details['num_recurrences'] == 0:
+        end_date, occurrences = populate_occurrences_no_recur_num(event_args['start_date'],
+                                                                       event_args['end_date'],
+                                                                       recurrence_details)
+        event_args['end_date'] = end_date  # Is this  needed?
+        event_args['occurrences'] = occurrences
 
 
 def set_default_recurrence_details():
@@ -66,10 +74,31 @@ def populate_occurrences(start_date, end_date, recurrence_details):
                                                              i * month_separation,
                                                              recurrence_details['nday'],
                                                              recurrence_details['nweek'])
-
-        occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_end_date))
+        if start_date <= curr_start_date:
+            occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_end_date))
 
     return curr_end_date, occurrences
+
+
+def populate_occurrences_no_recur_num(start_date, end_date, recurrence_details):
+    day_separation, week_separation, month_separation = define_interval_increments(recurrence_details['recurrence'])
+
+    occurrences = []
+
+    i = 0
+    curr_start_date = start_date
+    curr_end_date = dt.strptime(constants.DEFAULT_DATE, constants.EVENT_DATE_FORMAT)
+
+    while curr_end_date <= end_date:
+        curr_end_date = set_occurrence_date_no_recur_num(curr_start_date,
+                                                         day_separation,
+                                                         week_separation,
+                                                         month_separation)
+        occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_start_date))
+        curr_start_date = curr_end_date
+        i += 1
+
+    return end_date, occurrences
 
 
 def get_occurrence_entry(occurrence_num, start_date, end_date):
@@ -91,10 +120,12 @@ def set_occurrence_date(start_date, end_date, day_separation, week_separation, m
         if nday_separation == 6: arg = SA(nweek_separation)
         if nday_separation == 7: arg = SU(nweek_separation)
 
-        new_start_date = start_date + relativedelta(months=+month_separation,
+        new_start_date = start_date + relativedelta(day=1,
+                                                    months=+month_separation,
                                                     weekday=arg)
 
-        new_end_date = end_date + relativedelta(months=+month_separation,
+        new_end_date = end_date + relativedelta(day=1,
+                                                months=+month_separation,
                                                 weekday=arg)
     else:
         new_start_date = start_date + relativedelta(day=+day_separation,
@@ -106,6 +137,15 @@ def set_occurrence_date(start_date, end_date, day_separation, week_separation, m
                                                 months=+month_separation)
 
     return new_start_date, new_end_date
+
+
+def set_occurrence_date_no_recur_num(start_date, day_separation, week_separation, month_separation):
+
+    new_end_date = start_date + relativedelta(day=+day_separation,
+                                              weeks=+week_separation,
+                                              months=+month_separation)
+
+    return new_end_date
 
 
 def base_daily_interval():
