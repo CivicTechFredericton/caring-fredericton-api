@@ -26,6 +26,12 @@ class UserDisplaySchema(BasicUserSchema):
     class Meta:
 	    strict = True
 
+# schema for activating a user by updating password
+class UserActivationSchema(ma.Schema):
+    email = fields.Email(required=True)
+    password = fields.Str(required=True)
+    new_password = fields.Str(required=True)
+
 class UserListFiltersSchema(ma.Schema):
 
     class Meta:
@@ -33,4 +39,5 @@ class UserListFiltersSchema(ma.Schema):
 
 user_registration_schema = UserRegistrationSchema()
 user_display_schema = UserDisplaySchema()
+user_activation_schema = UserActivationSchema()
 user_list_filter_schema = UserListFiltersSchema()
