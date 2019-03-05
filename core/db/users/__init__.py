@@ -12,7 +12,7 @@ def get_user_by_email(user_email):
         message = 'User with email {} does not exist'.format(user_email)
         raise errors.ResourceValidationError(messages={'email': [message]})
 
-    if(len(users) ):
+    if(len(users)>1):
         message = 'More than one user with email {}'.format(user_email)
         raise errors.ResourceValidationError(messages={'email': [message]})
 
@@ -30,7 +30,7 @@ def get_user_by_id(user_id):
         message = 'More than one user with id {}'.format(user_id)
         raise errors.ResourceValidationError(messages={'id': [message]})
 
-    return user[0]
+    return users[0]
   
 # TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
 def check_duplicate_user_email(user_email):
