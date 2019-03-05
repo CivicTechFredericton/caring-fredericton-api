@@ -39,6 +39,7 @@ class EventSchema(ma.Schema):
     end_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
     start_time = fields.DateTime(required=True, format=constants.EVENT_TIME_FORMAT)
     end_time = fields.DateTime(required=True, format=constants.EVENT_TIME_FORMAT)
+    end_date_no_recur = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
 
     class Meta:
         strict = True
@@ -75,6 +76,7 @@ class EventUpdateSchema(ma.Schema):
     end_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
     start_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
     end_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
+    end_date_no_recur = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
     is_recurring = fields.Bool()
     recurrence_details = fields.Nested(RecurrenceDetails)
 

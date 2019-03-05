@@ -67,6 +67,7 @@ class EventModel(BaseModel):
     categories = ListAttribute(default=lambda: [])
     start_date = DateAttribute()
     end_date = DateAttribute()
+    end_date_no_recur = DateAttribute()
     start_time = TimeAttribute()
     end_time = TimeAttribute()
     is_recurring = BooleanAttribute(default=False)

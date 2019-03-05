@@ -45,10 +45,11 @@ def set_occurrences(event_args):
         event_args['occurrences'] = occurrences
 
     if recurrence_details['num_recurrences'] == 0:
-        end_date, occurrences = populate_occurrences_no_recur_num(event_args['start_date'],
-                                                                       event_args['end_date'],
-                                                                       recurrence_details)
-        event_args['end_date'] = end_date  # Is this  needed?
+        last_end_date, occurrences = populate_occurrences_no_recur_num(event_args['start_date'],
+                                                                  event_args['end_date'],
+                                                                  event_args['end_date_no_recur'],
+                                                                  recurrence_details)
+        event_args['end_date'] = last_end_date
         event_args['occurrences'] = occurrences
 
 
@@ -65,40 +66,71 @@ def populate_occurrences(start_date, end_date, recurrence_details):
     day_separation, week_separation, month_separation = define_interval_increments(recurrence_details['recurrence'])
 
     occurrences = []
+    skip_regular_occ__flag = False
 
     for i in range(recurrence_details['num_recurrences']):
-        curr_start_date, curr_end_date = set_occurrence_date(start_date,
-                                                             end_date,
-                                                             i * day_separation,
-                                                             i * week_separation,
-                                                             i * month_separation,
-                                                             recurrence_details['nday'],
-                                                             recurrence_details['nweek'])
-        if start_date <= curr_start_date:
-            occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_end_date))
+        if i == 0:  # insert first occ as user sets and then the rest as calculated later
+            occurrences.append(get_occurrence_entry(i + 1, start_date, end_date))
+            # after the first event as set by the user, calculate next occ and add it
+            curr_start_date, curr_end_date = set_occurrence_date(start_date,
+                                                                 end_date,
+                                                                 i * day_separation,
+                                                                 i * week_separation,
+                                                                 i * month_separation,
+                                                                 recurrence_details['nday'],
+                                                                 recurrence_details['nweek'])
+
+            # this can happen only at the second occ calculation due to date calculated being before the start_date
+            # as month is 0 and month taken into account by relativedelta before day,
+            # so it begins at day1 from month of start date and adds whatever resulting possibly in date < start_date
+            if start_date < curr_start_date:
+                occurrences.append(get_occurrence_entry(i + 2, curr_start_date, curr_end_date))
+                skip_regular_occ__flag = True
+
+        # Check in case there is only one recurr so it needs to stop above
+        # if recurrence_details['num_recurrences'] > 1:
+        # else:
+        if recurrence_details['num_recurrences'] > 1 and i > 0:  # otherwise, if only one recurr, we have put it already
+            curr_start_date, curr_end_date = set_occurrence_date(start_date,
+                                                                 end_date,
+                                                                 i * day_separation,
+                                                                 i * week_separation,
+                                                                 i * month_separation,
+                                                                 recurrence_details['nday'],
+                                                                 recurrence_details['nweek'])
+
+            if skip_regular_occ__flag is False and i < recurrence_details['num_recurrences']:
+                occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_end_date))
+
+            if skip_regular_occ__flag is True and (i+1) < recurrence_details['num_recurrences']:
+                occurrences.append(get_occurrence_entry(i + 2, curr_start_date, curr_end_date))
 
     return curr_end_date, occurrences
 
 
-def populate_occurrences_no_recur_num(start_date, end_date, recurrence_details):
+def populate_occurrences_no_recur_num(start_date, end_date, end_date_no_recur, recurrence_details):
     day_separation, week_separation, month_separation = define_interval_increments(recurrence_details['recurrence'])
 
     occurrences = []
 
-    i = 0
-    curr_start_date = start_date
-    curr_end_date = dt.strptime(constants.DEFAULT_DATE, constants.EVENT_DATE_FORMAT)
+    i = 1
+    # Add the first occ as set by the user, then the rest up to the end_date_no_recur
+    occurrences.append(get_occurrence_entry(i, start_date, end_date))
 
-    while curr_end_date <= end_date:
-        curr_end_date = set_occurrence_date_no_recur_num(curr_start_date,
-                                                         day_separation,
-                                                         week_separation,
-                                                         month_separation)
-        occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_start_date))
-        curr_start_date = curr_end_date
+    curr_start_date = start_date
+    start_end_difference = relativedelta(end_date, start_date)
+
+    while curr_start_date < end_date_no_recur:
+        curr_start_date = set_occurrence_date_no_recur_num(curr_start_date,
+                                                           day_separation,
+                                                           week_separation,
+                                                           month_separation)
+
+        occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_start_date + start_end_difference))
         i += 1
 
-    return end_date, occurrences
+    curr_end_date = curr_start_date + start_end_difference
+    return curr_end_date, occurrences
 
 
 def get_occurrence_entry(occurrence_num, start_date, end_date):
@@ -124,9 +156,7 @@ def set_occurrence_date(start_date, end_date, day_separation, week_separation, m
                                                     months=+month_separation,
                                                     weekday=arg)
 
-        new_end_date = end_date + relativedelta(day=1,
-                                                months=+month_separation,
-                                                weekday=arg)
+        new_end_date = new_start_date + relativedelta(end_date, start_date)  # here it needs to calc the diff between
     else:
         new_start_date = start_date + relativedelta(day=+day_separation,
                                                     weeks=+week_separation,
@@ -141,11 +171,11 @@ def set_occurrence_date(start_date, end_date, day_separation, week_separation, m
 
 def set_occurrence_date_no_recur_num(start_date, day_separation, week_separation, month_separation):
 
-    new_end_date = start_date + relativedelta(day=+day_separation,
-                                              weeks=+week_separation,
-                                              months=+month_separation)
+    new_start_date = start_date + relativedelta(day=+day_separation,
+                                                weeks=+week_separation,
+                                                months=+month_separation)
 
-    return new_end_date
+    return new_start_date
 
 
 def base_daily_interval():
