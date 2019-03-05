@@ -8,7 +8,7 @@ from core.db.users import create_user, get_user_by_id, get_user_by_email
 from core.db.users.model import UserModel
 
 from services.organizations import build_scan_condition
-from services.users.resource import user_registration_schema, user_display_schema, user_list_filter_schema,user_activation_schema 
+from services.users.resource import user_registration_schema, user_display_schema, user_list_filter_schema,user_activation_schema, user_join_org_schema
 
 from core.db.organizations import get_organization_from_db 
 
@@ -36,11 +36,7 @@ def register_user(**kwargs):
 @blueprint.route('/users', methods=["GET"])
 @use_kwargs(user_list_filter_schema, locations=('query',))
 def list_users(**kwargs):
-<<<<<<< HEAD
     filter_condition = build_scan_condition(**kwargs)
-=======
-    filter_condition = build_filter_condition(**kwargs)
->>>>>>> 3878834ddc25a70074cb617c1029adc86c471903
     users = UserModel.scan(filter_condition)
 
     response = []
