@@ -94,7 +94,7 @@ def verify_organization(org_id, **kwargs):
         # we've verified the organization and ensured that the admin user 
         # is a valid user so add the organization to 
         admin = get_user_by_id(organization.administrator_id)
-        admin['organization_id'] = organization.id
+        admin.organization_id = organization.id
         admin.save()
 
     return jsonify(organization_details_schema.dump(organization).data)

@@ -32,6 +32,12 @@ class UserActivationSchema(ma.Schema):
     password = fields.Str(required=True)
     new_password = fields.Str(required=True)
 
+class UserJoinOrgSchema(ma.Schema):
+    reason = fields.Str(required=True)
+    
+    class Meta:
+        string = True
+
 class UserListFiltersSchema(ma.Schema):
 
     class Meta:
@@ -41,3 +47,4 @@ user_registration_schema = UserRegistrationSchema()
 user_display_schema = UserDisplaySchema()
 user_activation_schema = UserActivationSchema()
 user_list_filter_schema = UserListFiltersSchema()
+user_join_org_schema = UserJoinOrgSchema()
