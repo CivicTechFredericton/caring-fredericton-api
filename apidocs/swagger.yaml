@@ -321,10 +321,10 @@ paths:
         422:
           description: Organization does not exist in the system
 
-  /register-organization:
+  /organizations/register:
     post:
       tags:
-        - external-api
+        - organizations 
       summary: Sends a registration request for an organization
       parameters:
       - in: body
@@ -341,6 +341,126 @@ paths:
             $ref: '#/definitions/OrganizationDetailsResponse'
         422:
           description: Missing required parameters
+
+  /users:
+    get:
+      tags:
+        - users 
+      summary: Returns a list of all the users in the system 
+      parameters:
+      responses:
+        200:
+          description: Paged object of users 
+          schema:
+            $ref: '#/definitions/PagedUser'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+
+  /users/register:
+    post:
+      tags:
+        - external-api
+      summary: Registers a new user 
+      parameters:
+      - in: body
+        name: body
+        description: >
+          User registration details
+        required: true
+        schema:
+          $ref: "#/definitions/UserRegistrationDetails"
+      responses:
+        201:
+          description: The new user was created 
+          schema:
+            $ref: '#/definitions/UserDetailsResponse'
+        422:
+          description: Missing required parameters
+   
+  /users/activate:
+    post:
+      tags:
+        - external-api
+      summary: Registers a new user and logs them in
+      parameters:
+      - in: body
+        name: body
+        description: >
+          User activation details 
+        required: true
+        schema:
+          $ref: "#/definitions/UserActivationDetails"
+      responses:
+        201:
+          description: Auth token for the acviated user
+          schema:
+            $ref: '#/definitions/AuthResponse'
+        422:
+          description: Missing required parameters 
+
+
+  /users/<user_id>:
+    get:
+      tags:
+        - users  
+      summary: Returns the details for a user 
+      parameters:
+      - in: path
+        name: user_id
+        description: >
+          User ID
+        required: true
+        type: string
+      responses:
+        200:
+          description: User details
+          schema:
+            $ref: '#/definitions/UserDetailsResponse'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+        422:
+          description: User does not exist in the system
+
+  /users/<user_id>/join/<org_id>:
+    post:
+      tags:
+        - users
+      summary: Joins the user with user_id to org_id. Any existing org that the user is already part of will be replaced.
+      parameters:
+      - in: path
+        name: user_id
+        description: >
+          User ID
+        required: true
+        type: string
+      - in: path
+        name: org_id
+        description: >
+          Organization ID
+        required: true
+        type: string
+      - in: body
+        name: body
+        description: >
+          Join details
+        required: true
+        schema:
+          $ref: "#/definitions/UserJoinDetails"
+      responses:
+        200:
+          description: User Details 
+          schema:
+            $ref: '#/definitions/UserDetailsResponse'
+        401:
+          description: Authentication error
+          schema:
+            $ref: '#/definitions/AuthError'
+        422:
+          description: User does not exist in the system
 
 definitions:
   # -------------------------------------
@@ -722,6 +842,107 @@ definitions:
       num_recurrences:
         type: integer
         description: The number of times the event is set to recur
+
+  # -------------------------------------
+  # User Definitions
+  # -------------------------------------
+  PagedUser:
+    description: >
+      Page of user resources
+    type: object
+    properties:
+      objects:
+        type: array
+        description: User array for page
+        items:
+          $ref: '#/definitions/UserDetailsResponse'
+      page:
+        type: integer
+        description: Current page
+      size:
+        type: integer
+        description: Size of the page
+      _links:
+        $ref: '#/definitions/PageLinks'
+
+  UserDetailsResponse:
+    description: >
+      Response object containing the detailed user information
+    type: object
+    properties:
+      id:
+        type: string
+        description: ID of the user as a UUID
+      email:
+        type: string
+        description: Name of the event
+      first_name:
+        type: string
+        description: The user's first name 
+      last_name:
+        type: string
+        description: The user's second name 
+      active:
+        type: boolean
+        description: The user's activity state
+      organization_id:
+        type: string
+        description: the ID of the organization that the user is associated with as a UUID
+ 
+  UserRegistrationDetails:
+    description: >
+      Registration details for a user. 
+    type:
+      object
+    required:
+    - email
+    - password
+    - new_password
+    properties:
+      email:
+        type: string
+        description: The user email/username
+      password:
+        type: string
+        description: The existing password
+      first_name:
+        type: string
+        description: The users's first name 
+      last_name:
+        type: string
+        description: The users's last name 
+
+  UserActivationDetails:
+    description: >
+      Activation details for a user 
+    type:
+      object
+    required:
+    - email 
+    - password 
+    - new_password 
+    properties:
+      email:
+        type: string 
+        description: The user email/username 
+      password:
+        type: string
+        description: The existing password 
+      new_password:
+        type: string
+        description: The new password 
+
+  UserJoinDetails:
+    description: >
+    type:
+      object
+    required:
+    - reason 
+    properties:
+      reason:
+        type: string
+        description: The reason the user is joining this organization. 
+
 
   # -------------------------------------
   # Common Page Definitions
