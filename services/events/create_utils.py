@@ -2,7 +2,6 @@ from dateutil.relativedelta import relativedelta, MO, TU, WE, TH, FR, SA, SU
 from core import errors
 from core.db import save_with_unique_id
 from core.db.events.model import EventModel
-from datetime import datetime as dt
 
 
 # -------------------------
@@ -152,11 +151,16 @@ def set_occurrence_date(start_date, end_date, day_separation, week_separation, m
         if nday_separation == 6: arg = SA(nweek_separation)
         if nday_separation == 7: arg = SU(nweek_separation)
 
-        new_start_date = start_date + relativedelta(day=1,
-                                                    months=+month_separation,
-                                                    weekday=arg)
+        if nweek_separation != -1:
+            new_start_date = start_date + relativedelta(day=1,
+                                                        months=+month_separation,
+                                                        weekday=arg)
+        if nweek_separation == -1:
+            new_start_date = start_date + relativedelta(day=31,
+                                                        months=+month_separation,
+                                                        weekday=arg)
 
-        new_end_date = new_start_date + relativedelta(end_date, start_date)  # here it needs to calc the diff between
+        new_end_date = new_start_date + relativedelta(end_date, start_date)
     else:
         new_start_date = start_date + relativedelta(day=+day_separation,
                                                     weeks=+week_separation,

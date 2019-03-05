@@ -918,6 +918,10 @@ components:
           type: string
           description: The end time for the event
           format: 'HH:MM:SS'
+        end_date_no_recur:
+          type: string
+          description: The end date for the event that has no specified occurence value, but start, end date for each event and an overall end date
+          format: YYYY-MM-DD
         is_recurring:
           type: boolean
           description: Flag indicating if the event is recurring
@@ -969,6 +973,10 @@ components:
           type: string
           description: The end time for the event
           format: 'HH:MM:SS'
+        end_date_no_recur:
+          type: string
+          description: The end date for the event that has no specified occurence value, but start, end date for each event and an overall end date
+          format: YYYY-MM-DD
         is_recurring:
           type: boolean
           description: Flag indicating if the event is recurring
@@ -1014,7 +1022,7 @@ components:
           description: The specified day [1-7] that the event is set to recur
         nweek:
           type: integer
-          description: The specified week of the month [1,2,3,-1] that the event is set to recur
+          description: The specified week of the month [1,2,3,4,5,-1] that the event is set to recur (-1->last week")
     PageLinks:
       description: |
         Links included in paged responses for navigation
