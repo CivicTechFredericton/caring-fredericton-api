@@ -23,6 +23,7 @@ def get_verified_organization_from_db(org_id):
     """
     organization = get_organization_from_db(org_id)
 
+
     if organization.is_verified:
         return organization
     else:

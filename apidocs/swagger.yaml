@@ -524,7 +524,7 @@ paths:
   /organizations/register:
     post:
       tags:
-        - external-api
+        - organizations 
       summary: Sends a registration request for an organization
       responses:
         '201':

@@ -12,6 +12,7 @@ from services.users.resource import user_registration_schema, user_display_schem
 
 from core.db.organizations import get_organization_from_db 
 
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -35,7 +36,11 @@ def register_user(**kwargs):
 @blueprint.route('/users', methods=["GET"])
 @use_kwargs(user_list_filter_schema, locations=('query',))
 def list_users(**kwargs):
+<<<<<<< HEAD
     filter_condition = build_scan_condition(**kwargs)
+=======
+    filter_condition = build_filter_condition(**kwargs)
+>>>>>>> 3878834ddc25a70074cb617c1029adc86c471903
     users = UserModel.scan(filter_condition)
 
     response = []

@@ -9,6 +9,7 @@ from core.db.users.model import UserModel
 from core.db.users import get_user_by_email, get_user_by_id
 
 from services.organizations import build_scan_condition, build_update_actions, build_verify_organization_actions
+
 from services.organizations.resource import organization_details_schema, organization_list_filters_schema,\
     organization_schema, organization_update_schema, organization_verification_schema
 
@@ -70,6 +71,7 @@ def list_organizations(**kwargs):
     response = []
 
     for org in organizations:
+        
         response.append(organization_schema.dump(org).data)
 
     return jsonify(response)
