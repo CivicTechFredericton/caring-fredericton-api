@@ -155,7 +155,7 @@ functions:
     events:
       - http:
           method: POST
-          path: /register-organization
+          path: /organizations/register
           cors: true
       - http:
           method: any

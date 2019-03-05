@@ -6,13 +6,9 @@ from webargs.flaskparser import use_kwargs
 from core.db.organizations import check_for_duplicate_name, get_organization_from_db
 from core.db.organizations.model import OrganizationModel
 from core.db.users.model import UserModel
-<<<<<<< HEAD
-from services.organizations import build_scan_condition, build_update_actions, build_verify_organization_actions
-=======
 from core.db.users import get_user_by_email, get_user_by_id
 
-from services.organizations import build_filter_condition, build_update_actions, build_verify_organization_actions
->>>>>>> Removed user creation from organization verificaton.
+from services.organizations import build_scan_condition, build_update_actions, build_verify_organization_actions
 from services.organizations.resource import organization_details_schema, organization_list_filters_schema,\
     organization_schema, organization_update_schema, organization_verification_schema
 

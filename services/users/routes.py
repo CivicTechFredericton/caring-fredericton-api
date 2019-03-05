@@ -7,7 +7,7 @@ from webargs.flaskparser import use_kwargs
 from core.db.users import create_user, get_user_by_id, get_user_by_email
 from core.db.users.model import UserModel
 
-from services.users import build_filter_condition
+from services.organizations import build_scan_condition
 from services.users.resource import user_registration_schema, user_display_schema, user_list_filter_schema,user_activation_schema 
 
 import logging
@@ -33,7 +33,7 @@ def register_user(**kwargs):
 @blueprint.route('/users', methods=["GET"])
 @use_kwargs(user_list_filter_schema, locations=('query',))
 def list_users(**kwargs):
-    filter_condition = build_filter_condition(**kwargs)
+    filter_condition = build_scan_condition(**kwargs)
     users = UserModel.scan(filter_condition)
 
     response = []

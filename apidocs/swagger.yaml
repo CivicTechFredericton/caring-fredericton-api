@@ -489,6 +489,7 @@ paths:
           description: Organization does not exist in the system
       requestBody:
         $ref: '#/components/requestBodies/VerificationDetails'
+
   /organizations/<org_id>/verify:
     post:
       tags:
@@ -519,7 +520,8 @@ paths:
           description: Organization does not exist in the system
       requestBody:
         $ref: '#/components/requestBodies/VerificationDetails'
-  /register-organization:
+
+  /organizations/register:
     post:
       tags:
         - external-api
@@ -543,8 +545,154 @@ paths:
         description: |
           Organization registration request details
         required: true
+
+  /users:
+    get:
+      tags:
+        - users 
+      summary: Returns a list of all the users in the system 
+      parameters:
+      responses:
+        '200':
+          description: Paged object of users 
+          content:
+            application/json:          
+              schema:
+                $ref: '#/components/schemas/PagedUser'
+        '401':
+          description: Authentication error
+          content:
+            application/json:          
+              schema:
+                $ref: '#/components/schemas/AuthError'
+
+  /users/register:
+    post:
+      tags:
+        - external-api
+      summary: Registers a new user 
+      parameters:
+      responses:
+        '201':
+          description: >-
+            The new user was created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailsResponse'
+        '422':
+          description: Missing required parameters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationDetails'
+        description: |
+          User registration request details
+        required: true
+   
+  /users/activate:
+    post:
+      tags:
+        - external-api
+      summary: Registers a new user and logs them in
+      parameters:
+      responses:
+        '201':
+          description: Auth token for the activated user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'
+        '422':
+          description: Missing required parameters.
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserActivationDetails'
+        description: |
+          User activation details
+        required: true
+
+  /users/<user_id>:
+    get:
+      tags:
+        - users  
+      summary: Returns the details for a user 
+      parameters:
+        - in: path
+          name: user_id
+          description: |
+            User ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailsResponse'
+        '401':
+          description: Authenticaion error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+        '422':
+          description: User does not exist in the system
+
+  /users/<user_id>/join/<org_id>:
+    post:
+      tags:
+        - users
+      summary: Joins the user with user_id to org_id. Any existing org that the user is already part of will be replaced.
+      parameters:
+        - in: path
+          name: user_id
+          description: |
+            User ID
+          required: true
+          schema:
+            type: string
+        - in: path
+          name: org_id
+          description: |
+            Organization ID
+          required: true
+          schema:
+            type: string         
+      responses:
+        '200':
+          description: User details.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailsResponse'
+        '401':
+          description: Auth token for the activated user.
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthResponse'                
+        '422':
+          description: User does not exist in the system   
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserJoinDetails'
+        description: |
+          Details for a user joining an organization.
+        required: true          
+          
+
 components:
+  
   requestBodies:
+
     AuthDetails:
       content:
         application/json:
@@ -552,6 +700,7 @@ components:
             $ref: '#/components/schemas/AuthRequest'
       description: User authentication request details
       required: true
+
     VerificationDetails:
       content:
         application/json:
@@ -560,6 +709,7 @@ components:
       description: |
         Verification details
       required: true
+
     EventRequest:
       content:
         application/json:
@@ -568,7 +718,9 @@ components:
       description: |
         Event request details
       required: true
+  
   schemas:
+    
     AuthRequest:
       description: |
         Request object that includes user details for authentication
@@ -583,6 +735,7 @@ components:
         password:
           type: string
           description: Password of the system user
+    
     AuthResponse:
       description: |
         Response object that includes an auth token for the API user
@@ -591,6 +744,7 @@ components:
         authToken:
           type: string
           readOnly: true
+    
     AuthError:
       description: >
         Response received when an authorization error has occured. This can be
@@ -605,6 +759,7 @@ components:
             - error.jwt.invalid_signature
         message:
           type: string
+    
     Address:
       description: |
         organization address
@@ -631,6 +786,7 @@ components:
         country:
           type: string
           description: Country
+    
     AdministratorDetails:
       description: |
         Contact details for an organization
@@ -649,6 +805,7 @@ components:
         email:
           type: string
           description: Organization's contact email address
+    
     OrganizationRequest:
       description: |
         Request object that includes details for registering a new organization
@@ -678,6 +835,7 @@ components:
         address:
           allOf:
             - $ref: '#/components/schemas/Address'
+
     OrganizationGuestResponse:
       description: >
         Response object that is used for the guest view of the organizations
@@ -690,6 +848,7 @@ components:
         name:
           type: string
           description: Name of the organization
+    
     OrganizationResponse:
       description: >
         Response object that includes basic details of the organization; used in
@@ -712,6 +871,7 @@ components:
         is_verified:
           type: boolean
           readOnly: true
+    
     OrganizationDetailsResponse:
       description: |
         Response object that includes the details of an organization
@@ -739,6 +899,7 @@ components:
         is_verified:
           type: boolean
           readOnly: true
+   
     PagedGuestOrganization:
       description: |
         Page of organization resources for guest view
@@ -757,6 +918,7 @@ components:
           description: Size of the page
         _links:
           $ref: '#/components/schemas/PageLinks'
+    
     PagedOrganization:
       description: |
         Page of organization resources
@@ -775,6 +937,7 @@ components:
           description: Size of the page
         _links:
           $ref: '#/components/schemas/PageLinks'
+    
     VerificationDetails:
       description: >
         Verification details for a requested action (for example: verify
@@ -789,6 +952,7 @@ components:
         reason:
           type: string
           description: Detailed reason if the request is not verified
+    
     EventRequest:
       description: |
         Request object that includes details for an event
@@ -837,6 +1001,7 @@ components:
         recurrence_details:
           allOf:
             - $ref: '#/components/schemas/RecurrenceDetails'
+    
     EventResponse:
       description: |
         Response object containing the base event information
@@ -879,6 +1044,7 @@ components:
           type: string
           description: The end time for the event
           format: 'HH:MM:SS'
+    
     EventDetailsResponse:
       description: |
         Response object containing the detailed event information
@@ -927,6 +1093,7 @@ components:
         timezone:
           type: string
           description: Timezone for the event as it was created
+    
     EventOccurrenceDetailsResponse:
       description: |
         Response object containing the detailed event information for an occurrence
@@ -978,6 +1145,7 @@ components:
         timezone:
           type: string
           description: Timezone for the event as it was created
+    
     PagedEvent:
       description: |
         Page of organization resources
@@ -996,6 +1164,104 @@ components:
           description: Size of the page
         _links:
           $ref: '#/components/schemas/PageLinks'
+
+    PagedUser:
+      description: >
+        Page of user resources
+      type: object
+      properties:
+        objects:
+          type: array
+          description: User array for page
+          items:
+            $ref: '#/components/schemas/UserDetailsResponse'
+        page:
+          type: integer
+          description: Current page
+        size:
+          type: integer
+          description: Size of the page
+        _links:
+          $ref: '#/components/schemas/PageLinks'
+
+    UserDetailsResponse:
+      description: >
+        Response object containing the detailed user information
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the user as a UUID
+        email:
+          type: string
+          description: Name of the event
+        first_name:
+          type: string
+          description: The user's first name 
+        last_name:
+          type: string
+          description: The user's second name 
+        active:
+          type: boolean
+          description: The user's activity state
+        organization_id:
+          type: string
+          description: the ID of the organization that the user is associated with as a UUID
+  
+    UserRegistrationDetails:
+      description: >
+        Registration details for a user. 
+      type:
+        object
+      required:
+      - email
+      - password
+      - new_password
+      properties:
+        email:
+          type: string
+          description: The user email/username
+        password:
+          type: string
+          description: The existing password
+        first_name:
+          type: string
+          description: The users's first name 
+        last_name:
+          type: string
+          description: The users's last name 
+
+    UserActivationDetails:
+      description: >
+        Activation details for a user 
+      type:
+        object
+      required:
+      - email 
+      - password 
+      - new_password 
+      properties:
+        email:
+          type: string 
+          description: The user email/username 
+        password:
+          type: string
+          description: The existing password 
+        new_password:
+          type: string
+          description: The new password 
+
+    UserJoinDetails:
+      description: >
+      type:
+        object
+      required:
+      - reason 
+      properties:
+        reason:
+          type: string
+          description: The reason the user is joining this organization. 
+              
     RecurrenceDetails:
       description: |
         Details pertaining to the event's recurrence information
@@ -1009,6 +1275,7 @@ components:
         num_recurrences:
           type: integer
           description: The number of times the event is set to recur
+    
     PageLinks:
       description: |
         Links included in paged responses for navigation

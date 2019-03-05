@@ -12,7 +12,6 @@ class AddressSchema(ma.Schema):
     class Meta:
         strict = True
 
-
 class OrganizationListFiltersSchema(ma.Schema):
     is_verified = fields.Bool(required=False)
 
