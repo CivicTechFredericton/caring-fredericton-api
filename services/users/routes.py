@@ -10,6 +10,8 @@ from core.db.users.model import UserModel
 from services.organizations import build_scan_condition
 from services.users.resource import user_registration_schema, user_display_schema, user_list_filter_schema,user_activation_schema 
 
+from core.db.organizations import get_organization_from_db 
+
 import logging
 logger = logging.getLogger(__name__)
 
@@ -78,3 +80,22 @@ def activate_user(**kwargs):
 
     return response
 
+@blueprint.route('/users/<user_id>/join/<org_id>', methods=["POST"])
+@use_kwargs(user_join_org_schema, locations=('json',))
+def join_org(user_id, org_id, **kwargs):
+
+    # get the user (check to see if they exist) 
+    user = get_user_by_id(user_id)
+   
+    # get the organization (check to see if it exists)
+    org = get_organization_from_db(org_id) 
+
+    # set the id and save
+    user.organization_id = org_id
+    user.save()
+
+    # print a nice response (leave out password) 
+    response = jsonify(user_display_schema.dump(user).data)
+    response.status_code = 201
+
+    return response
