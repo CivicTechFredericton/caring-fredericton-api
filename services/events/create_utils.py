@@ -45,9 +45,9 @@ def set_occurrences(event_args):
 
     if recurrence_details['num_recurrences'] == 0:
         last_end_date, occurrences = populate_occurrences_no_recur_num(event_args['start_date'],
-                                                                  event_args['end_date'],
-                                                                  event_args['end_date_no_recur'],
-                                                                  recurrence_details)
+                                                                       event_args['end_date'],
+                                                                       event_args['end_date_no_recur'],
+                                                                       recurrence_details)
         event_args['end_date'] = last_end_date
         event_args['occurrences'] = occurrences
 
@@ -68,9 +68,10 @@ def populate_occurrences(start_date, end_date, recurrence_details):
     skip_regular_occ__flag = False
 
     for i in range(recurrence_details['num_recurrences']):
-        if i == 0:  # insert first occ as user sets and then the rest as calculated later
+        # Insert first occurrence as user sets and then the rest as calculated later
+        if i == 0:
             occurrences.append(get_occurrence_entry(i + 1, start_date, end_date))
-            # after the first event as set by the user, calculate next occ and add it
+            # After the first event as set by the user, calculate next occurrence and add it
             curr_start_date, curr_end_date = set_occurrence_date(start_date,
                                                                  end_date,
                                                                  i * day_separation,
@@ -79,7 +80,7 @@ def populate_occurrences(start_date, end_date, recurrence_details):
                                                                  recurrence_details['nday'],
                                                                  recurrence_details['nweek'])
 
-            # this can happen only at the second occ calculation due to date calculated being before the start_date
+            # This can happen only at the second occ calculation due to date calculated being before the start_date
             # as month is 0 and month taken into account by relativedelta before day,
             # so it begins at day1 from month of start date and adds whatever resulting possibly in date < start_date
             if start_date < curr_start_date:
@@ -87,8 +88,6 @@ def populate_occurrences(start_date, end_date, recurrence_details):
                 skip_regular_occ__flag = True
 
         # Check in case there is only one recurr so it needs to stop above
-        # if recurrence_details['num_recurrences'] > 1:
-        # else:
         if recurrence_details['num_recurrences'] > 1 and i > 0:  # otherwise, if only one recurr, we have put it already
             curr_start_date, curr_end_date = set_occurrence_date(start_date,
                                                                  end_date,
@@ -124,8 +123,10 @@ def populate_occurrences_no_recur_num(start_date, end_date, end_date_no_recur, r
                                                            day_separation,
                                                            week_separation,
                                                            month_separation)
+        # Following if statement needed for the case the last date passes the end_date and should not be registered
+        if curr_start_date < end_date_no_recur:
+            occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_start_date + start_end_difference))
 
-        occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_start_date + start_end_difference))
         i += 1
 
     curr_end_date = curr_start_date + start_end_difference

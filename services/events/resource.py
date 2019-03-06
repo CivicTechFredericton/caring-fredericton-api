@@ -13,12 +13,13 @@ def validate_update_type(val):
         raise ValidationError('Invalid value, must be one of {}'.format(constants.UpdateType.values()))
 
 
+# TODO Check and see why val limits do not work
 class RecurrenceDetails(ma.Schema):
     recurrence = fields.Str(required=True, validate=validate_recurrence)
     num_recurrences = fields.Int(required=True,
                                  validate=lambda val: constants.MIN_RECURRENCE <= val <= constants.MAX_RECURRENCE)
     nday = fields.Int(required=True, validate=lambda val: 0 <= val <= 7)  # 0 value when not needed for NWEEKDAY
-    nweek = fields.Int(required=True, validate=lambda val: [0, 1, 2, 3, -1])  # 0 value when not needed for NWEEKDAY
+    nweek = fields.Int(required=True, validate=lambda val: [0, 1, 2, 3, 4, 5, -1])  # 0 value when not needed for NWEEKDAY
 
     # day_of_week = fields.Int(required=False, validate=lambda val: 1 <= val <= 7)
     # week_of_month = fields.Int(required=False, validate=lambda val: 1 <= val <= 4)
