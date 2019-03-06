@@ -111,24 +111,10 @@ def create_cognito_user(username, password, suppress=False):
 def manage_first_login(username, old_password, new_password):
 
     client = open_cognito_connection()
-    response = client.list_user_pools(
-        MaxResults=60
-    )
 
     # find the user pool
     user_pool_id = configuration.get_setting('COGNITO_USER_POOL_USERS_ID')
-    response = client.list_user_pool_clients(
-        UserPoolId=user_pool_id,
-        MaxResults=60
-    )
-    
-    for user_pool_client in response['UserPoolClients']:
-        if user_pool_client['ClientName'] == APP_CLIENT_NAME: 
-            client_id = user_pool_client['ClientId']
-            break
-
-    if client_id==[]:
-        return
+    client_id = configuration.get_setting('COGNITO_USER_POOL_CLIENT_USERS_ID')
 
     try: 
         response = client.admin_initiate_auth(
