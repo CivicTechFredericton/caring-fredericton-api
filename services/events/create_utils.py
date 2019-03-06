@@ -12,7 +12,18 @@ from services.events import constants
 
 def create_event(**event_args):
     # Set the number of occurrences
-    set_occurrences(event_args)
+
+    # Check if it is recurring but not for ever [is_recurring=True and is_ending=True ]
+    if event_args['is_recurring'] and event_args['is_ending']:
+        set_occurrences_recurring_ending(event_args)
+
+    # Check if it is one time only, so not recurring and not for ever [is_recurring=False and is_ending=True ]
+    if not event_args['is_recurring'] and event_args['is_ending']:
+        set_occurrences_one_time(event_args)
+
+    # Check if it is recurring and will go for ever [is_recurring=True and is_ending=False ]
+    if not event_args['is_ending'] and event_args['is_recurring']:
+        set_occurrences_recurring_not_ending(event_args)
 
     # Save the object
     event = EventModel(**event_args)
@@ -24,16 +35,11 @@ def create_event(**event_args):
 # -------------------------
 # Set occurrences on save
 # -------------------------
-def set_occurrences(event_args):
-    # Check to see if the recurrence details is set
-    if event_args['is_recurring']:
-        recurrence_details = event_args.get('recurrence_details')
-        if recurrence_details is None:
-            message = 'Missing data for required field when is_recurring is true'
-            raise errors.ResourceValidationError(messages={'recurrence_details': [message]})
-    else:
-        event_args['recurrence_details'] = None
-        recurrence_details = set_default_recurrence_details()
+def set_occurrences_recurring_ending(event_args):
+    recurrence_details = event_args.get('recurrence_details')
+    if recurrence_details is None:
+        message = 'Missing data for required field when is_recurring is true'
+        raise errors.ResourceValidationError(messages={'recurrence_details': [message]})
 
     if recurrence_details['num_recurrences'] != 0:
         # Populate the occurrences list and last end date when recurrence number is specified
@@ -52,13 +58,35 @@ def set_occurrences(event_args):
         event_args['occurrences'] = occurrences
 
 
-def set_default_recurrence_details():
-    return {
+def set_occurrences_recurring_not_ending(event_args):
+    recurrence_details = event_args.get('recurrence_details')
+    if recurrence_details is None:
+        message = 'Missing data for required field when is_recurring is true'
+        raise errors.ResourceValidationError(messages={'recurrence_details': [message]})
+
+    recurrence_details = event_args.get('recurrence_details')
+    # Now populate occurrences
+    last_end_date, occurrences = populate_occurrences_for_ever(event_args['start_date'],
+                                                               event_args['end_date'],
+                                                               recurrence_details)
+    event_args['end_date'] = last_end_date
+    event_args['occurrences'] = occurrences
+
+
+def set_occurrences_one_time(event_args):
+    recurrence_details = {
         'recurrence': constants.RecurrenceType.DAILY.value,
-        'num_recurrences': constants.MIN_RECURRENCE,
+        'num_recurrences': constants.SINGLE_RECURRENCE,
         'nday': constants.NDAY,
         'nweek': constants.NWEEK
     }
+    # Populate the occurrence and last end date
+    last_end_date, occurrences = populate_occurrences(event_args['start_date'],
+                                                      event_args['end_date'],
+                                                      recurrence_details)
+
+    event_args['end_date'] = last_end_date
+    event_args['occurrences'] = occurrences
 
 
 def populate_occurrences(start_date, end_date, recurrence_details):
@@ -126,6 +154,33 @@ def populate_occurrences_no_recur_num(start_date, end_date, end_date_no_recur, r
         # Following if statement needed for the case the last date passes the end_date and should not be registered
         if curr_start_date < end_date_no_recur:
             occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_start_date + start_end_difference))
+
+        i += 1
+
+    curr_end_date = curr_start_date + start_end_difference
+    return curr_end_date, occurrences
+
+
+# The simplest of calendar functions, just start_date and end_date of an event and repeats for ever in the frequency set
+def populate_occurrences_for_ever(start_date, end_date, recurrence_details):
+    day_separation, week_separation, month_separation = define_interval_increments(recurrence_details['recurrence'])
+
+    occurrences = []
+
+    i = 0
+
+    curr_start_date = start_date
+    start_end_difference = relativedelta(end_date, start_date)
+    # Add the first occ as set by the user, then the rest up to the MAX_RECURRENCE number
+    occurrences.append(get_occurrence_entry(i + 1, curr_start_date, end_date))#curr_start_date + start_end_difference))
+
+    while i+1 < constants.MAX_RECURRENCE:
+        curr_start_date = set_occurrence_date_no_recur_num(curr_start_date,
+                                                           day_separation,
+                                                           week_separation,
+                                                           month_separation)
+
+        occurrences.append(get_occurrence_entry(i + 2, curr_start_date, curr_start_date + start_end_difference))
 
         i += 1
 

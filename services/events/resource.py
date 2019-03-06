@@ -55,6 +55,7 @@ class EventListSchema(EventSchema):
 
 class EventDetailsSchema(EventSchema):
     is_recurring = fields.Bool(missing=False)
+    is_ending = fields.Bool(missing=True)
     recurrence_details = fields.Nested(RecurrenceDetails, required=False)
     timezone = fields.Str(dump_only=True)
 

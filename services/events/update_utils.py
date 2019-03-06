@@ -4,7 +4,8 @@
 # from core.db import update_item
 from core.db.events.model import EventModel
 # from services.events import constants
-from services.events.create_utils import set_occurrences
+# from services.events.create_utils import set_occurrences # This is deprecated, below the new functions
+from services.events.create_utils import set_occurrences_one_time, set_occurrences_recurring_ending, set_occurrences_recurring_not_ending
 
 
 # ------------------------------
@@ -20,7 +21,9 @@ def build_update_actions(event, event_args):
 
     if reset_occurrences:
         # Reset the occurrences
-        set_occurrences(event_args)
+        #TODO The update model has to change if it will support the new create functions.
+        # So the below was commented out as the functions have changed.
+        # set_occurrences(event_args)
         actions.append(EventModel.occurrences.set(event_args['occurrences']))
 
         # Check the updated recurrence details

@@ -71,6 +71,7 @@ class EventModel(BaseModel):
     start_time = TimeAttribute()
     end_time = TimeAttribute()
     is_recurring = BooleanAttribute(default=False)
+    is_ending = BooleanAttribute(default=True)
     recurrence_details = RecurrenceDetails(null=True, default=lambda: [])
     occurrences = ListAttribute(of=OccurrenceDetail, default=lambda: [])
     timezone = UnicodeAttribute(default='AST')
