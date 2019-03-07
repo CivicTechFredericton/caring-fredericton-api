@@ -16,7 +16,6 @@ class RecurrenceType(Enum):
     WEEKLY = 'WEEKLY'
     BI_WEEKLY = 'BI-WEEKLY'
     MONTHLY = 'MONTHLY'
-    NWEEKDAY = 'NWEEKDAY'
 
     @classmethod
     def values(cls):
