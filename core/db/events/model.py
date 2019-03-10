@@ -22,6 +22,7 @@ class RecurrenceDetails(MapAttribute):
     num_recurrences = NumberAttribute()
     nday = NumberAttribute(default=0)
     nweek = NumberAttribute(default=0)
+    frequency = NumberAttribute(default=1)
 
 
 class DateAttribute(UnicodeAttribute):

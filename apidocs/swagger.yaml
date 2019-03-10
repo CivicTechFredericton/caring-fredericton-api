@@ -1023,6 +1023,9 @@ components:
         nweek:
           type: integer
           description: The specified week of the month [1,2,3,4,5,-1] that the event is set to recur (-1->last week")
+        frequency:
+          type: integer
+          description: The frequency of the recurrence, default value=1
     PageLinks:
       description: |
         Links included in paged responses for navigation
