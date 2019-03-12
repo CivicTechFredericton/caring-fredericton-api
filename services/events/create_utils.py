@@ -51,9 +51,9 @@ def set_occurrences_recurring_ending(event_args):
         message = 'Missing data for required field when is_recurring is true'
         raise errors.ResourceValidationError(messages={'recurrence_details': [message]})
 
-    if recurrence_details['frequency'] == 0:
-        message = 'Event frequency can be equal or greater than 1'
-        raise errors.ResourceValidationError(messages={'frequency': [message]})
+    # if recurrence_details.get('frequency') == 0:
+    #     message = 'Event frequency can be equal or greater than 1'
+    #     raise errors.ResourceValidationError(messages={'frequency': [message]})
 
     if recurrence_details['num_recurrences'] != 0:
         # Populate the occurrences list and last end date when recurrence number is specified
@@ -67,7 +67,7 @@ def set_occurrences_recurring_ending(event_args):
     if recurrence_details['num_recurrences'] == 0:
         last_end_date, occurrences = populate_occurrences_with_end_date(event_args['start_date'],
                                                                         event_args['end_date'],
-                                                                        event_args['end_date_no_recur'],
+                                                                        event_args.get('end_date_no_recur'),
                                                                         recurrence_details,
                                                                         february_flag)
         event_args['end_date'] = last_end_date
@@ -134,9 +134,9 @@ def populate_occurrences(start_date, end_date, recurrence_details, february_flag
                                                                  i * day_separation,
                                                                  i * week_separation,
                                                                  i * month_separation,
-                                                                 recurrence_details['nday'],
-                                                                 recurrence_details['nweek'],
-                                                                 recurrence_details['frequency'],
+                                                                 recurrence_details.get('nday'),
+                                                                 recurrence_details.get('nweek'),
+                                                                 recurrence_details.get('frequency', 1),
                                                                  february_flag)
 
             # This can happen only at the second occ calculation due to date calculated being before the start_date
@@ -153,9 +153,9 @@ def populate_occurrences(start_date, end_date, recurrence_details, february_flag
                                                                  i * day_separation,
                                                                  i * week_separation,
                                                                  i * month_separation,
-                                                                 recurrence_details['nday'],
-                                                                 recurrence_details['nweek'],
-                                                                 recurrence_details['frequency'],
+                                                                 recurrence_details.get('nday'),
+                                                                 recurrence_details.get('nweek'),
+                                                                 recurrence_details.get('frequency', 1),
                                                                  february_flag)
 
             if skip_regular_occ__flag is False and i < recurrence_details['num_recurrences']:
@@ -187,9 +187,9 @@ def populate_occurrences_with_end_date(start_date, end_date, end_date_no_recur, 
                                                              day_separation,
                                                              week_separation,
                                                              month_separation,
-                                                             recurrence_details['nday'],
-                                                             recurrence_details['nweek'],
-                                                             recurrence_details['frequency'],
+                                                             recurrence_details.get('nday'),
+                                                             recurrence_details.get('nweek'),
+                                                             recurrence_details.get('frequency', 1),
                                                              february_flag)
 
         # Following if statement needed for the case the last date passes the end_date and should not be registered
@@ -219,9 +219,9 @@ def populate_occurrences_for_ever(start_date, end_date, recurrence_details, febr
                                                              day_separation,
                                                              week_separation,
                                                              month_separation,
-                                                             recurrence_details['nday'],
-                                                             recurrence_details['nweek'],
-                                                             recurrence_details['frequency'],
+                                                             recurrence_details.get('nday'),
+                                                             recurrence_details.get('nweek'),
+                                                             recurrence_details.get('frequency', 1),
                                                              february_flag)
 
         occurrences.append(get_occurrence_entry(i + 2, curr_start_date, curr_end_date))

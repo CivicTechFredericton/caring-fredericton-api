@@ -18,9 +18,9 @@ class RecurrenceDetails(ma.Schema):
     recurrence = fields.Str(required=True, validate=validate_recurrence)
     num_recurrences = fields.Int(required=True,
                                  validate=lambda val: constants.MIN_RECURRENCE <= val <= constants.MAX_RECURRENCE)
-    nday = fields.Int(required=True, validate=lambda val: 0 <= val <= 7)  # 0 value when not needed for NWEEKDAY
-    nweek = fields.Int(required=True, validate=lambda val: [0, 1, 2, 3, 4, 5, -1])  # 0 value when not needed for NWEEKDAY
-    frequency = fields.Int(required=True)
+    nday = fields.Int(required=False, validate=lambda val: 0 <= val <= 7)  # 0 value when not needed for NWEEKDAY
+    nweek = fields.Int(required=False, validate=lambda val: [0, 1, 2, 3, 4, 5, -1])  # 0 value when not needed for NWEEKDAY
+    frequency = fields.Int(required=False, default=1)
 
     # day_of_week = fields.Int(required=False, validate=lambda val: 1 <= val <= 7)
     # week_of_month = fields.Int(required=False, validate=lambda val: 1 <= val <= 4)
@@ -41,7 +41,7 @@ class EventSchema(ma.Schema):
     end_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
     start_time = fields.DateTime(required=True, format=constants.EVENT_TIME_FORMAT)
     end_time = fields.DateTime(required=True, format=constants.EVENT_TIME_FORMAT)
-    end_date_no_recur = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
+    end_date_no_recur = fields.DateTime(required=False, format=constants.EVENT_DATE_FORMAT)
 
     class Meta:
         strict = True
