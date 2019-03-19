@@ -1,6 +1,5 @@
 account_id: 260286112360
 domain_name: api.caringfredericton.com
-dynamo_host: null
 deletion_policy: Retain
 
 #SES Settings
