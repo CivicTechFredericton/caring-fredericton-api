@@ -13,12 +13,10 @@ logger = logging.getLogger(__name__)
 MODELS = [EventModel, OrganizationModel, UserModel]
 
 
-def init_models(service_name, stage, host=None):
-    logger.info("Configuring pynamodb models. host: %s", host)
+def init_models(service_name, stage):
+    logger.info('Configuring pynamodb models')
 
     for model in MODELS:
-        model.Meta.host = host
-
         model.Meta.index_name = model.Meta.table_name = \
             '{}-{}-{}'.format(service_name, stage, model.Meta.simple_name)
 

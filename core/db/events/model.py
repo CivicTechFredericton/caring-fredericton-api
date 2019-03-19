@@ -75,4 +75,4 @@ class EventModel(BaseModel):
     is_ending = BooleanAttribute(default=True)
     recurrence_details = RecurrenceDetails(null=True, default=lambda: [])
     occurrences = ListAttribute(of=OccurrenceDetail, default=lambda: [])
-    timezone = UnicodeAttribute(default='AST')
+    timezone = UnicodeAttribute(default='GMT')

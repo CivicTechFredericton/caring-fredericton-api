@@ -46,11 +46,7 @@ def handler(event, context):
         )
 
         if response.get('ChallengeName') == 'NEW_PASSWORD_REQUIRED':
-            return {'statusCode': 422,
-                    'body': json.dumps({
-                        'error_message': 'User must change password'
-                    })
-                    }
+            return get_error_response()
 
         token_details = {
             'authToken': response.get('AuthenticationResult').get('IdToken')
@@ -64,21 +60,18 @@ def handler(event, context):
             },
             "body": json.dumps(token_details)
         }
-    except cognito.exceptions.UserNotFoundException:
-        return {'statusCode': 422,
-                'body': json.dumps({
-                    'error_message': 'User does not exist'
-                })
-                }
-    except cognito.exceptions.NotAuthorizedException:
-        return {'statusCode': 401,
-                'body': json.dumps({
-                    'error_message': 'Invalid username or password'
-                })
-                }
-    except cognito.exceptions.InvalidParameterException:
-        return {'statusCode': 401,
-                'body': json.dumps({
-                    'error_message': 'Invalid username or password'
-                })
-                }
+    except (cognito.exceptions.UserNotFoundException,cognito.exceptions.NotAuthorizedException,
+            cognito.exceptions.InvalidParameterException):
+        return get_error_response()
+
+
+def get_error_response():
+    return {
+        'statusCode': 401,
+        'headers': {
+            'Content-Type': 'application/json',
+        },
+        'body': json.dumps({
+            'error_message': 'Invalid username or password'
+            })
+    }
