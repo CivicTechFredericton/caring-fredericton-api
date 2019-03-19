@@ -1,5 +1,4 @@
 account_id: 260286112360
-dynamo_host: null
 
 # SES Settings
 hosted_zone_name: caringfredericton.com.

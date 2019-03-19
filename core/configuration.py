@@ -38,6 +38,7 @@ def set_setting(name, value):
     settings[name] = value
 
 
+# TODO: Remove fallback value
 def get_region_name():
     if 'AWS_REGION' in os.environ:
         return os.environ['AWS_REGION']
