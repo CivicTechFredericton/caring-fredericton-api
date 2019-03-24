@@ -5,10 +5,9 @@ EVENT_TIME_FORMAT = '%H:%M:%S'
 MIN_RECURRENCE = 0  # 0 is needed to define the no recurrence scenario
 SINGLE_RECURRENCE = 1
 MAX_RECURRENCE = 10
-NDAY = 0
-NWEEK = 0
+# NDAY = 0
+# NWEEK = 0
 
-DEFAULT_DATE = '1970-01-01'
 
 @unique
 class RecurrenceType(Enum):
@@ -20,6 +19,22 @@ class RecurrenceType(Enum):
     @classmethod
     def values(cls):
         values = [item.value for item in RecurrenceType]
+        return ', '.join(values)
+
+    @classmethod
+    def has_value(cls, value):
+        return any(value == item.value for item in cls)
+
+
+@unique
+class OccurrenceType(Enum):
+    NEVER = 'NEVER'
+    AFTER = 'AFTER'  # num occurrences
+    ON = 'ON'  # after specific date
+
+    @classmethod
+    def values(cls):
+        values = [item.value for item in OccurrenceType]
         return ', '.join(values)
 
     @classmethod
