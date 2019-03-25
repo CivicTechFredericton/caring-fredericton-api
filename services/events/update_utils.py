@@ -5,7 +5,7 @@
 from core.db.events.model import EventModel
 # from services.events import constants
 # from services.events.create_utils import set_occurrences # This is deprecated, below the new functions
-from services.events.create_utils import set_occurrences_one_time, set_occurrences_recurring_ending, set_occurrences_recurring_not_ending
+from services.events.create_utils_bak import set_occurrences_one_time, set_occurrences_recurring_ending, set_occurrences_recurring_not_ending
 
 
 # ------------------------------

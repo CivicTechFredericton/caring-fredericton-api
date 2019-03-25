@@ -61,7 +61,7 @@ class RecurrenceDetails(MapAttribute):
     on_end_date = DateAttribute(null=True)
     day_of_week = NumberAttribute(null=True)
     week_of_month = NumberAttribute(null=True)
-    frequency = NumberAttribute(null=True)
+    separation_count = NumberAttribute(default=1)
 
 
 class OccurrenceDetail(MapAttribute):
@@ -81,11 +81,9 @@ class EventModel(BaseModel):
     categories = ListAttribute(default=lambda: [])
     start_date = DateAttribute()
     end_date = DateAttribute()
-    # end_date_no_recur = DateAttribute(null=True)
     start_time = TimeAttribute()
     end_time = TimeAttribute()
     is_recurring = BooleanAttribute(default=False)
-    # is_ending = BooleanAttribute(default=True)
     recurrence_details = RecurrenceDetails(null=True, default=lambda: [])
     occurrences = ListAttribute(of=OccurrenceDetail, default=lambda: [])
     timezone = UnicodeAttribute(default='GMT')

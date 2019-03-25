@@ -22,15 +22,12 @@ class RecurrenceDetails(ma.Schema):
     recurrence = fields.Str(required=True, validate=validate_recurrence)
     occurrence_type = fields.Str(required=False, missing=constants.OccurrenceType.AFTER.value,
                                  validate=validate_occurrence_type)
-    # is_ending = fields.Bool(missing=True)
     num_recurrences = fields.Int(required=True,
                                  validate=lambda val: constants.MIN_RECURRENCE <= val <= constants.MAX_RECURRENCE)
-    on_end_date = fields.DateTime(required=False, format=constants.EVENT_DATE_FORMAT)
+    on_end_date = fields.DateTime(load_only=True, required=False, format=constants.EVENT_DATE_FORMAT)
     day_of_week = fields.Int(required=False, validate=lambda val: 1 <= val <= 7)
     week_of_month = fields.Int(required=False, validate=lambda val: 1 <= val <= 4)
-    frequency = fields.Int(required=False, default=1)
-    # nday = fields.Int(required=False, validate=lambda val: 0 <= val <= 7)  # 0 value when not needed for NWEEKDAY
-    # nweek = fields.Int(required=False, validate=lambda val: [0, 1, 2, 3, 4, 5, -1])  # 0 value when not needed for NWEEKDAY
+    separation_count = fields.Int(required=False, default=1)
     # days_of_week = fields.List(fields.Int(), validate=lambda val: 1 <= val <= 7, required=False)
 
     class Meta:
@@ -83,7 +80,6 @@ class EventUpdateSchema(ma.Schema):
     end_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
     start_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
     end_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
-    # end_date_no_recur = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
     is_recurring = fields.Bool()
     recurrence_details = fields.Nested(RecurrenceDetails)
 
