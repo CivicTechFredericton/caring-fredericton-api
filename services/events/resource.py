@@ -22,7 +22,7 @@ class RecurrenceDetails(ma.Schema):
     recurrence = fields.Str(required=True, validate=validate_recurrence)
     occurrence_type = fields.Str(required=False, missing=constants.OccurrenceType.AFTER.value,
                                  validate=validate_occurrence_type)
-    num_recurrences = fields.Int(required=True,
+    num_recurrences = fields.Int(required=False, missing=constants.MIN_RECURRENCE,
                                  validate=lambda val: constants.MIN_RECURRENCE <= val <= constants.MAX_RECURRENCE)
     on_end_date = fields.DateTime(load_only=True, required=False, format=constants.EVENT_DATE_FORMAT)
     day_of_week = fields.Int(required=False, validate=lambda val: 1 <= val <= 7)
