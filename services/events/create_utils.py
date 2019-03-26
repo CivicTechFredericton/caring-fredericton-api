@@ -17,7 +17,7 @@ def create_event(**event_args):
 
     # Save the object
     event = EventModel(**event_args)
-    # save_with_unique_id(event)
+    save_with_unique_id(event)
 
     return event
 
@@ -85,29 +85,28 @@ def generate_occurrence_type_after_events(start_date, end_date, recurrence_detai
     day_of_week, week_of_month, separation_count = get_relative_interval_details(recurrence_details)
 
     if day_of_week and week_of_month:
-        for i in range(recurrence_details['num_recurrences']):
+        for occurrence_num in range(recurrence_details['num_recurrences']):
             curr_start_date, curr_end_date = set_relative_occurrence_date(start_date,
                                                                           end_date,
                                                                           day_of_week,
                                                                           week_of_month,
-                                                                          separation_count)
+                                                                          occurrence_num * separation_count)
 
-            occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_end_date))
+            occurrences.append(get_occurrence_entry(occurrence_num + 1, curr_start_date, curr_end_date))
 
     else:
         # Check to see if the event begins on the 28th of February
         # is_start_end_february = is_event_start_end_february(start_date)
 
         day_separation, week_separation, month_separation = define_interval_increments(recurrence_details['recurrence'])
-
-        for i in range(recurrence_details['num_recurrences']):
+        for occurrence_num in range(recurrence_details['num_recurrences']):
             curr_start_date, curr_end_date = set_absolute_occurrence_date(start_date,
                                                                           end_date,
-                                                                          i * day_separation,
-                                                                          i * week_separation,
-                                                                          i * month_separation)
+                                                                          occurrence_num * day_separation,
+                                                                          occurrence_num * week_separation,
+                                                                          occurrence_num * month_separation)
 
-            occurrences.append(get_occurrence_entry(i + 1, curr_start_date, curr_end_date))
+            occurrences.append(get_occurrence_entry(occurrence_num + 1, curr_start_date, curr_end_date))
 
     return curr_end_date, occurrences
 
@@ -127,7 +126,7 @@ def generate_occurrence_type_on_events(start_date, end_date, recurrence_details)
                                                                           end_date,
                                                                           day_of_week,
                                                                           week_of_month,
-                                                                          separation_count)
+                                                                          occurrence_num * separation_count)
 
             occurrences.append(get_occurrence_entry(occurrence_num + 1, curr_start_date, curr_end_date))
 
@@ -198,7 +197,7 @@ def define_interval_increments(recurrence):
 def get_relative_interval_details(recurrence_details):
     return recurrence_details.get('day_of_week'), \
            recurrence_details.get('week_of_month'), \
-           recurrence_details.get('separation_count', 1)
+           recurrence_details.get('separation_count')
 
 
 def set_absolute_occurrence_date(start_date, end_date, day_separation, week_separation, month_separation):
@@ -223,7 +222,7 @@ def set_absolute_occurrence_date(start_date, end_date, day_separation, week_sepa
     return new_start_date, new_end_date
 
 
-def set_relative_occurrence_date(start_date, end_date, month_separation, day_of_week, week_of_month, separation_count):
+def set_relative_occurrence_date(start_date, end_date, day_of_week, week_of_month, separation_count):
     """
     Sets the relative date interval between events
 
@@ -238,7 +237,7 @@ def set_relative_occurrence_date(start_date, end_date, month_separation, day_of_
     # For example: Every month on the 3rd day of the 2nd week
     """
     start_end_difference = relativedelta(end_date, start_date)
-    new_start_date = set_next_relative_date(start_date, day_of_week, week_of_month, month_separation, separation_count)
+    new_start_date = set_next_relative_date(start_date, day_of_week, week_of_month, separation_count)
     new_end_date = new_start_date + start_end_difference
 
     return new_start_date, new_end_date

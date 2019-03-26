@@ -2,11 +2,8 @@ from enum import Enum, unique
 
 EVENT_DATE_FORMAT = '%Y-%m-%d'
 EVENT_TIME_FORMAT = '%H:%M:%S'
-MIN_RECURRENCE = 0  # 0 is needed to define the no recurrence scenario
-SINGLE_RECURRENCE = 1
+MIN_RECURRENCE = 1
 MAX_RECURRENCE = 10
-# NDAY = 0
-# NWEEK = 0
 
 
 @unique
