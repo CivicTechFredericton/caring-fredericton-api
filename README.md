@@ -58,6 +58,7 @@ deactivate
 The application can be deployed by issuing the following commands:
 ```
 export AWS_PROFILE=test
+export AWS_REGION=ca-central-1
 npm run deploy -- --stage <stage name>
 ```
 

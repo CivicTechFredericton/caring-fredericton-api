@@ -9,17 +9,10 @@ from services.events import build_list_events_scan_condition, \
     get_event_occurrence, get_recurring_events_list, set_dates_filter, set_category_filter
 from services.events.create_utils import create_event
 from services.events.resource import event_details_schema, event_details_filter_schema, event_filters_schema, \
-    event_list_schema, event_occurrence_details_schema, event_occurrence_update_schema, event_update_schema
+    event_list_schema, event_occurrence_details_schema, event_update_schema
 from services.events.update_utils import build_update_actions
 
 blueprint = Blueprint('events', __name__)
-
-
-@blueprint.route('/organizations/<org_id>/events/<event_id>/alloccurrences', methods=["GET"])
-def get_all_event_occurrence_details(org_id, event_id):
-    event = get_event_from_db(event_id, org_id)
-    occurrences = get_all_occ_from_event_response(event)
-    return occurrences
 
 
 @blueprint.route('/events', defaults={'org_id': None}, methods=["GET"])
@@ -52,6 +45,13 @@ def get_organization_event(org_id, event_id, **kwargs):
     event = get_event_from_db(event_id, org_id)
     occurrence = get_event_occurrence(event, kwargs.get('occurrence_num'))
     return jsonify(event_occurrence_details_schema.dump(occurrence).data)
+
+
+@blueprint.route('/organizations/<org_id>/events/<event_id>/occurrences', methods=["GET"])
+def get_event_occurrence_details(org_id, event_id):
+    event = get_event_from_db(event_id, org_id)
+    occurrences = get_all_occ_from_event_response(event)
+    return occurrences
 
 
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["PUT"])
@@ -103,8 +103,9 @@ def get_events_response(events_list, **kwargs):
 
 
 def get_all_occ_from_event_response(event):
-    response = []
-    for occurrence in event.occurrences:
-        response.append(event_list_schema.dump(occurrence).data)
+    response = [event_list_schema.dump(occurrence).data for occurrence in event.occurrences]
+
+    # for occurrence in event.occurrences:
+    #     response.append(event_list_schema.dump(occurrence).data)
 
     return jsonify(response)
