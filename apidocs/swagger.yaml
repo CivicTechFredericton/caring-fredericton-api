@@ -25,7 +25,7 @@ paths:
         '401':
           description: Invalid username and password combination
         '422':
-          description: 'Missing parameters, user not found, or account locked'
+          description: Missing required parameters
       requestBody:
         $ref: '#/components/requestBodies/AuthDetails'
   /guest-view/organizations:
