@@ -17,9 +17,15 @@ class RecurrenceTypeEnumUnicodeAttribute(UnicodeAttribute):
             return UnicodeAttribute.serialize(self, value)
 
 
-class RecurrenceDetails(MapAttribute):
-    recurrence = RecurrenceTypeEnumUnicodeAttribute()
-    num_recurrences = NumberAttribute()
+class OccurrenceTypeEnumUnicodeAttribute(UnicodeAttribute):
+    attr_type = STRING
+
+    def serialize(self, value):
+        if not constants.OccurrenceType.has_value(value):
+            raise ValueError(
+                f"{self.attr_name} must be one of {constants.OccurrenceType.values()}, not '{value}'")
+        else:
+            return UnicodeAttribute.serialize(self, value)
 
 
 class DateAttribute(UnicodeAttribute):
@@ -48,6 +54,16 @@ class TimeAttribute(UnicodeAttribute):
         return parser.parse(value)
 
 
+class RecurrenceDetails(MapAttribute):
+    recurrence = RecurrenceTypeEnumUnicodeAttribute()
+    occurrence_type = OccurrenceTypeEnumUnicodeAttribute()
+    num_recurrences = NumberAttribute()
+    on_end_date = DateAttribute(null=True)
+    day_of_week = NumberAttribute(null=True)
+    week_of_month = NumberAttribute(null=True)
+    separation_count = NumberAttribute(default=1)
+
+
 class OccurrenceDetail(MapAttribute):
     occurrence_num = NumberAttribute()
     start_date = DateAttribute()
@@ -70,4 +86,4 @@ class EventModel(BaseModel):
     is_recurring = BooleanAttribute(default=False)
     recurrence_details = RecurrenceDetails(null=True, default=lambda: [])
     occurrences = ListAttribute(of=OccurrenceDetail, default=lambda: [])
-    timezone = UnicodeAttribute(default='AST')
+    timezone = UnicodeAttribute(default='GMT')

@@ -8,6 +8,11 @@ def validate_recurrence(val):
         raise ValidationError('Invalid value, must be one of {}'.format(constants.RecurrenceType.values()))
 
 
+def validate_occurrence_type(val):
+    if not constants.OccurrenceType.has_value(val):
+        raise ValidationError('Invalid value, must be one of {}'.format(constants.OccurrenceType.values()))
+
+
 def validate_update_type(val):
     if not constants.UpdateType.has_value(val):
         raise ValidationError('Invalid value, must be one of {}'.format(constants.UpdateType.values()))
@@ -15,11 +20,14 @@ def validate_update_type(val):
 
 class RecurrenceDetails(ma.Schema):
     recurrence = fields.Str(required=True, validate=validate_recurrence)
-    num_recurrences = fields.Int(required=True,
+    occurrence_type = fields.Str(required=False, missing=constants.OccurrenceType.AFTER.value,
+                                 validate=validate_occurrence_type)
+    num_recurrences = fields.Int(required=False, missing=constants.MIN_RECURRENCE,
                                  validate=lambda val: constants.MIN_RECURRENCE <= val <= constants.MAX_RECURRENCE)
-    # day_of_week = fields.Int(required=False, validate=lambda val: 1 <= val <= 7)
-    # week_of_month = fields.Int(required=False, validate=lambda val: 1 <= val <= 4)
-    # day_of_month = fields.Int(required=False, validate=lambda val: 1 <= val <= 31)
+    on_end_date = fields.DateTime(load_only=True, required=False, format=constants.EVENT_DATE_FORMAT)
+    day_of_week = fields.Int(required=False, validate=lambda val: 1 <= val <= 7)
+    week_of_month = fields.Int(required=False, validate=lambda val: 1 <= val <= 4)
+    separation_count = fields.Int(required=False, missing=1)
     # days_of_week = fields.List(fields.Int(), validate=lambda val: 1 <= val <= 7, required=False)
 
     class Meta:

@@ -37,9 +37,8 @@ def init_logging():
 def init_models():
     service_name = configuration.get_setting('SERVICE_NAME')
     stage = configuration.get_setting('STAGE')
-    host = configuration.get_setting('dynamo_host')
 
-    db.init_models(service_name, stage, host)
+    db.init_models(service_name, stage)
 
 
 def init_app():

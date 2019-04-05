@@ -4,7 +4,7 @@ from pynamodb import attributes, indexes
 
 class UserEmail(indexes.GlobalSecondaryIndex):
     class Meta:
-        simple_name = 'user-email-index'
+        index_name = 'user-email-index'
         projection = indexes.IncludeProjection(['id'])
 
     email = attributes.UnicodeAttribute(hash_key=True)

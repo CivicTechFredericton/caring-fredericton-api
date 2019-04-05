@@ -9,11 +9,11 @@
     "rollback": "serverless rollback"
   },
   "dependencies": {
-    "serverless": "1.38.0",
+    "serverless": "1.39.1",
     "serverless-domain-manager": "2.6.13",
     "serverless-plugin-bind-deployment-id": "1.0.2",
     "serverless-plugin-scripts": "1.0.2",
-    "serverless-wsgi": "1.7.1"
+    "serverless-wsgi": "1.7.2"
   },
   "license": "ISC"
 }
