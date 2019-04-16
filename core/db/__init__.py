@@ -50,7 +50,17 @@ def save_with_unique_id(item):
     :return: None
     """
     item.id = str(uuid.uuid4())
+    return save_item(item)
+
+
+def save_item(item):
+    """
+    Save a record in the database
+    :param item: The item to be saved
+    :return:
+    """
     try:
         item.save()
     except PutError as e:
         logger.error('Unable to save the item {}'.format(str(e)))
+

@@ -549,7 +549,7 @@ paths:
   /users:
     get:
       tags:
-        - users 
+        - Users
       summary: Returns a list of all the users in the system 
       parameters:
       responses:
@@ -566,16 +566,15 @@ paths:
               schema:
                 $ref: '#/components/schemas/AuthError'
 
-  /users/register:
+  /users/signup:
     post:
       tags:
-        - external-api
+        - Users
       summary: Registers a new user 
       parameters:
       responses:
         '201':
-          description: >-
-            The new user was created
+          description: The new user was created
           content:
             application/json:
               schema:
@@ -591,29 +590,29 @@ paths:
           User registration request details
         required: true
    
-  /users/activate:
-    post:
-      tags:
-        - external-api
-      summary: Registers a new user and logs them in
-      parameters:
-      responses:
-        '201':
-          description: Auth token for the activated user.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuthResponse'
-        '422':
-          description: Missing required parameters.
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserActivationDetails'
-        description: |
-          User activation details
-        required: true
+#  /users/activate:
+#    post:
+#      tags:
+#        - external-api
+#      summary: Registers a new user and logs them in
+#      parameters:
+#      responses:
+#        '201':
+#          description: Auth token for the activated user.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/AuthResponse'
+#        '422':
+#          description: Missing required parameters.
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/UserActivationDetails'
+#        description: |
+#          User activation details
+#        required: true
 
   /users/<user_id>:
     get:

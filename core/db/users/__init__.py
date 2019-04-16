@@ -1,63 +1,49 @@
-from core import errors
-from core.db.users.model import UserModel 
-from core import db 
+from core.aws.cognito import create_user
+from core.db import save_with_unique_id
+from core.db.users.model import UserModel
+from core.errors import ResourceConflictError
 
-from core.aws.cognito import create_cognito_user, generate_random_password 
+
+def create_new_user(**kwargs):
+    email = kwargs.get('email')
+
+    try:
+        create_user(email, kwargs.get('password'))
+
+        user = UserModel(**kwargs)
+        save_with_unique_id(user)
+
+        return user
+    except Exception as e:
+        if e.response['Error']['Code'] == 'UsernameExistsException':
+            message = f"User with name {email} already created"
+            raise ResourceConflictError(messages={'folderName': [message]})
 
 # get a user by email
-def get_user_by_email(user_email):
-    users = list(UserModel.scan(UserModel.email == user_email))
-    
-    if(users == []):
-        message = 'User with email {} does not exist'.format(user_email)
-        raise errors.ResourceValidationError(messages={'email': [message]})
+# def get_user_by_email(user_email):
+#     users = list(UserModel.scan(UserModel.email == user_email))
+#
+#     if(users == []):
+#         message = 'User with email {} does not exist'.format(user_email)
+#         raise ResourceValidationError(messages={'email': [message]})
+#
+#     if(len(users)>1):
+#         message = 'More than one user with email {}'.format(user_email)
+#         raise ResourceValidationError(messages={'email': [message]})
+#
+# 	# convert from list to single instance
+#     return users[0]
 
-    if(len(users)>1):
-        message = 'More than one user with email {}'.format(user_email)
-        raise errors.ResourceValidationError(messages={'email': [message]})
 
-	# convert from list to single instance
-    return users[0]
-
-def get_user_by_id(user_id):
-    users = list(UserModel.scan(UserModel.id == user_id))
-
-    if(users == []):
-        message = 'User with id {} does not exist'.format(user_id)
-        raise errors.ResourceValidationError(messages={'id': [message]})
-
-    if(len(users)>1 ):
-        message = 'More than one user with id {}'.format(user_id)
-        raise errors.ResourceValidationError(messages={'id': [message]})
-
-    return users[0]
-  
-# TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
-def check_duplicate_user_email(user_email):
-    if len(list(UserModel.scan(UserModel.email == user_email))) > 0:
-        message = 'User with email {} already exists'.format(user_email)
-        raise errors.ResourceValidationError(messages={'email': [message]})
-
-# create cognito and user db entries for a given user from a dictionary
-# email, password, first_name, last_name are required fields 
-# returns a persisted UserModel
-def create_user(**user_args):
-
-	# check for duplicates using the email as a public unique ID
-    email = user_args['email']
-    check_duplicate_user_email(email)
-	
-    # Create the Cognito user for organization's administrator
-    # TODO: add password strength checks if needed
-    password = user_args['password']
-    # password = generate_random_password() 
-    create_cognito_user(email, password)
-
-    # Create the user model (remove the password from the input args since we don't 
-    # store it in DynamoDB)
-    user_args.pop('password')
-
-    user = UserModel(**user_args)
-    db.save_with_unique_id(user)
-
-    return user	
+# def get_user_by_id(user_id):
+#     users = list(UserModel.scan(UserModel.id == user_id))
+#
+#     if(users == []):
+#         message = 'User with id {} does not exist'.format(user_id)
+#         raise ResourceValidationError(messages={'id': [message]})
+#
+#     if(len(users)>1 ):
+#         message = 'More than one user with id {}'.format(user_id)
+#         raise ResourceValidationError(messages={'id': [message]})
+#
+#     return users[0]

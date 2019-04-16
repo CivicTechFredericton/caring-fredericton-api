@@ -42,10 +42,7 @@ provider:
 
     - Effect: Allow
       Action:
-        - cognito-idp:AdminCreateUser
-        - cognito-idp:AdminInitiateAuth
-        - cognito-idp:DescribeUserPool
-        - cognito-idp:AdminRespondToAuthChallenge
+        - cognito-idp:SignUp
       Resource:
         Fn::GetAtt: [CognitoUserPoolUsers, Arn]
 
@@ -151,11 +148,7 @@ functions:
     events:
       - http:
           method: POST
-          path: /users/register
-          cors: true
-      - http:
-          method: POST
-          path: /users/activate
+          path: /users/signup
           cors: true
       - http:
           method: any
@@ -193,7 +186,7 @@ resources:
       DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
       Properties:
         AdminCreateUserConfig:
-          AllowAdminCreateUserOnly: True
+          AllowAdminCreateUserOnly: False
           InviteMessageTemplate:
             EmailSubject: Your temporary password
             EmailMessage: |
