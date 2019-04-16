@@ -42,6 +42,7 @@ provider:
 
     - Effect: Allow
       Action:
+        - cognito-idp:AdminInitiateAuth
         - cognito-idp:SignUp
       Resource:
         Fn::GetAtt: [CognitoUserPoolUsers, Arn]
