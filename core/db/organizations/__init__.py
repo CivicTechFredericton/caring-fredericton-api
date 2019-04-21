@@ -1,6 +1,7 @@
 from core import errors
 from core.db.organizations.model import OrganizationModel
 
+
 def check_for_duplicate_name(org_name):
     if len(list(OrganizationModel.scan(OrganizationModel.name == org_name))) > 0:
         message = 'Organization with name {} already exists'.format(org_name)
@@ -22,7 +23,6 @@ def get_verified_organization_from_db(org_id):
     :return:
     """
     organization = get_organization_from_db(org_id)
-
 
     if organization.is_verified:
         return organization

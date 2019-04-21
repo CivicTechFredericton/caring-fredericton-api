@@ -12,6 +12,7 @@ class AddressSchema(ma.Schema):
     class Meta:
         strict = True
 
+
 class OrganizationListFiltersSchema(ma.Schema):
     is_verified = fields.Bool(required=False)
 
@@ -30,7 +31,6 @@ class OrganizationSchema(ma.Schema):
         strict = True
 
 
-# administrator is now specified by email  
 class OrganizationDetailsSchema(OrganizationSchema):
     administrator_email = fields.Email(required=True)
     address = fields.Nested(AddressSchema, required=True)

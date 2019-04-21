@@ -31,7 +31,7 @@ class UserJoinOrgSchema(ma.Schema):
     class Meta:
         strict = True
 
-    reason = fields.Str(required=True)
+    reason = fields.Str(required=False)
 
 
 user_registration_schema = UserRegistrationSchema()

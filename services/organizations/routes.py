@@ -5,11 +5,9 @@ from webargs.flaskparser import use_kwargs
 
 from core.db.organizations import check_for_duplicate_name, get_organization_from_db
 from core.db.organizations.model import OrganizationModel
-from core.db.users.model import UserModel
 from core.db.users import get_user_by_email, get_user_by_id
 
 from services.organizations import build_scan_condition, build_update_actions, build_verify_organization_actions
-
 from services.organizations.resource import organization_details_schema, organization_list_filters_schema,\
     organization_schema, organization_update_schema, organization_verification_schema
 
@@ -19,15 +17,14 @@ logger = logging.getLogger(__name__)
 blueprint = Blueprint('organizations', __name__)
 
 
-@blueprint.route('/organizations/register', methods=["POST"])
+@blueprint.route('/organizations', methods=["POST"])
 @use_kwargs(organization_details_schema, locations=('json',))
 def register_organization(**kwargs):
     # TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
     name = kwargs['name']
     check_for_duplicate_name(name)
 
-	# get the admin user with the specified email address  
-    # this also checks that there is a valid user with this email
+    # Verify the that administrator user exists in the system
     admin_email = kwargs['administrator_email']
     admin_user = get_user_by_email(admin_email)
 
@@ -36,7 +33,7 @@ def register_organization(**kwargs):
     kwargs['administrator_id'] = admin_user.id
 
     # create the organization
-    kwargs.pop('administrator_email')
+    # kwargs.pop('administrator_email')
     organization = OrganizationModel(**kwargs)
     db.save_with_unique_id(organization)
 
@@ -68,12 +65,7 @@ def list_organizations(**kwargs):
     scan_condition = build_scan_condition(**kwargs)
     organizations = OrganizationModel.scan(scan_condition)
 
-    response = []
-
-    for org in organizations:
-        
-        response.append(organization_schema.dump(org).data)
-
+    response = [organization_schema.dump(org).data for org in organizations]
     return jsonify(response)
 
 

@@ -5,7 +5,7 @@ from pynamodb import attributes, indexes
 class UserEmail(indexes.GlobalSecondaryIndex):
     class Meta:
         index_name = 'user-email-index'
-        projection = indexes.IncludeProjection(['id'])
+        projection = indexes.KeysOnlyProjection()
 
     email = attributes.UnicodeAttribute(hash_key=True)
 
@@ -16,7 +16,7 @@ class UserModel(BaseModel):
 
     id = attributes.UnicodeAttribute(hash_key=True)
     email = attributes.UnicodeAttribute()
-    organization_id = attributes.UnicodeAttribute(null=True) # not assigned to an org by default
+    organization_id = attributes.UnicodeAttribute(null=True)
     first_name = attributes.UnicodeAttribute()
     last_name = attributes.UnicodeAttribute()
     active = attributes.BooleanAttribute(default=False)

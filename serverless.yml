@@ -254,14 +254,12 @@ resources:
           SSEEnabled: True
         BillingMode: PAY_PER_REQUEST
         GlobalSecondaryIndexes:
-        - IndexName: ${self:service}-${self:provider.stage}-user-email-index
+        - IndexName: user-email-index
           KeySchema:
           - AttributeName: email
             KeyType: HASH
           Projection:
-            ProjectionType: INCLUDE
-            NonKeyAttributes:
-              - id
+            ProjectionType: KEYS_ONLY
 
     TableOrganizations:
       Type: AWS::DynamoDB::Table
