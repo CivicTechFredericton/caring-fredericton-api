@@ -19,6 +19,10 @@ def check_user_exists(email):
 
 
 def get_user_by_email(email):
-    user = UserModel.user_email_index.query(hash_key=email)
+    user_list = UserModel.user_email_index.query(hash_key=email)
+    user = next(user_list, None)
+
+    if user is None:
+        raise ResourceNotFoundError
 
     return user

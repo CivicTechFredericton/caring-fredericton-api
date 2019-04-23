@@ -21,7 +21,3 @@ class UserModel(BaseModel):
     last_name = attributes.UnicodeAttribute()
     active = attributes.BooleanAttribute(default=False)
     user_email_index = UserEmail()
-
-    def save(self, *args, **kwargs):
-        self.email = str(self.email).lower()
-        super().save(*args, **kwargs)
