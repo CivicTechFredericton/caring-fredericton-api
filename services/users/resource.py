@@ -27,13 +27,13 @@ class UserDisplaySchema(BasicUserSchema):
     active = fields.Bool(dump_only=True)
 
 
-class UserJoinOrgSchema(ma.Schema):
-    class Meta:
-        strict = True
-
-    reason = fields.Str(required=False)
+# class UserJoinOrgSchema(ma.Schema):
+#     class Meta:
+#         strict = True
+#
+#     reason = fields.Str(required=False)
 
 
 user_registration_schema = UserRegistrationSchema()
 user_display_schema = UserDisplaySchema()
-user_join_org_schema = UserJoinOrgSchema()
+# user_join_org_schema = UserJoinOrgSchema()

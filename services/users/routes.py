@@ -48,20 +48,20 @@ def get_user(user_id):
     return jsonify(response)
 
 
-@blueprint.route('/users/<user_id>/join/<org_id>', methods=["POST"])
-@use_kwargs(user_join_org_schema, locations=('json',))
-def join_org(user_id, org_id):
-    # Check user existence
-    user = get_user_by_id(user_id)
-   
-    # Check organization existence
-    org = get_organization_from_db(org_id) 
-
-    # Update the user's organization ID
-    actions = [UserModel.organization_id.set(org.id)]
-    update_item(user, actions)
-
-    response = jsonify(user_display_schema.dump(user).data)
-    response.status_code = 201
-
-    return response
+# @blueprint.route('/users/<user_id>/join/<org_id>', methods=["POST"])
+# @use_kwargs(user_join_org_schema, locations=('json',))
+# def join_org(user_id, org_id):
+#     # Check user existence
+#     user = get_user_by_id(user_id)
+#
+#     # Check organization existence
+#     org = get_organization_from_db(org_id)
+#
+#     # Update the user's organization ID
+#     actions = [UserModel.organization_id.set(org.id)]
+#     update_item(user, actions)
+#
+#     response = jsonify(user_display_schema.dump(user).data)
+#     response.status_code = 201
+#
+#     return response
