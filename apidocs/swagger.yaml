@@ -530,7 +530,7 @@ paths:
         '201':
           description: >-
             The request was accepted in the system pending verification by the
-            System Adminstrator
+            System Administrator
           content:
             application/json:
               schema:
