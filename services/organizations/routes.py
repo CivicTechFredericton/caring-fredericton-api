@@ -17,10 +17,12 @@ logger = logging.getLogger(__name__)
 blueprint = Blueprint('organizations', __name__)
 
 
-@blueprint.route('/organizations', methods=["POST"])
+# ----------------------------------
+# Organization Registration Routes
+# ----------------------------------
+@blueprint.route('/organizations/register', methods=["POST"])
 @use_kwargs(organization_details_schema, locations=('json',))
 def register_organization(**kwargs):
-    # TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
     name = kwargs['name']
     check_for_duplicate_name(name)
 
@@ -28,12 +30,11 @@ def register_organization(**kwargs):
     admin_email = kwargs['administrator_email']
     admin_user = get_user_by_email(admin_email)
 
-    # set the administrator id to the admin users's email
-    # the org will be added to the admin user's account when verified
+    # Set the administrator id to the admin users's email
+    # The org will be added to the admin user's account when verified
     kwargs['administrator_id'] = admin_user.id
 
-    # create the organization
-    # kwargs.pop('administrator_email')
+    # Create the organization
     organization = OrganizationModel(**kwargs)
     db.save_with_unique_id(organization)
 
@@ -59,6 +60,28 @@ def register_organization(**kwargs):
     return response
 
 
+@blueprint.route('/organizations/<org_id>/verify', methods=["POST"])
+@use_kwargs(organization_verification_schema, locations=('json',))
+def verify_organization(org_id, **kwargs):
+    organization = get_organization_from_db(org_id)
+    is_verified = kwargs['is_verified']
+
+    if is_verified and not organization.is_verified:
+        actions = build_verify_organization_actions(is_verified)
+        db.update_item(organization, actions)
+
+        # we've verified the organization and ensured that the admin user
+        # is a valid user so add the organization to
+        admin = get_user_by_id(organization.administrator_id)
+        admin.organization_id = organization.id
+        admin.save()
+
+    return jsonify(organization_details_schema.dump(organization).data)
+
+
+# ----------------------------------
+# Organization Management Routes
+# ----------------------------------
 @blueprint.route('/organizations', methods=["GET"])
 @use_kwargs(organization_list_filters_schema, locations=('query',))
 def list_organizations(**kwargs):
@@ -72,25 +95,6 @@ def list_organizations(**kwargs):
 @blueprint.route('/organizations/<org_id>', methods=["GET"])
 def retrieve_organization(org_id):
     organization = get_organization_from_db(org_id)
-    return jsonify(organization_details_schema.dump(organization).data)
-
-
-@blueprint.route('/organizations/<org_id>/verify', methods=["POST"])
-@use_kwargs(organization_verification_schema, locations=('json',))
-def verify_organization(org_id, **kwargs):
-    organization = get_organization_from_db(org_id)
-    is_verified = kwargs['is_verified']
-
-    if is_verified and not organization.is_verified:
-        actions = build_verify_organization_actions(is_verified)
-        db.update_item(organization, actions)
-
-        # we've verified the organization and ensured that the admin user 
-        # is a valid user so add the organization to 
-        admin = get_user_by_id(organization.administrator_id)
-        admin.organization_id = organization.id
-        admin.save()
-
     return jsonify(organization_details_schema.dump(organization).data)
 
 

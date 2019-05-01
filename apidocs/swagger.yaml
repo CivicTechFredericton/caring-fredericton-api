@@ -182,7 +182,7 @@ paths:
   /events:
     get:
       tags:
-        - events
+        - Event Management
       summary: Returns a list of all the events in the system
       parameters:
         - name: start_date
@@ -224,7 +224,7 @@ paths:
   /organizations/<org_id>/events:
     get:
       tags:
-        - events
+        - Event Management
       summary: Returns a list of all the events associated with the organization
       parameters:
         - name: org_id
@@ -272,7 +272,7 @@ paths:
                 $ref: '#/components/schemas/AuthError'
     post:
       tags:
-        - events
+        - Event Management
       summary: Creates a new event in the system for an organization
       parameters:
         - name: org_id
@@ -299,7 +299,7 @@ paths:
   /organizations/<org_id>/events/<event_id>:
     get:
       tags:
-        - events
+        - Event Management
       summary: Gets the details of an existing event
       parameters:
         - name: org_id
@@ -340,7 +340,7 @@ paths:
           description: Event for the organization does not exist in the system
     put:
       tags:
-        - events
+        - Event Management
       summary: Updates an existing event
       parameters:
         - in: path
@@ -376,7 +376,7 @@ paths:
         $ref: '#/components/requestBodies/EventRequest'
     delete:
       tags:
-        - events
+        - Event Management
       summary: Cancels an existing event
       parameters:
         - in: path
@@ -409,7 +409,7 @@ paths:
   /organizations:
     get:
       tags:
-        - organizations
+        - Organizations
       summary: Returns a list of all the organizations in the system
       parameters:
         - name: is_verified
@@ -435,7 +435,7 @@ paths:
   /organizations/<org_id>:
     get:
       tags:
-        - organizations
+        - Organizations
       summary: Returns the details for an organization
       parameters:
         - in: path
@@ -462,7 +462,7 @@ paths:
           description: Organization does not exist in the system
     put:
       tags:
-        - organizations
+        - Organizations
       summary: Update the details of an organization
       parameters:
         - in: path
@@ -493,7 +493,7 @@ paths:
   /organizations/<org_id>/verify:
     post:
       tags:
-        - organizations
+        - Organizations
       summary: Marks the organization as verified in the system
       parameters:
         - in: path
@@ -524,7 +524,7 @@ paths:
   /organizations/register:
     post:
       tags:
-        - organizations 
+        - Organizations
       summary: Sends a registration request for an organization
       responses:
         '201':

@@ -2,13 +2,12 @@ from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 
 from core.aws.cognito import create_user
-from core.db import save_item, update_item
-from core.db.organizations import get_organization_from_db
+from core.db import save_item
 from core.db.users import get_user_by_id
 from core.db.users.model import UserModel
 from core.errors import ResourceConflictError
 
-from services.users.resource import user_registration_schema, user_display_schema, user_join_org_schema
+from services.users.resource import user_registration_schema, user_display_schema
 
 
 import logging

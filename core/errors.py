@@ -1,5 +1,7 @@
 from http import HTTPStatus
 
+DEFAULT_ERROR = HTTPStatus.UNPROCESSABLE_ENTITY
+
 
 class HttpError(Exception):
     status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value

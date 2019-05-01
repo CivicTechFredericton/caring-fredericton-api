@@ -24,16 +24,16 @@ def init_models(service_name, stage):
         logger.debug("Init %s model '%s'", entity_type, model.Meta.index_name)
 
 
-def get_scan_condition(conditions):
-    scan_condition = None
+def get_filter_condition(conditions):
+    filter_condition = None
 
     for index, condition in enumerate(conditions):
         if index == 0:
-            scan_condition = condition
+            filter_condition = condition
         else:
-            scan_condition = scan_condition & condition
+            filter_condition = filter_condition & condition
 
-    return scan_condition
+    return filter_condition
 
 
 def update_item(item, actions):

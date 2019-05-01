@@ -18,7 +18,7 @@ def build_list_events_scan_condition(org_id):
     if org_id is not None:
         conditions.append(EventModel.owner == org_id)
 
-    return db.get_scan_condition(conditions)
+    return db.get_filter_condition(conditions)
 
 
 def set_dates_filter(start_date, end_date):

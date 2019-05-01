@@ -250,9 +250,6 @@ resources:
         KeySchema:
         - AttributeName: id
           KeyType: HASH
-        SSESpecification:
-          SSEEnabled: True
-        BillingMode: PAY_PER_REQUEST
         GlobalSecondaryIndexes:
         - IndexName: user-email-index
           KeySchema:
@@ -260,6 +257,9 @@ resources:
             KeyType: HASH
           Projection:
             ProjectionType: KEYS_ONLY
+        SSESpecification:
+          SSEEnabled: True
+        BillingMode: PAY_PER_REQUEST
 
     TableOrganizations:
       Type: AWS::DynamoDB::Table
@@ -269,9 +269,18 @@ resources:
         AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
+        - AttributeName: name
+          AttributeType: S
         KeySchema:
         - AttributeName: id
           KeyType: HASH
+        GlobalSecondaryIndexes:
+        - IndexName: name-index
+          KeySchema:
+          - AttributeName: name
+            KeyType: HASH
+          Projection:
+            ProjectionType: KEYS_ONLY
         SSESpecification:
           SSEEnabled: True
         BillingMode: PAY_PER_REQUEST
