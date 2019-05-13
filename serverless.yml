@@ -42,9 +42,8 @@ provider:
 
     - Effect: Allow
       Action:
-        - cognito-idp:AdminCreateUser
         - cognito-idp:AdminInitiateAuth
-        - cognito-idp:DescribeUserPool
+        - cognito-idp:SignUp
       Resource:
         Fn::GetAtt: [CognitoUserPoolUsers, Arn]
 
@@ -150,7 +149,7 @@ functions:
     events:
       - http:
           method: POST
-          path: /register-organization
+          path: /users/signup
           cors: true
       - http:
           method: any
@@ -188,7 +187,7 @@ resources:
       DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
       Properties:
         AdminCreateUserConfig:
-          AllowAdminCreateUserOnly: True
+          AllowAdminCreateUserOnly: False
           InviteMessageTemplate:
             EmailSubject: Your temporary password
             EmailMessage: |
@@ -251,18 +250,16 @@ resources:
         KeySchema:
         - AttributeName: id
           KeyType: HASH
-        SSESpecification:
-          SSEEnabled: True
-        BillingMode: PAY_PER_REQUEST
         GlobalSecondaryIndexes:
-        - IndexName: ${self:service}-${self:provider.stage}-user-email-index
+        - IndexName: user-email-index
           KeySchema:
           - AttributeName: email
             KeyType: HASH
           Projection:
-            ProjectionType: INCLUDE
-            NonKeyAttributes:
-              - id
+            ProjectionType: KEYS_ONLY
+        SSESpecification:
+          SSEEnabled: True
+        BillingMode: PAY_PER_REQUEST
 
     TableOrganizations:
       Type: AWS::DynamoDB::Table
@@ -272,9 +269,18 @@ resources:
         AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
+        - AttributeName: name
+          AttributeType: S
         KeySchema:
         - AttributeName: id
           KeyType: HASH
+        GlobalSecondaryIndexes:
+        - IndexName: name-index
+          KeySchema:
+          - AttributeName: name
+            KeyType: HASH
+          Projection:
+            ProjectionType: KEYS_ONLY
         SSESpecification:
           SSEEnabled: True
         BillingMode: PAY_PER_REQUEST

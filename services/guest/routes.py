@@ -7,7 +7,7 @@ from webargs.flaskparser import use_kwargs
 
 from core.db.events import get_event_from_db
 from core.db.events.model import EventModel
-from core.db.organizations import OrganizationModel
+from core.db.organizations.model import OrganizationModel
 from services.events import get_event_occurrence
 from services.events.resource import event_filters_schema, event_occurrence_details_schema
 from services.events.routes import get_events_response

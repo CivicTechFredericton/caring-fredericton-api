@@ -1,28 +1,24 @@
 from core.db.model import BaseModel
-from pynamodb import attributes, indexes
+from pynamodb.attributes import BooleanAttribute, UnicodeAttribute
+from pynamodb.indexes import GlobalSecondaryIndex, KeysOnlyProjection
 
 
-class UserEmail(indexes.GlobalSecondaryIndex):
+class UserEmail(GlobalSecondaryIndex):
     class Meta:
         index_name = 'user-email-index'
-        projection = indexes.IncludeProjection(['id'])
+        projection = KeysOnlyProjection()
 
-    email = attributes.UnicodeAttribute(hash_key=True)
+    email = UnicodeAttribute(hash_key=True)
 
 
 class UserModel(BaseModel):
     class Meta(BaseModel.Meta):
         simple_name = 'user'
 
-    id = attributes.UnicodeAttribute(hash_key=True)
-    username = attributes.UnicodeAttribute()
-    organization_id = attributes.UnicodeAttribute()
-    email = attributes.UnicodeAttribute()
-    first_name = attributes.UnicodeAttribute()
-    last_name = attributes.UnicodeAttribute()
-    active = attributes.BooleanAttribute(default=True)
+    id = UnicodeAttribute(hash_key=True)
+    email = UnicodeAttribute()
+    organization_id = UnicodeAttribute(null=True)
+    first_name = UnicodeAttribute()
+    last_name = UnicodeAttribute()
+    active = BooleanAttribute(default=False)
     user_email_index = UserEmail()
-
-    def save(self, *args, **kwargs):
-        self.username = self.email = self.email.lower()
-        super().save(*args, **kwargs)

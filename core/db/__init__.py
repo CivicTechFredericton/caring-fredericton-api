@@ -24,16 +24,16 @@ def init_models(service_name, stage):
         logger.debug("Init %s model '%s'", entity_type, model.Meta.index_name)
 
 
-def get_scan_condition(conditions):
-    scan_condition = None
+def get_filter_condition(conditions):
+    filter_condition = None
 
     for index, condition in enumerate(conditions):
         if index == 0:
-            scan_condition = condition
+            filter_condition = condition
         else:
-            scan_condition = scan_condition & condition
+            filter_condition = filter_condition & condition
 
-    return scan_condition
+    return filter_condition
 
 
 def update_item(item, actions):
@@ -50,7 +50,17 @@ def save_with_unique_id(item):
     :return: None
     """
     item.id = str(uuid.uuid4())
+    return save_item(item)
+
+
+def save_item(item):
+    """
+    Save a record in the database
+    :param item: The item to be saved
+    :return:
+    """
     try:
         item.save()
     except PutError as e:
         logger.error('Unable to save the item {}'.format(str(e)))
+

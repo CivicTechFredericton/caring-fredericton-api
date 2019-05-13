@@ -1,4 +1,4 @@
-from core.db import get_scan_condition
+from core.db import get_filter_condition
 from core.db.events.model import EventModel
 
 
@@ -8,4 +8,4 @@ def build_list_events_scan_condition(org_id):
     if org_id is not None:
         conditions.append(EventModel.owner == org_id)
 
-    return get_scan_condition(conditions)
+    return get_filter_condition(conditions)

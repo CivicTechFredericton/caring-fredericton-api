@@ -1,11 +1,13 @@
-from core import errors
 from core.db.organizations.model import OrganizationModel
+from core.errors import ResourceConflictError, ResourceNotFoundError, ResourceValidationError
 
 
-def check_for_duplicate_name(org_name):
-    if len(list(OrganizationModel.scan(OrganizationModel.name == org_name))) > 0:
-        message = 'Organization with name {} already exists'.format(org_name)
-        raise errors.ResourceValidationError(messages={'name': [message]})
+def check_for_duplicate_name(name):
+    count = OrganizationModel.organization_name_index.count(hash_key=name)
+
+    if count > 0:
+        message = 'Organization with name {} already exists'.format(name)
+        raise ResourceConflictError(messages={'email': [message]})
 
 
 def get_organization_from_db(org_id):
@@ -13,7 +15,7 @@ def get_organization_from_db(org_id):
         return OrganizationModel.get(hash_key=org_id)
     except OrganizationModel.DoesNotExist:
         message = 'Organization {} does not exist'.format(org_id)
-        raise errors.ResourceNotFoundError(messages={'name': [message]})
+        raise ResourceNotFoundError(messages={'name': [message]})
 
 
 def get_verified_organization_from_db(org_id):
@@ -28,4 +30,4 @@ def get_verified_organization_from_db(org_id):
         return organization
     else:
         message = 'Organization {} has not been verified'.format(org_id)
-        raise errors.ResourceValidationError(messages={'name': [message]})
+        raise ResourceValidationError(messages={'name': [message]})
