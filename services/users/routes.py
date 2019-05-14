@@ -5,7 +5,7 @@ from core.aws.cognito import create_user
 from core.db import save_item
 from core.db.users import get_user_by_id
 from core.db.users.model import UserModel
-from core.errors import ResourceConflictError
+from core.errors import ResourceConflictError, BadRequestError
 
 from services.users.resource import user_registration_schema, user_display_schema
 
@@ -21,16 +21,23 @@ blueprint = Blueprint('users', __name__)
 def create_new_user(**kwargs):
     user_args = {k: v for k, v in kwargs.items() if v is not None}
 
+    email = user_args.get('email')
+
     try:
-        email = kwargs.get('email')
         cognito_response = create_user(email, kwargs.get('password'))
         user_args['id'] = cognito_response['UserSub']
     except Exception as e:
         if e.response['Error']['Code'] == 'UsernameExistsException':
             message = f"User with name {email} already created"
             raise ResourceConflictError(messages={'email': [message]})
+        else:
+            message = 'Error occurred when creating user'
+            raise BadRequestError(messages={'email': [message]})
 
-    user = UserModel(**user_args)
+    user = UserModel(id=user_args['id'],
+                     email=email,
+                     first_name=kwargs.get('first_name'),
+                     last_name=kwargs.get('last_name'))
     save_item(user)
 
     response = jsonify(user_display_schema.dump(user).data)
