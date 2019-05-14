@@ -20,5 +20,5 @@ class UserModel(BaseModel):
     organization_id = UnicodeAttribute(null=True)
     first_name = UnicodeAttribute()
     last_name = UnicodeAttribute()
-    active = BooleanAttribute(default=False)
+    active = BooleanAttribute(default=True)
     user_email_index = UserEmail()
