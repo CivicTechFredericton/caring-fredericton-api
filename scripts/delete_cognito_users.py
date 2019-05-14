@@ -3,7 +3,7 @@ import argparse
 import boto3
 import os
 
-PREFIX = 'punch-it-api'
+PREFIX = 'caring-fred'
 
 # =======================================================================
 # Read input parameters
