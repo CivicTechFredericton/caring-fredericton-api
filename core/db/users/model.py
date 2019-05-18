@@ -9,6 +9,8 @@ class UserEmail(GlobalSecondaryIndex):
         projection = KeysOnlyProjection()
 
     email = UnicodeAttribute(hash_key=True)
+    read_capacity_units = 0
+    write_capacity_units = 0
 
 
 class UserModel(BaseModel):

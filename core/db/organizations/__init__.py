@@ -3,11 +3,11 @@ from core.errors import ResourceConflictError, ResourceNotFoundError, ResourceVa
 
 
 def check_for_duplicate_name(name):
-    count = OrganizationModel.organization_name_index.count(hash_key=name)
+    count = OrganizationModel.search_name.count(hash_key=name.lower())
 
     if count > 0:
         message = 'Organization with name {} already exists'.format(name)
-        raise ResourceConflictError(messages={'email': [message]})
+        raise ResourceConflictError(messages={'name': [message]})
 
 
 def get_organization_from_db(org_id):

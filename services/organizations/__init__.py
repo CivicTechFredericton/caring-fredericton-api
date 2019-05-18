@@ -24,6 +24,7 @@ def build_update_actions(organization, **kwargs):
     if name and name != organization.name:
         check_for_duplicate_name(name)
         actions.append(OrganizationModel.name.set(name))
+        actions.append(OrganizationModel.search_name.set(name.lower()))
 
     email = kwargs.get('email')
     if email and email != organization.email:

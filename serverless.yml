@@ -269,15 +269,15 @@ resources:
         AttributeDefinitions:
         - AttributeName: id
           AttributeType: S
-        - AttributeName: name
+        - AttributeName: search_name
           AttributeType: S
         KeySchema:
         - AttributeName: id
           KeyType: HASH
         GlobalSecondaryIndexes:
-        - IndexName: name-index
+        - IndexName: search_name-index
           KeySchema:
-          - AttributeName: name
+          - AttributeName: search_name
             KeyType: HASH
           Projection:
             ProjectionType: KEYS_ONLY
