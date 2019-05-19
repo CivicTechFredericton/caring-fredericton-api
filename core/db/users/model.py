@@ -7,10 +7,10 @@ class UserEmail(GlobalSecondaryIndex):
     class Meta:
         index_name = 'user-email-index'
         projection = KeysOnlyProjection()
+        read_capacity_units = 0
+        write_capacity_units = 0
 
     email = UnicodeAttribute(hash_key=True)
-    read_capacity_units = 0
-    write_capacity_units = 0
 
 
 class UserModel(BaseModel):
