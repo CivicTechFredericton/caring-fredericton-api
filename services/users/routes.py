@@ -19,13 +19,11 @@ blueprint = Blueprint('users', __name__)
 @blueprint.route('/users/signup', methods=["POST"])
 @use_kwargs(user_registration_schema, locations=('json',))
 def create_new_user(**kwargs):
-    user_args = {k: v for k, v in kwargs.items() if v is not None}
-
-    email = user_args.get('email')
+    email = kwargs.get('email')
 
     try:
         cognito_response = create_user(email, kwargs.get('password'))
-        user_args['id'] = cognito_response['UserSub']
+        user_id = cognito_response['UserSub']
     except Exception as e:
         if e.response['Error']['Code'] == 'UsernameExistsException':
             message = f"User with name {email} already created"
@@ -34,7 +32,7 @@ def create_new_user(**kwargs):
             message = 'Error occurred when creating user'
             raise BadRequestError(messages={'email': [message]})
 
-    user = UserModel(id=user_args['id'],
+    user = UserModel(id=user_id,
                      email=email,
                      first_name=kwargs.get('first_name'),
                      last_name=kwargs.get('last_name'))
