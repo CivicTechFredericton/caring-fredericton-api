@@ -1124,7 +1124,10 @@ components:
           description: The user's activity state
         organization_id:
           type: string
-          description: the ID of the organization that the user is associated with as a UUID
+          description: The ID of the organization that the user is associated with as a UUID
+        organization_name:
+          type: string
+          description: The name of the organization the user belongs to
     UserRegistrationDetails:
       description: >
         Registration details for a user. 

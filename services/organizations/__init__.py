@@ -1,6 +1,7 @@
 from core.db import get_filter_condition
 from core.db.organizations import check_for_duplicate_name
 from core.db.organizations.model import OrganizationModel
+from core.db.users.model import UserModel
 
 
 def build_scan_condition(**kwargs):
@@ -15,6 +16,11 @@ def build_scan_condition(**kwargs):
 
 def build_verify_organization_actions(is_verified):
     return [OrganizationModel.is_verified.set(is_verified)]
+
+
+def build_user_organization_actions(organization):
+    return [UserModel.organization_id.set(organization.id),
+            UserModel.organization_name.set(organization.name)]
 
 
 def build_update_actions(organization, **kwargs):

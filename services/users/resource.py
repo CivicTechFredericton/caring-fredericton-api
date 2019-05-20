@@ -24,6 +24,7 @@ class UserDisplaySchema(BasicUserSchema):
 
     id = fields.Str(dump_only=True)
     organization_id = fields.Str(dump_only=True)
+    organization_name = fields.Str(dump_only=True)
     active = fields.Bool(dump_only=True)
 
 

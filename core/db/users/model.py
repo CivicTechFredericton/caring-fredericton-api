@@ -19,8 +19,9 @@ class UserModel(BaseModel):
 
     id = UnicodeAttribute(hash_key=True)
     email = UnicodeAttribute()
-    organization_id = UnicodeAttribute(null=True)
     first_name = UnicodeAttribute()
     last_name = UnicodeAttribute()
     active = BooleanAttribute(default=True)
+    organization_id = UnicodeAttribute(null=True)
+    organization_name = UnicodeAttribute(null=True)
     user_email_index = UserEmail()

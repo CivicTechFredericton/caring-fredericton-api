@@ -7,7 +7,8 @@ from core.db.organizations import check_for_duplicate_name, get_organization_fro
 from core.db.organizations.model import OrganizationModel
 from core.db.users import get_user_by_email, get_user_by_id
 
-from services.organizations import build_scan_condition, build_update_actions, build_verify_organization_actions
+from services.organizations import build_scan_condition, build_update_actions, build_user_organization_actions, \
+    build_verify_organization_actions
 from services.organizations.resource import organization_details_schema, organization_list_filters_schema,\
     organization_schema, organization_update_schema, organization_verification_schema
 
@@ -67,14 +68,16 @@ def verify_organization(org_id, **kwargs):
     is_verified = kwargs['is_verified']
 
     if is_verified and not organization.is_verified:
-        actions = build_verify_organization_actions(is_verified)
-        db.update_item(organization, actions)
+        organization_actions = build_verify_organization_actions(organization, is_verified)
+        db.update_item(organization, organization_actions)
 
         # we've verified the organization and ensured that the admin user
         # is a valid user so add the organization to
-        admin = get_user_by_id(organization.administrator_id)
-        admin.organization_id = organization.id
-        admin.save()
+        org_user = get_user_by_id(organization.administrator_id)
+        user_actions = build_user_organization_actions(organization)
+        db.update_item(org_user, user_actions)
+
+        # TODO: Send the user an email indicating the organization has been verified
 
     return jsonify(organization_details_schema.dump(organization).data)
 
