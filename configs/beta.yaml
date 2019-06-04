@@ -1,5 +1,5 @@
 account_id: 260286112360
-domain_name: dev-api.caringfredericton.com
+domain_name: beta-api.caringfredericton.com
 deletion_policy: Delete
 
 # SES Settings
