@@ -1,0 +1,9 @@
+template_path: templates/s3.j2
+
+stack_tags: {{ environment_config.stack_tags }}
+
+sceptre_user_data:
+  environment: {{ environment_path.0 }}
+  project_code: {{ environment_config.project_code }}
+  project_id: {{ environment_config.project_id }}
+  tags: {{ environment_config.stack_tags }}
