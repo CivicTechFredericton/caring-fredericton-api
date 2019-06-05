@@ -551,7 +551,6 @@ paths:
       tags:
         - Users
       summary: Registers a new user 
-      parameters:
       responses:
         '201':
           description: The new user was created
@@ -601,49 +600,49 @@ paths:
         '404':
           description: User does not exist in the system
 
-  /users/<user_id>/join/<org_id>:
-    post:
-      tags:
-        - Users
-      summary: Joins the user with user_id to org_id. Any existing org that the user is already part of will be replaced.
-      parameters:
-        - in: path
-          name: user_id
-          description: |
-            User ID
-          required: true
-          schema:
-            type: string
-        - in: path
-          name: org_id
-          description: |
-            Organization ID
-          required: true
-          schema:
-            type: string         
-      responses:
-        '200':
-          description: User details.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserDetailsResponse'
-        '401':
-          description: Auth token for the activated user.
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuthResponse'                
-        '422':
-          description: User does not exist in the system   
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserJoinDetails'
-        description: |
-          Details for a user joining an organization.
-        required: true          
+#  /users/<user_id>/join/<org_id>:
+#    post:
+#      tags:
+#        - Users
+#      summary: Joins the user with user_id to org_id. Any existing org that the user is already part of will be replaced.
+#      parameters:
+#        - in: path
+#          name: user_id
+#          description: |
+#            User ID
+#          required: true
+#          schema:
+#            type: string
+#        - in: path
+#          name: org_id
+#          description: |
+#            Organization ID
+#          required: true
+#          schema:
+#            type: string
+#      responses:
+#        '200':
+#          description: User details.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/UserDetailsResponse'
+#        '401':
+#          description: Auth token for the activated user.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/AuthResponse'
+#        '422':
+#          description: User does not exist in the system
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/UserJoinDetails'
+#        description: |
+#          Details for a user joining an organization.
+#        required: true
 
 components:
   requestBodies:
@@ -733,24 +732,6 @@ components:
         country:
           type: string
           description: Country
-    AdministratorDetails:
-      description: |
-        Contact details for an organization
-      type: object
-      required:
-        - first_name
-        - last_name
-        - email
-      properties:
-        first_name:
-          type: string
-          description: Organization's contact first name
-        last_name:
-          type: string
-          description: Organization's contact last name
-        email:
-          type: string
-          description: Organization's contact email address
     OrganizationRequest:
       description: |
         Request object that includes details for registering a new organization
@@ -759,7 +740,7 @@ components:
         - name
         - email
         - phone
-        - administrator
+        - administrator_id
         - address
       properties:
         name:
@@ -774,9 +755,9 @@ components:
         phone:
           type: string
           description: Phone number for the organization
-        administrator:
-          allOf:
-            - $ref: '#/components/schemas/AdministratorDetails'
+        administrator_id:
+          type: string
+          description: The ID of the user set as the administrator
         address:
           allOf:
             - $ref: '#/components/schemas/Address'
@@ -832,9 +813,9 @@ components:
         email:
           type: string
           description: Organization email
-        administrator_details:
-          allOf:
-            - $ref: '#/components/schemas/AdministratorDetails'
+        administrator_id:
+          type: string
+          description: The ID of the user set as the administrator
         address:
           allOf:
             - $ref: '#/components/schemas/Address'
