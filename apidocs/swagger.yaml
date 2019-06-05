@@ -140,7 +140,7 @@ paths:
   /guests/organizations/<org_id>/events/<event_id>:
     get:
       tags:
-        - Guset View
+        - Guest View
       summary: Gets the details of a registered event
       parameters:
         - name: org_id
