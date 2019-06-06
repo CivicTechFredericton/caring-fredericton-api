@@ -28,12 +28,7 @@ def register_organization(**kwargs):
     check_for_duplicate_name(name)
 
     # Verify the that administrator user exists in the system
-    admin_email = kwargs['administrator_email']
-    admin_user = get_user_by_email(admin_email)
-
-    # Set the administrator id to the admin users's email
-    # The org will be added to the admin user's account when verified
-    kwargs['administrator_id'] = admin_user.id
+    get_user_by_id(kwargs['administrator_id'])
 
     # Create the organization
     organization = OrganizationModel(**kwargs)
@@ -43,7 +38,6 @@ def register_organization(**kwargs):
     recipients = [configuration.get_setting('verification_email_recipient')]
     try:
         ses = SES()
-        # TODO: Format email message
         verification_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}/validation/{organization.id}"
         ses.send_email(recipients=recipients,
                        subject='New Organization Request',
@@ -78,6 +72,20 @@ def verify_organization(org_id, **kwargs):
         db.update_item(org_user, user_actions)
 
         # TODO: Send the user an email indicating the organization has been verified
+        recipient = org_user.email
+
+        try:
+            ses = SES()
+            signin_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}"
+            ses.send_email(recipients=[recipient],
+                           subject='Organization Request Approved',
+                           body='The organization {} has been approved for use in the Caring Calendar.  '
+                                'Please go to {} to start entering events.'.format(
+                               organization.name,
+                               signin_url
+                           ))
+        except errors.SESError:
+            logger.warning(f"Error sending email to {recipient}")
 
     return jsonify(organization_details_schema.dump(organization).data)
 

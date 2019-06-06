@@ -1,0 +1,10 @@
+---
+{% set environment = sceptre_user_data.environment -%}
+{% set project_code = sceptre_user_data.project_code -%}
+{% set project_id = sceptre_user_data.project_id -%}
+AWSTemplateFormatVersion: '2010-09-09'
+Resources:
+  ServerlessDeploymentBucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: {{ project_code }}-{{ environment }}-serverlessdeploymentbucket

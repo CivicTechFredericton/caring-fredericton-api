@@ -1,10 +1,10 @@
 account_id: 260286112360
-domain_name: matt-api.caringfredericton.com
+domain_name: beta-api.caringfredericton.com
 deletion_policy: Delete
 
 # SES Settings
 hosted_zone_name: caringfredericton.com.
-verification_email_recipient: matthew.c.dunphy@gmail.com
+verification_email_recipient: info@socialinnovationfredericton.com
 
 logging:
   version: 1

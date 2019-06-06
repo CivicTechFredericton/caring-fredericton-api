@@ -32,7 +32,7 @@ class OrganizationSchema(ma.Schema):
 
 
 class OrganizationDetailsSchema(OrganizationSchema):
-    administrator_email = fields.Email(required=True)
+    administrator_id = fields.Str(required=True)
     address = fields.Nested(AddressSchema, required=True)
 
     class Meta:
