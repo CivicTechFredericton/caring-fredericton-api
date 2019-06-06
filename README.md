@@ -22,7 +22,7 @@ Ensure the prerequisites are installed
 
 Install the NPM dependencies
 ```
-npm ci
+npm install
 ```
 
 ### Python Dependencies ###
@@ -48,6 +48,12 @@ Install the required python packages
 pip install -r requirements.txt
 ```
 
+Create a test user account
+```
+cd scripts
+./user_sign_up.py <username> <password> -p <profile name> - s <stage_name>
+```
+
 OPTIONAL: Exit the virtual environment using the following command
 ```
 deactivate
@@ -58,6 +64,7 @@ deactivate
 The application can be deployed by issuing the following commands:
 ```
 export AWS_PROFILE=test
+export AWS_REGION=ca-central-1
 npm run deploy -- --stage <stage name>
 ```
 
@@ -72,9 +79,11 @@ npm run deploy -- --stage <stage name>
 ## Running project locally ##
 
 The project can be run locally using the following command:
-> ```
-> npm run local -- --stage <stage name>
-> ```
+```
+export AWS_PROFILE=test
+export AWS_REGION=ca-central-1
+npm run local -- --stage <stage name>
+```
 
 **NOTES**:
 

@@ -1,0 +1,36 @@
+service: caring-fred
+
+provider:
+  account_id: ${env:AWS_ACCOUNT_ID, self:custom.env.account_id}
+  # The role referenced by cfnRole is created by IAM CloudFormation in
+  # advance via the aws-iam-management repository.
+  cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
+
+  name: aws
+  region: ca-central-1
+  stage: ${opt:stage}
+  stackName: ${self:service}-apig-${self:provider.stage}
+  # Allow for cf "AWS::" variables
+  # See https://serverless.com/framework/docs/providers/aws/guide/variables/#using-custom-variable-syntax
+  variableSyntax: "\\${((?!AWS)[ ~:a-zA-Z0-9._'\",\\-\\/\\(\\)]+?)}"
+
+custom:
+  env: ${file(../configs/${self:provider.stage}.yaml)}
+
+resources:
+  Resources:
+    ApiGateway:
+      Type: AWS::ApiGateway::RestApi
+      Properties:
+        Name: ${self:service}-${self:provider.stage}
+
+  Outputs:
+    ApiGateway:
+      Value:
+        Ref: ApiGateway
+
+    ApiGatewayRootResourceId:
+      Value:
+         Fn::GetAtt:
+          - ApiGateway
+          - RootResourceId

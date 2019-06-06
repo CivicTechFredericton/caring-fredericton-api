@@ -13,7 +13,7 @@ paths:
   /api/login:
     post:
       tags:
-        - external-api
+        - Authentication
       summary: Retrieve user token
       responses:
         '200':
@@ -25,13 +25,13 @@ paths:
         '401':
           description: Invalid username and password combination
         '422':
-          description: 'Missing parameters, user not found, or account locked'
+          description: Missing required parameters
       requestBody:
         $ref: '#/components/requestBodies/AuthDetails'
-  /guest-view/organizations:
+  /guests/organizations:
     get:
       tags:
-        - guest-view
+        - Guest View
       summary: Returns a list of all registered and verified organizations
       responses:
         '200':
@@ -46,10 +46,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthError'
-  /guest-view/events:
+  /guests/events:
     get:
       tags:
-        - guest-view
+        - Guest View
       summary: Returns a list of all the registered events
       parameters:
         - name: start_date
@@ -88,10 +88,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthError'
-  /guest-view/organizations/<org_id>/events:
+  /guests/organizations/<org_id>/events:
     get:
       tags:
-        - guest-view
+        - Guest View
       summary: Returns a list of created events associated with the organization
       parameters:
         - name: org_id
@@ -137,10 +137,10 @@ paths:
             application/json:
               schema:
                 $ref: '#/components/schemas/AuthError'
-  /guest-view/organizations/<org_id>/events/<event_id>:
+  /guests/organizations/<org_id>/events/<event_id>:
     get:
       tags:
-        - guest-view
+        - Guest View
       summary: Gets the details of a registered event
       parameters:
         - name: org_id
@@ -182,7 +182,7 @@ paths:
   /events:
     get:
       tags:
-        - events
+        - Event Management
       summary: Returns a list of all the events in the system
       parameters:
         - name: start_date
@@ -224,7 +224,7 @@ paths:
   /organizations/<org_id>/events:
     get:
       tags:
-        - events
+        - Event Management
       summary: Returns a list of all the events associated with the organization
       parameters:
         - name: org_id
@@ -272,7 +272,7 @@ paths:
                 $ref: '#/components/schemas/AuthError'
     post:
       tags:
-        - events
+        - Event Management
       summary: Creates a new event in the system for an organization
       parameters:
         - name: org_id
@@ -299,7 +299,7 @@ paths:
   /organizations/<org_id>/events/<event_id>:
     get:
       tags:
-        - events
+        - Event Management
       summary: Gets the details of an existing event
       parameters:
         - name: org_id
@@ -340,7 +340,7 @@ paths:
           description: Event for the organization does not exist in the system
     put:
       tags:
-        - events
+        - Event Management
       summary: Updates an existing event
       parameters:
         - in: path
@@ -376,7 +376,7 @@ paths:
         $ref: '#/components/requestBodies/EventRequest'
     delete:
       tags:
-        - events
+        - Event Management
       summary: Cancels an existing event
       parameters:
         - in: path
@@ -409,7 +409,7 @@ paths:
   /organizations:
     get:
       tags:
-        - organizations
+        - Organizations
       summary: Returns a list of all the organizations in the system
       parameters:
         - name: is_verified
@@ -435,7 +435,7 @@ paths:
   /organizations/<org_id>:
     get:
       tags:
-        - organizations
+        - Organizations
       summary: Returns the details for an organization
       parameters:
         - in: path
@@ -462,7 +462,7 @@ paths:
           description: Organization does not exist in the system
     put:
       tags:
-        - organizations
+        - Organizations
       summary: Update the details of an organization
       parameters:
         - in: path
@@ -489,10 +489,11 @@ paths:
           description: Organization does not exist in the system
       requestBody:
         $ref: '#/components/requestBodies/VerificationDetails'
+
   /organizations/<org_id>/verify:
     post:
       tags:
-        - organizations
+        - Organizations
       summary: Marks the organization as verified in the system
       parameters:
         - in: path
@@ -519,16 +520,17 @@ paths:
           description: Organization does not exist in the system
       requestBody:
         $ref: '#/components/requestBodies/VerificationDetails'
-  /register-organization:
+
+  /organizations/register:
     post:
       tags:
-        - external-api
+        - Organizations
       summary: Sends a registration request for an organization
       responses:
         '201':
           description: >-
             The request was accepted in the system pending verification by the
-            System Adminstrator
+            System Administrator
           content:
             application/json:
               schema:
@@ -543,6 +545,105 @@ paths:
         description: |
           Organization registration request details
         required: true
+
+  /users/signup:
+    post:
+      tags:
+        - Users
+      summary: Registers a new user 
+      responses:
+        '201':
+          description: The new user was created
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailsResponse'
+        '409':
+          description: Email already in use
+        '422':
+          description: Missing required parameters
+      requestBody:
+        content:
+          application/json:
+            schema:
+              $ref: '#/components/schemas/UserRegistrationDetails'
+        description: |
+          User registration request details
+        required: true
+
+  /users/<user_id>:
+    get:
+      tags:
+        - Users
+      summary: Returns the details for a user 
+      parameters:
+        - in: path
+          name: user_id
+          description: |
+            User ID
+          required: true
+          schema:
+            type: string
+      responses:
+        '200':
+          description: User details
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/UserDetailsResponse'
+        '401':
+          description: Authentication error
+          content:
+            application/json:
+              schema:
+                $ref: '#/components/schemas/AuthError'
+        '404':
+          description: User does not exist in the system
+
+#  /users/<user_id>/join/<org_id>:
+#    post:
+#      tags:
+#        - Users
+#      summary: Joins the user with user_id to org_id. Any existing org that the user is already part of will be replaced.
+#      parameters:
+#        - in: path
+#          name: user_id
+#          description: |
+#            User ID
+#          required: true
+#          schema:
+#            type: string
+#        - in: path
+#          name: org_id
+#          description: |
+#            Organization ID
+#          required: true
+#          schema:
+#            type: string
+#      responses:
+#        '200':
+#          description: User details.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/UserDetailsResponse'
+#        '401':
+#          description: Auth token for the activated user.
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/AuthResponse'
+#        '422':
+#          description: User does not exist in the system
+#      requestBody:
+#        content:
+#          application/json:
+#            schema:
+#              $ref: '#/components/schemas/UserJoinDetails'
+#        description: |
+#          Details for a user joining an organization.
+#        required: true
+
 components:
   requestBodies:
     AuthDetails:
@@ -631,24 +732,6 @@ components:
         country:
           type: string
           description: Country
-    AdministratorDetails:
-      description: |
-        Contact details for an organization
-      type: object
-      required:
-        - first_name
-        - last_name
-        - email
-      properties:
-        first_name:
-          type: string
-          description: Organization's contact first name
-        last_name:
-          type: string
-          description: Organization's contact last name
-        email:
-          type: string
-          description: Organization's contact email address
     OrganizationRequest:
       description: |
         Request object that includes details for registering a new organization
@@ -657,7 +740,7 @@ components:
         - name
         - email
         - phone
-        - administrator
+        - administrator_id
         - address
       properties:
         name:
@@ -672,9 +755,9 @@ components:
         phone:
           type: string
           description: Phone number for the organization
-        administrator:
-          allOf:
-            - $ref: '#/components/schemas/AdministratorDetails'
+        administrator_id:
+          type: string
+          description: The ID of the user set as the administrator
         address:
           allOf:
             - $ref: '#/components/schemas/Address'
@@ -730,9 +813,9 @@ components:
         email:
           type: string
           description: Organization email
-        administrator_details:
-          allOf:
-            - $ref: '#/components/schemas/AdministratorDetails'
+        administrator_id:
+          type: string
+          description: The ID of the user set as the administrator
         address:
           allOf:
             - $ref: '#/components/schemas/Address'
@@ -825,11 +908,11 @@ components:
         start_time:
           type: string
           description: The start time for the event
-          format: 'HH:MM:SS'
+          format: HH:MM:SS
         end_time:
           type: string
           description: The end time for the event
-          format: 'HH:MM:SS'
+          format: HH:MM:SS
         is_recurring:
           type: boolean
           description: Flag indicating if the event is recurring
@@ -874,11 +957,11 @@ components:
         start_time:
           type: string
           description: The start time for the event
-          format: 'HH:MM:SS'
+          format: HH:MM:SS
         end_time:
           type: string
           description: The end time for the event
-          format: 'HH:MM:SS'
+          format: HH:MM:SS
     EventDetailsResponse:
       description: |
         Response object containing the detailed event information
@@ -913,11 +996,15 @@ components:
         start_time:
           type: string
           description: The start time for the event
-          format: 'HH:MM:SS'
+          format: HH:MM:SS
         end_time:
           type: string
           description: The end time for the event
-          format: 'HH:MM:SS'
+          format: HH:MM:SS
+        end_date_no_recur:
+          type: string
+          description: The end date for the event that has no specified occurence value, but start, end date for each event and an overall end date
+          format: YYYY-MM-DD
         is_recurring:
           type: boolean
           description: Flag indicating if the event is recurring
@@ -996,6 +1083,65 @@ components:
           description: Size of the page
         _links:
           $ref: '#/components/schemas/PageLinks'
+    UserDetailsResponse:
+      description: >
+        Response object containing the detailed user information
+      type: object
+      properties:
+        id:
+          type: string
+          description: ID of the user as a UUID
+        email:
+          type: string
+          description: Name of the event
+        first_name:
+          type: string
+          description: The user's first name 
+        last_name:
+          type: string
+          description: The user's second name 
+        active:
+          type: boolean
+          description: The user's activity state
+        organization_id:
+          type: string
+          description: The ID of the organization that the user is associated with as a UUID
+        organization_name:
+          type: string
+          description: The name of the organization the user belongs to
+    UserRegistrationDetails:
+      description: >
+        Registration details for a user. 
+      type:
+        object
+      required:
+      - email
+      - password
+      - first_name
+      - last_name
+      properties:
+        email:
+          type: string
+          description: The user email/username
+        password:
+          type: string
+          description: The existing password
+        first_name:
+          type: string
+          description: The users's first name 
+        last_name:
+          type: string
+          description: The users's last name
+#    UserJoinDetails:
+#      description: >
+#      type:
+#        object
+#      required:
+#      - reason
+#      properties:
+#        reason:
+#          type: string
+#          description: The reason the user is joining this organization.
     RecurrenceDetails:
       description: |
         Details pertaining to the event's recurrence information
@@ -1005,10 +1151,26 @@ components:
       properties:
         recurrence:
           type: string
-          description: 'The event recurrence option (DAILY, WEEKLY, BI_WEEKLY, MONTHLY)'
+          description: The event recurrence option (DAILY, WEEKLY, BI_WEEKLY, MONTHLY)
+        occurrence_type:
+          type: string
+          description: The type of occurrence (NEVER, ON, AFTER)
         num_recurrences:
           type: integer
           description: The number of times the event is set to recur
+        on_end_date:
+          type: string
+          description: The end date for the event that has no specified occurence value, but start, end date for each event and an overall end date
+          format: YYYY-MM-DD
+        day_of_week:
+          type: integer
+          description: The specified day [1-7] that the event is set to recur
+        week_of_month:
+          type: integer
+          description: The specified week of the month [1,2,3,4,5,-1] that the event is set to recur (-1->last week")
+        separation_count:
+          type: integer
+          description: The separation count between intervals, default value is 1
     PageLinks:
       description: |
         Links included in paged responses for navigation

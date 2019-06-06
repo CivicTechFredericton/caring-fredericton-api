@@ -1,10 +1,10 @@
 account_id: 260286112360
-domain_name: dev-api.caringfredericton.com
+domain_name: ody-api.caringfredericton.com
 deletion_policy: Delete
 
 # SES Settings
 hosted_zone_name: caringfredericton.com.
-verification_email_recipient: howard.powell@bluespurs.com
+verification_email_recipient: vl.odysseas@gmail.com
 
 logging:
   version: 1

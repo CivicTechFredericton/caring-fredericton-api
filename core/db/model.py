@@ -53,8 +53,8 @@ class BaseModel(Model):
 
     def update(self, attributes=None, actions=None, condition=None, conditional_operator=None, **expected_values):
         # Set the updated_at and updated_by values
-        actions.append(BaseModel.updated_at.set(get_time_now()))
-        actions.append(BaseModel.updated_by.set(get_current_user_id()))
+        self.updated_at = get_time_now()
+        self.updated_by = get_current_user_id()
 
         return Model.update(self, attributes, actions, condition, conditional_operator, **expected_values)
 

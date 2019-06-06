@@ -1,8 +1,10 @@
-from http.client import INTERNAL_SERVER_ERROR, BAD_REQUEST, NOT_FOUND, UNPROCESSABLE_ENTITY
+from http import HTTPStatus
+
+DEFAULT_ERROR = HTTPStatus.UNPROCESSABLE_ENTITY
 
 
 class HttpError(Exception):
-    status_code = INTERNAL_SERVER_ERROR
+    status_code = HTTPStatus.INTERNAL_SERVER_ERROR.value
     code = 'error.internal_sever_error'
     message = 'Internal server error'
 
@@ -20,7 +22,18 @@ class HttpError(Exception):
 
 
 class BadRequestError(HttpError):
-    status_code = BAD_REQUEST
+    status_code = HTTPStatus.BAD_REQUEST.value
+
+    def __init__(self, messages):
+        self.data = {'messages': messages}
+        super().__init__()
+
+    def to_dict(self):
+        return self.data
+
+
+class ResourceConflictError(HttpError):
+    status_code = HTTPStatus.CONFLICT.value
 
     def __init__(self, messages):
         self.data = {'messages': messages}
@@ -31,7 +44,7 @@ class BadRequestError(HttpError):
 
 
 class ResourceNotFoundError(HttpError):
-    status_code = NOT_FOUND
+    status_code = HTTPStatus.NOT_FOUND.value
 
     def __init__(self, messages):
         self.data = {'messages': messages}
@@ -42,7 +55,7 @@ class ResourceNotFoundError(HttpError):
 
 
 class ResourceValidationError(HttpError):
-    status_code = UNPROCESSABLE_ENTITY
+    status_code = HTTPStatus.UNPROCESSABLE_ENTITY.value
 
     def __init__(self, messages):
         self.data = {'messages': messages}
@@ -50,11 +63,6 @@ class ResourceValidationError(HttpError):
 
     def to_dict(self):
         return self.data
-
-
-class CognitoError(HttpError):
-    code = 'error.cognito.error'
-    message = 'Cognito error'
 
 
 class SESError(HttpError):

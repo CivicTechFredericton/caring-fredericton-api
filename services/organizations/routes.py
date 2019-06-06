@@ -1,13 +1,14 @@
 from core import configuration, db, errors
-from core.aws.cognito import create_user, generate_random_password
 from core.aws.ses import SES
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 
 from core.db.organizations import check_for_duplicate_name, get_organization_from_db
 from core.db.organizations.model import OrganizationModel
-from core.db.users.model import UserModel
-from services.organizations import build_scan_condition, build_update_actions, build_verify_organization_actions
+from core.db.users import get_user_by_email, get_user_by_id
+
+from services.organizations import build_scan_condition, build_update_actions, build_user_organization_actions, \
+    build_verify_organization_actions
 from services.organizations.resource import organization_details_schema, organization_list_filters_schema,\
     organization_schema, organization_update_schema, organization_verification_schema
 
@@ -17,13 +18,19 @@ logger = logging.getLogger(__name__)
 blueprint = Blueprint('organizations', __name__)
 
 
-@blueprint.route('/register-organization', methods=["POST"])
+# ----------------------------------
+# Organization Registration Routes
+# ----------------------------------
+@blueprint.route('/organizations/register', methods=["POST"])
 @use_kwargs(organization_details_schema, locations=('json',))
 def register_organization(**kwargs):
-    # TODO: Enhance duplicate check to use Global Secondary Indexes, decorators, and updated rules (name, address, etc.)
     name = kwargs['name']
     check_for_duplicate_name(name)
 
+    # Verify the that administrator user exists in the system
+    get_user_by_id(kwargs['administrator_id'])
+
+    # Create the organization
     organization = OrganizationModel(**kwargs)
     db.save_with_unique_id(organization)
 
@@ -31,7 +38,6 @@ def register_organization(**kwargs):
     recipients = [configuration.get_setting('verification_email_recipient')]
     try:
         ses = SES()
-        # TODO: Format email message
         verification_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}/validation/{organization.id}"
         ses.send_email(recipients=recipients,
                        subject='New Organization Request',
@@ -49,22 +55,6 @@ def register_organization(**kwargs):
     return response
 
 
-@blueprint.route('/organizations', methods=["GET"])
-@use_kwargs(organization_list_filters_schema, locations=('query',))
-def list_organizations(**kwargs):
-    scan_condition = build_scan_condition(**kwargs)
-    organizations = OrganizationModel.scan(scan_condition)
-    response = [organization_schema.dump(org).data for org in organizations]
-
-    return jsonify(response)
-
-
-@blueprint.route('/organizations/<org_id>', methods=["GET"])
-def retrieve_organization(org_id):
-    organization = get_organization_from_db(org_id)
-    return jsonify(organization_details_schema.dump(organization).data)
-
-
 @blueprint.route('/organizations/<org_id>/verify', methods=["POST"])
 @use_kwargs(organization_verification_schema, locations=('json',))
 def verify_organization(org_id, **kwargs):
@@ -72,23 +62,50 @@ def verify_organization(org_id, **kwargs):
     is_verified = kwargs['is_verified']
 
     if is_verified and not organization.is_verified:
-        actions = build_verify_organization_actions(is_verified)
-        db.update_item(organization, actions)
+        organization_actions = build_verify_organization_actions(organization, is_verified)
+        db.update_item(organization, organization_actions)
 
-        administrator_details = organization.administrator
-        if administrator_details:
-            # Create the Cognito user for organization's administrator
-            email = administrator_details['email']
-            password = generate_random_password()
-            create_user(email, password)
+        # we've verified the organization and ensured that the admin user
+        # is a valid user so add the organization to
+        org_user = get_user_by_id(organization.administrator_id)
+        user_actions = build_user_organization_actions(organization)
+        db.update_item(org_user, user_actions)
 
-            # Create the user record in the database
-            user = UserModel(organization_id=organization.id,
-                             email=email,
-                             first_name=administrator_details['first_name'],
-                             last_name=administrator_details['last_name'])
-            db.save_with_unique_id(user)
+        # TODO: Send the user an email indicating the organization has been verified
+        recipient = org_user.email
 
+        try:
+            ses = SES()
+            signin_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}"
+            ses.send_email(recipients=[recipient],
+                           subject='Organization Request Approved',
+                           body='The organization {} has been approved for use in the Caring Calendar.  '
+                                'Please go to {} to start entering events.'.format(
+                               organization.name,
+                               signin_url
+                           ))
+        except errors.SESError:
+            logger.warning(f"Error sending email to {recipient}")
+
+    return jsonify(organization_details_schema.dump(organization).data)
+
+
+# ----------------------------------
+# Organization Management Routes
+# ----------------------------------
+@blueprint.route('/organizations', methods=["GET"])
+@use_kwargs(organization_list_filters_schema, locations=('query',))
+def list_organizations(**kwargs):
+    scan_condition = build_scan_condition(**kwargs)
+    organizations = OrganizationModel.scan(scan_condition)
+
+    response = [organization_schema.dump(org).data for org in organizations]
+    return jsonify(response)
+
+
+@blueprint.route('/organizations/<org_id>', methods=["GET"])
+def retrieve_organization(org_id):
+    organization = get_organization_from_db(org_id)
     return jsonify(organization_details_schema.dump(organization).data)
 
 

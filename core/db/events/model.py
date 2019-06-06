@@ -17,9 +17,15 @@ class RecurrenceTypeEnumUnicodeAttribute(UnicodeAttribute):
             return UnicodeAttribute.serialize(self, value)
 
 
-class RecurrenceDetails(MapAttribute):
-    recurrence = RecurrenceTypeEnumUnicodeAttribute()
-    num_recurrences = NumberAttribute()
+class OccurrenceTypeEnumUnicodeAttribute(UnicodeAttribute):
+    attr_type = STRING
+
+    def serialize(self, value):
+        if not constants.OccurrenceType.has_value(value):
+            raise ValueError(
+                f"{self.attr_name} must be one of {constants.OccurrenceType.values()}, not '{value}'")
+        else:
+            return UnicodeAttribute.serialize(self, value)
 
 
 class DateAttribute(UnicodeAttribute):
@@ -46,6 +52,16 @@ class TimeAttribute(UnicodeAttribute):
 
     def deserialize(self, value):
         return parser.parse(value)
+
+
+class RecurrenceDetails(MapAttribute):
+    recurrence = RecurrenceTypeEnumUnicodeAttribute()
+    occurrence_type = OccurrenceTypeEnumUnicodeAttribute()
+    num_recurrences = NumberAttribute()
+    on_end_date = DateAttribute(null=True)
+    day_of_week = NumberAttribute(null=True)
+    week_of_month = NumberAttribute(null=True)
+    separation_count = NumberAttribute(default=1)
 
 
 class OccurrenceDetail(MapAttribute):

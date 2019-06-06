@@ -24,6 +24,22 @@ class RecurrenceType(Enum):
 
 
 @unique
+class OccurrenceType(Enum):
+    NEVER = 'NEVER'
+    AFTER = 'AFTER'  # num occurrences
+    ON = 'ON'  # after specific date
+
+    @classmethod
+    def values(cls):
+        values = [item.value for item in OccurrenceType]
+        return ', '.join(values)
+
+    @classmethod
+    def has_value(cls, value):
+        return any(value == item.value for item in cls)
+
+
+@unique
 class UpdateType(Enum):
     ONE_TIME = 'ONE-TIME'
     ALL = 'ALL'
