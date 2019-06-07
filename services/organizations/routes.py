@@ -106,6 +106,12 @@ def list_organizations(**kwargs):
 @blueprint.route('/organizations/<org_id>', methods=["GET"])
 def retrieve_organization(org_id):
     organization = get_organization_from_db(org_id)
+    admin_user = get_user_by_id(organization.administrator_id)
+    organization.administrator_details = {
+        'email': admin_user.email,
+        'first_name': admin_user.first_name,
+        'last_name': admin_user.last_name
+    }
     return jsonify(organization_details_schema.dump(organization).data)
 
 
