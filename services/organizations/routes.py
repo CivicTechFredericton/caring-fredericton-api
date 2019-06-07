@@ -62,7 +62,7 @@ def verify_organization(org_id, **kwargs):
     is_verified = kwargs['is_verified']
 
     if is_verified and not organization.is_verified:
-        organization_actions = build_verify_organization_actions(organization, is_verified)
+        organization_actions = build_verify_organization_actions(is_verified)
         db.update_item(organization, organization_actions)
 
         # we've verified the organization and ensured that the admin user
