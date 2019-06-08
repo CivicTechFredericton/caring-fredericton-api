@@ -76,7 +76,7 @@ def verify_organization(org_id, **kwargs):
 
         try:
             ses = SES()
-            signin_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}"
+            signin_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}/login"
             ses.send_email(recipients=[recipient],
                            subject='Organization Request Approved',
                            body='The organization {} has been approved for use in the Caring Calendar.  '
