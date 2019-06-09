@@ -78,6 +78,7 @@ class EventModel(BaseModel):
     owner = UnicodeAttribute(range_key=True)
     name = UnicodeAttribute()
     description = UnicodeAttribute(null=True)
+    contact_email = UnicodeAttribute(default='')
     categories = ListAttribute(default=lambda: [])
     start_date = DateAttribute()
     end_date = DateAttribute()

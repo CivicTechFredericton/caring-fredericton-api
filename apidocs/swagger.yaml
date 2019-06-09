@@ -893,6 +893,7 @@ components:
       type: object
       required:
         - name
+        - contact_email
         - start_date
         - end_date
         - start_time
@@ -991,7 +992,10 @@ components:
           description: Name of the event
         owner:
           type: string
-          description: Owner identifier for the event
+          description: Owner (organization) identifier for the event
+        contact_email:
+          type: string
+          description: Contact email for more details about the event
         description:
           type: string
           description: Description of the event

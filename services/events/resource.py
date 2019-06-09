@@ -39,6 +39,7 @@ class EventSchema(ma.Schema):
     owner = fields.Str(dump_only=True)
     name = fields.Str(required=True)
     description = fields.Str(missing="")
+    contact_email = fields.Str(required=True, missing="");
     categories = fields.List(fields.Str, missing=[])
     start_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
     end_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
@@ -76,6 +77,7 @@ class EventUpdateSchema(ma.Schema):
     name = fields.Str(required=False)
     description = fields.Str(required=False)
     categories = fields.List(fields.Str, missing=[])
+    contact_email = fields.Str(required=False);
     start_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
     end_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
     start_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
