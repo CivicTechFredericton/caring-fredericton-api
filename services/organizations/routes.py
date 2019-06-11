@@ -41,7 +41,7 @@ def register_organization(**kwargs):
         verification_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}/validation/{organization.id}"
         ses.send_email(recipients=recipients,
                        subject='New Organization Request',
-                       body='New organization request for {}.  Please go to {} to verify the request.'.format(
+                       body='New Caring Calendar organization request for {}.  Please go to {} to verify the request.'.format(
                            name,
                            verification_url
                        ))
