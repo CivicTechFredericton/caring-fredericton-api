@@ -44,6 +44,10 @@ def build_update_actions(event, event_args):
     if contact_email and contact_email != event.contact_email:
         actions.append(EventModel.contact_email.set(contact_email))
 
+    location = event_args.get('location')
+    if location and location != event.location:
+        actions.append(EventModel.location.set(location))
+
     categories = event_args.get('categories')
     if categories and not are_lists_equal(categories, event.categories):
         actions.append(EventModel.categories.set(categories))

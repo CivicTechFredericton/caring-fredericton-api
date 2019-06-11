@@ -76,6 +76,7 @@ class EventModel(BaseModel):
 
     id = UnicodeAttribute(hash_key=True)
     owner = UnicodeAttribute(range_key=True)
+    owner_name = UnicodeAttribute(default='')
     name = UnicodeAttribute()
     description = UnicodeAttribute(null=True)
     contact_email = UnicodeAttribute(default='')
@@ -84,6 +85,7 @@ class EventModel(BaseModel):
     end_date = DateAttribute()
     start_time = TimeAttribute()
     end_time = TimeAttribute()
+    location = UnicodeAttribute(default='')
     is_recurring = BooleanAttribute(default=False)
     recurrence_details = RecurrenceDetails(null=True, default=lambda: [])
     occurrences = ListAttribute(of=OccurrenceDetail, default=lambda: [])

@@ -31,6 +31,7 @@ def create_organization_event(org_id, **kwargs):
 
     organization = get_verified_organization_from_db(org_id)
     event_args['owner'] = organization.id
+    event_args['owner_name'] = organization.name
 
     event = create_event(**event_args)
     response = jsonify(event_details_schema.dump(event).data)

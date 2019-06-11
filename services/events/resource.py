@@ -37,10 +37,12 @@ class RecurrenceDetails(ma.Schema):
 class EventSchema(ma.Schema):
     id = fields.Str(dump_only=True)
     owner = fields.Str(dump_only=True)
+    owner_name = fields.Str(dump_only=True)
     name = fields.Str(required=True)
     description = fields.Str(missing="")
-    contact_email = fields.Str(required=True, missing="");
+    contact_email = fields.Str(required=True, missing="")
     categories = fields.List(fields.Str, missing=[])
+    location = fields.Str(required=True)
     start_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
     end_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
     start_time = fields.DateTime(required=True, format=constants.EVENT_TIME_FORMAT)
@@ -77,7 +79,8 @@ class EventUpdateSchema(ma.Schema):
     name = fields.Str(required=False)
     description = fields.Str(required=False)
     categories = fields.List(fields.Str, missing=[])
-    contact_email = fields.Str(required=False);
+    contact_email = fields.Str(required=False)
+    location = fields.Str(required=False)
     start_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
     end_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
     start_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
