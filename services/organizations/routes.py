@@ -41,7 +41,7 @@ def register_organization(**kwargs):
         verification_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}/validation/{organization.id}"
         ses.send_email(recipients=recipients,
                        subject='New Organization Request',
-                       body='New organization request for {}.  Please go to {} to verify the request.'.format(
+                       body='New Caring Calendar organization request for {}.  Please go to {} to verify the request.'.format(
                            name,
                            verification_url
                        ))
@@ -62,7 +62,7 @@ def verify_organization(org_id, **kwargs):
     is_verified = kwargs['is_verified']
 
     if is_verified and not organization.is_verified:
-        organization_actions = build_verify_organization_actions(organization, is_verified)
+        organization_actions = build_verify_organization_actions(is_verified)
         db.update_item(organization, organization_actions)
 
         # we've verified the organization and ensured that the admin user
@@ -76,7 +76,7 @@ def verify_organization(org_id, **kwargs):
 
         try:
             ses = SES()
-            signin_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}"
+            signin_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}/login"
             ses.send_email(recipients=[recipient],
                            subject='Organization Request Approved',
                            body='The organization {} has been approved for use in the Caring Calendar.  '
@@ -106,6 +106,12 @@ def list_organizations(**kwargs):
 @blueprint.route('/organizations/<org_id>', methods=["GET"])
 def retrieve_organization(org_id):
     organization = get_organization_from_db(org_id)
+    admin_user = get_user_by_id(organization.administrator_id)
+    organization.administrator_details = {
+        'email': admin_user.email,
+        'first_name': admin_user.first_name,
+        'last_name': admin_user.last_name
+    }
     return jsonify(organization_details_schema.dump(organization).data)
 
 

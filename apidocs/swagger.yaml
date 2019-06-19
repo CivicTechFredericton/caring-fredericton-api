@@ -707,8 +707,7 @@ components:
         message:
           type: string
     Address:
-      description: |
-        organization address
+      description: Organization address details
       type: object
       required:
         - street
@@ -732,6 +731,19 @@ components:
         country:
           type: string
           description: Country
+    AdministratorDetails:
+      description: Organization admininstrator user details
+      type: object
+      properties:
+        email:
+          type: string
+          description: User's email address
+        first_name:
+          type: string
+          description: User's first name
+        last_name:
+          type: string
+          description: User's last name
     OrganizationRequest:
       description: |
         Request object that includes details for registering a new organization
@@ -758,6 +770,9 @@ components:
         administrator_id:
           type: string
           description: The ID of the user set as the administrator
+        administrator_details:
+          allOf:
+            - $ref: '#/components/schemas/AdministratorDetails'
         address:
           allOf:
             - $ref: '#/components/schemas/Address'
@@ -878,6 +893,7 @@ components:
       type: object
       required:
         - name
+        - contact_email
         - start_date
         - end_date
         - start_time
@@ -976,7 +992,10 @@ components:
           description: Name of the event
         owner:
           type: string
-          description: Owner identifier for the event
+          description: Owner (organization) identifier for the event
+        contact_email:
+          type: string
+          description: Contact email for more details about the event
         description:
           type: string
           description: Description of the event

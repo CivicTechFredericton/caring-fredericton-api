@@ -10,6 +10,11 @@ def handle_error(error):
     return jsonify(ERROR_SCHEMA.dump(error).data), error.status_code
 
 
+@blueprint.app_errorhandler(errors.ResourceConflictError)
+def handle_resource_conflict_error(error):
+    return jsonify(error.to_dict()), error.status_code
+
+
 @blueprint.app_errorhandler(errors.BadRequestError)
 def handle_bad_request_error(error):
     return jsonify(error.to_dict()), error.status_code

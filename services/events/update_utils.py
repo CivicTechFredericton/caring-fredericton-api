@@ -21,8 +21,6 @@ def build_update_actions(event, event_args):
 
     if reset_occurrences:
         # Reset the occurrences
-        #TODO The update model has to change if it will support the new create functions.
-        # So the below was commented out as the functions have changed.
         # set_occurrences(event_args)
         actions.append(EventModel.occurrences.set(event_args['occurrences']))
 
@@ -41,6 +39,14 @@ def build_update_actions(event, event_args):
     description = event_args.get('description')
     if description and description != event.description:
         actions.append(EventModel.description.set(description))
+
+    contact_email = event_args.get('contact_email')
+    if contact_email and contact_email != event.contact_email:
+        actions.append(EventModel.contact_email.set(contact_email))
+
+    location = event_args.get('location')
+    if location and location != event.location:
+        actions.append(EventModel.location.set(location))
 
     categories = event_args.get('categories')
     if categories and not are_lists_equal(categories, event.categories):

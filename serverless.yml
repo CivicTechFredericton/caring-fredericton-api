@@ -65,6 +65,7 @@ provider:
         - dynamodb:GetItem
         - dynamodb:DeleteItem
         - dynamodb:PutItem
+        - dynamodb:Query
         - dynamodb:Scan
         - dynamodb:UpdateItem
       Resource: arn:aws:dynamodb:*:*:table/${self:service}-${self:provider.stage}*
