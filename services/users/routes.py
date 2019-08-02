@@ -1,11 +1,9 @@
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 
-from core.aws.cognito import create_user
 from core.db import save_item
 from core.db.users import get_user_by_id
 from core.db.users.model import UserModel
-from core.errors import ResourceConflictError, BadRequestError
 
 from services.users.resource import user_registration_schema, user_display_schema
 
@@ -19,21 +17,8 @@ blueprint = Blueprint('users', __name__)
 @blueprint.route('/users/signup', methods=["POST"])
 @use_kwargs(user_registration_schema, locations=('json',))
 def create_new_user(**kwargs):
-    email = kwargs.get('email')
-
-    try:
-        cognito_response = create_user(email, kwargs.get('password'))
-        user_id = cognito_response['UserSub']
-    except Exception as e:
-        if e.response['Error']['Code'] == 'UsernameExistsException':
-            message = f"User with name {email} already created"
-            raise ResourceConflictError(messages={'email': [message]})
-        else:
-            message = 'Error occurred when creating user'
-            raise BadRequestError(messages={'email': [message]})
-
-    user = UserModel(id=user_id,
-                     email=email,
+    user = UserModel(id=kwargs.get('user_sub'),
+                     email=kwargs.get('email'),
                      first_name=kwargs.get('first_name'),
                      last_name=kwargs.get('last_name'))
     save_item(user)
