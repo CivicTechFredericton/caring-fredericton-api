@@ -1,4 +1,4 @@
-boto3==1.9.185
+boto3==1.9.199
 Flask==1.1.1
 Flask-Cors==3.0.8
 flask-marshmallow==0.10.1
@@ -6,7 +6,7 @@ marshmallow==2.19.5
 pynamodb==3.4.1
 python-dateutil==2.8.0
 python-json-logger==0.1.11
-PyYAML==5.1.1
+PyYAML==5.1.2
 requests==2.22.0
-virtualenv==16.6.1
+virtualenv==16.7.2
 webargs==5.3.2
