@@ -15,6 +15,7 @@ class UserRegistrationSchema(BasicUserSchema):
     class Meta:
         strict = True
 
+    user_sub = fields.Str(required=True)
     password = fields.Str(load_only=True)
 
 
