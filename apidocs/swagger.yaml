@@ -1134,17 +1134,17 @@ components:
       type:
         object
       required:
+      - user_sub
       - email
-      - password
       - first_name
       - last_name
       properties:
+        user_sub:
+          type: string
+          description: The Cognito sub value
         email:
           type: string
           description: The user email/username
-        password:
-          type: string
-          description: The existing password
         first_name:
           type: string
           description: The users's first name 
