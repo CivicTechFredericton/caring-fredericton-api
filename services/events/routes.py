@@ -58,10 +58,10 @@ def get_event_occurrence_details(org_id, event_id):
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["PUT"])
 @use_kwargs(event_update_schema, locations=('json',))
 def update_organization_event(org_id, event_id, **kwargs):
-    event_args = {k: v for k, v in kwargs.items() if v is not None}
+    # event_args = {k: v for k, v in kwargs.items() if v is not None}
 
     event = get_event_from_db(event_id, org_id)
-    actions = build_update_actions(event, event_args)
+    actions = build_update_actions(event, kwargs)
     db.update_item(event, actions)
 
     return jsonify(event_details_schema.dump(event).data)

@@ -5,7 +5,7 @@
 from core.db.events.model import EventModel
 # from services.events import constants
 # from services.events.create_utils import set_occurrences # This is deprecated, below the new functions
-from services.events.create_utils_bak import set_occurrences_one_time, set_occurrences_recurring_ending, set_occurrences_recurring_not_ending
+# from services.events.create_utils_bak import set_occurrences_one_time, set_occurrences_recurring_ending, set_occurrences_recurring_not_ending
 
 
 # ------------------------------
@@ -13,23 +13,6 @@ from services.events.create_utils_bak import set_occurrences_one_time, set_occur
 # ------------------------------
 def build_update_actions(event, event_args):
     actions = []
-
-    # Check for changes in the recurrences
-    reset_occurrences, is_recurring_changed = check_recurrence_details_changed(event, event_args)
-    if is_recurring_changed:
-        actions.append(EventModel.is_recurring.set(event_args['is_recurring']))
-
-    if reset_occurrences:
-        # Reset the occurrences
-        # set_occurrences(event_args)
-        actions.append(EventModel.occurrences.set(event_args['occurrences']))
-
-        # Check the updated recurrence details
-        recurrence_details = event_args.get('recurrence_details')
-        if recurrence_details is not None:
-            actions.append(EventModel.recurrence_details.set(recurrence_details))
-        else:
-            actions.append(EventModel.recurrence_details.remove())
 
     # Check the remainder of the attributes
     name = event_args.get('name')
@@ -52,14 +35,14 @@ def build_update_actions(event, event_args):
     if categories and not are_lists_equal(categories, event.categories):
         actions.append(EventModel.categories.set(categories))
 
-    # TODO: Work with the occurrence record
-    start_date = event_args.get('start_date')
-    if start_date and start_date != event.start_date:
-        actions.append(EventModel.start_date.set(start_date))
-
-    end_date = event_args.get('end_date')
-    if end_date and end_date != event.end_date:
-        actions.append(EventModel.end_date.set(end_date))
+    # TODO: Only update the start date and end date for the occurrence
+    # start_date = event_args.get('start_date')
+    # if start_date and start_date != event.start_date:
+    #     actions.append(EventModel.start_date.set(start_date))
+    #
+    # end_date = event_args.get('end_date')
+    # if end_date and end_date != event.end_date:
+    #     actions.append(EventModel.end_date.set(end_date))
 
     start_time = event_args.get('start_time')
     if start_time and start_time != event.start_time:
@@ -68,6 +51,23 @@ def build_update_actions(event, event_args):
     end_time = event_args.get('end_time')
     if end_time and end_time != event.end_time:
         actions.append(EventModel.end_time.set(end_time))
+
+    # Check for changes in the recurrences
+    # reset_occurrences, is_recurring_changed = check_recurrence_details_changed(event, event_args)
+    # if is_recurring_changed:
+    #     actions.append(EventModel.is_recurring.set(event_args['is_recurring']))
+    #
+    # if reset_occurrences:
+    #     # Reset the occurrences
+    #     # set_occurrences(event_args)
+    #     actions.append(EventModel.occurrences.set(event_args['occurrences']))
+    #
+    #     # Check the updated recurrence details
+    #     recurrence_details = event_args.get('recurrence_details')
+    #     if recurrence_details is not None:
+    #         actions.append(EventModel.recurrence_details.set(recurrence_details))
+    #     else:
+    #         actions.append(EventModel.recurrence_details.remove())
 
     return actions
 
@@ -88,6 +88,8 @@ def check_recurrence_details_changed(event, event_args):
     recurrence_details = event_args.get('recurrence_details')
     if recurrence_details and recurrence_details != event.recurrence_details:
         reset_occurrences = True
+
+    # Check to see if the start or end time has changed
 
     return reset_occurrences, is_recurring_changed
 
