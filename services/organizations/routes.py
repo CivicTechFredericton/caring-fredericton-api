@@ -49,7 +49,7 @@ def register_organization(**kwargs):
         # TODO: In addition to logging message include in response message indicating that the email failed to send
         logger.warning('Organization {} created; error sending email to {}.'.format(name, recipients))
 
-    response = jsonify(organization_details_schema.dump(organization).data)
+    response = jsonify(organization_details_schema.dump(organization))
     response.status_code = 201
 
     return response
@@ -87,7 +87,7 @@ def verify_organization(org_id, **kwargs):
         except errors.SESError:
             logger.warning(f"Error sending email to {recipient}")
 
-    return jsonify(organization_details_schema.dump(organization).data)
+    return jsonify(organization_details_schema.dump(organization))
 
 
 # ----------------------------------
@@ -99,7 +99,7 @@ def list_organizations(**kwargs):
     scan_condition = build_scan_condition(**kwargs)
     organizations = OrganizationModel.scan(scan_condition)
 
-    response = [organization_schema.dump(org).data for org in organizations]
+    response = [organization_schema.dump(org) for org in organizations]
     return jsonify(response)
 
 
@@ -112,7 +112,7 @@ def retrieve_organization(org_id):
         'first_name': admin_user.first_name,
         'last_name': admin_user.last_name
     }
-    return jsonify(organization_details_schema.dump(organization).data)
+    return jsonify(organization_details_schema.dump(organization))
 
 
 @blueprint.route('/organizations/<org_id>', methods=["PUT"])
@@ -122,4 +122,4 @@ def update_organization(org_id, **kwargs):
     actions = build_update_actions(organization, **kwargs)
     db.update_item(organization, actions)
 
-    return jsonify(organization_details_schema.dump(organization).data)
+    return jsonify(organization_details_schema.dump(organization))

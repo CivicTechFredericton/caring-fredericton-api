@@ -23,7 +23,7 @@ def create_new_user(**kwargs):
                      last_name=kwargs.get('last_name'))
     save_item(user)
 
-    response = jsonify(user_display_schema.dump(user).data)
+    response = jsonify(user_display_schema.dump(user))
     response.status_code = 201
 
     return response
@@ -32,7 +32,7 @@ def create_new_user(**kwargs):
 @blueprint.route('/users/<user_id>', methods=["GET"])
 def get_user(user_id):
     user = get_user_by_id(user_id)
-    response = user_display_schema.dump(user).data
+    response = user_display_schema.dump(user)
 
     return jsonify(response)
 
@@ -50,7 +50,7 @@ def get_user(user_id):
 #     actions = [UserModel.organization_id.set(org.id)]
 #     update_item(user, actions)
 #
-#     response = jsonify(user_display_schema.dump(user).data)
+#     response = jsonify(user_display_schema.dump(user))
 #     response.status_code = 201
 #
 #     return response

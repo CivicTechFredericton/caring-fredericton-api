@@ -40,7 +40,7 @@ class EventSchema(ma.Schema):
     owner_name = fields.Str(dump_only=True)
     name = fields.Str(required=True)
     description = fields.Str(missing="")
-    contact_email = fields.Str(required=True, missing="")
+    contact_email = fields.Str(required=True)
     categories = fields.List(fields.Str, missing=[])
     location = fields.Str(required=True)
     start_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
