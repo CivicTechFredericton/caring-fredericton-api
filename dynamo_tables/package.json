@@ -5,7 +5,7 @@
     "rollback": "serverless rollback"
   },
   "dependencies": {
-    "serverless": "1.39.1"
+    "serverless": "1.52.2"
   },
   "license": "ISC"
 }
