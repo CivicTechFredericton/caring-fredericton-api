@@ -12,6 +12,20 @@ agnostic to the client interface being used (React, Angular, iOS, Android).
 
 NPM is used to install the serverless tools whereas pip is used to install runtime Python packages.
 
+### AWS setup ###
+To launch project you need your own AWS account. Here is step-by-step manual to setting up it properly
+
+* First of all, you have to login into AWS console
+* Next, please enter into the Amazon Cognito
+* Next, please choose blue batton Manage User Pools
+* Next, press Create a user pool - bottom-right blue batton
+* Choose pool name. It should be caring-fred-$STAGENAME-users. You can find proper stage names in config directory of this project. Example: caring-fred-dev-users
+* Please edit settings. You can leave everything default, excluding 2 following settings:
+* Uncheck "required attribute - email", select requirements for password (up to you)
+* App clients - please create new one. You have to select app client name "users", with no secret and also please select Enable sign-in API
+
+ 
+
 ### NPM Dependencies ###
 
 Ensure the prerequisites are installed
