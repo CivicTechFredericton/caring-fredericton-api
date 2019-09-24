@@ -1,36 +1,109 @@
 service: caring-fred
 
 provider:
-  account_id: ${env:AWS_ACCOUNT_ID, self:custom.env.account_id}
+  # account_id: ${env:AWS_ACCOUNT_ID, self:custom.env.account_id}
   # The role referenced by cfnRole is created by IAM CloudFormation in
   # advance via the aws-iam-management repository.
   cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
 
   name: aws
-  region: ca-central-1
-  stage: ${opt:stage}
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'ca-central-1'}
   stackName: ${self:service}-apig-${self:provider.stage}
+  deploymentBucket:
+    name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
+
   # Allow for cf "AWS::" variables
   # See https://serverless.com/framework/docs/providers/aws/guide/variables/#using-custom-variable-syntax
   variableSyntax: "\\${((?!AWS)[ ~:a-zA-Z0-9._'\",\\-\\/\\(\\)]+?)}"
 
+plugins:
+  - serverless-deployment-bucket
+  - serverless-domain-manager
+  - serverless-plugin-scripts
+
 custom:
   env: ${file(../configs/${self:provider.stage}.yaml)}
+  default_domain_name: caringfredericton.com
+  default_api_domain_name: ${self:provider.stage}-api.${self:custom.default_domain_name}
+  customDomain:
+    domainName: ${self:custom.env.api_domain_name, self:custom.default_api_domain_name}
+    stage: ${opt:stage}
+  scripts:
+    hooks:
+      'after:package:finalize': npm run create_domain -- --stage ${self:provider.stage}
+      'before:remove:remove': npm run delete_domain -- --stage ${self:provider.stage}
+
+  # default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
+  # web_domain_name: ${self:custom.env.ui_domain_name, self:custom.default_ui_domain_name}
 
 resources:
   Resources:
-    ApiGateway:
+    ApiGatewayRestApi:
       Type: AWS::ApiGateway::RestApi
       Properties:
         Name: ${self:service}-${self:provider.stage}
 
+    ApiGatewayMockResource:
+      Type: AWS::ApiGateway::Resource
+      Properties:
+        ParentId:
+          Fn::GetAtt:
+            - ApiGatewayRestApi
+            - RootResourceId
+        PathPart: connectivity-test
+        RestApiId:
+          Ref: ApiGatewayRestApi
+
+    ApiGatewayMockMethod:
+      Type: AWS::ApiGateway::Method
+      Properties:
+        AuthorizationType: None
+        HttpMethod: GET
+        ResourceId:
+          Ref: ApiGatewayMockResource
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        MethodResponses:
+          - ResponseModels:
+              text/html: Empty
+            StatusCode: 200
+        Integration:
+          RequestTemplates:
+            application/json: |
+              {"statusCode": 200}
+          Type: MOCK
+          IntegrationResponses:
+            - ResponseTemplates:
+                application/json: "{\"message\": \"OK\"}"
+              StatusCode: 200
+
+    ApiGatewayStage:
+      Type: AWS::ApiGateway::Stage
+      Properties:
+        DeploymentId:
+          Ref: ApiGatewayDeployment
+        RestApiId:
+          Ref: ApiGatewayRestApi
+        StageName: ${self:provider.stage}
+
+    ApiGatewayDeployment:
+      Type: AWS::ApiGateway::Deployment
+      DependsOn: ApiGatewayMockMethod
+      Properties:
+        RestApiId:
+          Ref: ApiGatewayRestApi
+
+  #===================================================================
+  # Stack Outputs
+  #===================================================================
   Outputs:
     ApiGateway:
       Value:
-        Ref: ApiGateway
+        Ref: ApiGatewayRestApi
 
     ApiGatewayRootResourceId:
       Value:
          Fn::GetAtt:
-          - ApiGateway
+          - ApiGatewayRestApi
           - RootResourceId

@@ -34,7 +34,7 @@ def create_organization_event(org_id, **kwargs):
     event_args['owner_name'] = organization.name
 
     event = create_event(**event_args)
-    response = jsonify(event_details_schema.dump(event).data)
+    response = jsonify(event_details_schema.dump(event))
     response.status_code = 201
 
     return response
@@ -45,7 +45,7 @@ def create_organization_event(org_id, **kwargs):
 def get_organization_event(org_id, event_id, **kwargs):
     event = get_event_from_db(event_id, org_id)
     occurrence = get_event_occurrence(event, kwargs.get('occurrence_num'))
-    return jsonify(event_occurrence_details_schema.dump(occurrence).data)
+    return jsonify(event_occurrence_details_schema.dump(occurrence))
 
 
 @blueprint.route('/organizations/<org_id>/events/<event_id>/occurrences', methods=["GET"])
@@ -58,13 +58,13 @@ def get_event_occurrence_details(org_id, event_id):
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["PUT"])
 @use_kwargs(event_update_schema, locations=('json',))
 def update_organization_event(org_id, event_id, **kwargs):
-    event_args = {k: v for k, v in kwargs.items() if v is not None}
+    # event_args = {k: v for k, v in kwargs.items() if v is not None}
 
     event = get_event_from_db(event_id, org_id)
-    actions = build_update_actions(event, event_args)
+    actions = build_update_actions(event, kwargs)
     db.update_item(event, actions)
 
-    return jsonify(event_details_schema.dump(event).data)
+    return jsonify(event_details_schema.dump(event))
 
 
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=['DELETE'])
@@ -83,7 +83,7 @@ def cancel_organization_event(org_id, event_id):
 #     update_event_occurrences(event, event_args)
 #
 #     # TODO: Update response
-#     return jsonify(event_details_schema.dump(event).data)
+#     return jsonify(event_details_schema.dump(event))
 
 
 # ----------------------------------------------------
@@ -98,15 +98,15 @@ def get_events_response(events_list, **kwargs):
     for event in events_list:
         occurrences = get_recurring_events_list(event, filter_start_date, filter_end_date, filter_categories)
         for occurrence in occurrences:
-            response.append(event_list_schema.dump(occurrence).data)
+            response.append(event_list_schema.dump(occurrence))
 
     return jsonify(response)
 
 
 def get_all_occ_from_event_response(event):
-    response = [event_list_schema.dump(occurrence).data for occurrence in event.occurrences]
+    response = [event_list_schema.dump(occurrence) for occurrence in event.occurrences]
 
     # for occurrence in event.occurrences:
-    #     response.append(event_list_schema.dump(occurrence).data)
+    #     response.append(event_list_schema.dump(occurrence))
 
     return jsonify(response)

@@ -40,7 +40,7 @@ class EventSchema(ma.Schema):
     owner_name = fields.Str(dump_only=True)
     name = fields.Str(required=True)
     description = fields.Str(missing="")
-    contact_email = fields.Str(required=True, missing="")
+    contact_email = fields.Str(required=True)
     categories = fields.List(fields.Str, missing=[])
     location = fields.Str(required=True)
     start_date = fields.DateTime(required=True, format=constants.EVENT_DATE_FORMAT)
@@ -81,12 +81,12 @@ class EventUpdateSchema(ma.Schema):
     categories = fields.List(fields.Str, missing=[])
     contact_email = fields.Str(required=False)
     location = fields.Str(required=False)
-    start_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
-    end_date = fields.DateTime(format=constants.EVENT_DATE_FORMAT)
-    start_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
-    end_time = fields.DateTime(format=constants.EVENT_TIME_FORMAT)
-    is_recurring = fields.Bool()
-    recurrence_details = fields.Nested(RecurrenceDetails)
+    # start_date = fields.DateTime(required=False, format=constants.EVENT_DATE_FORMAT)
+    # end_date = fields.DateTime(required=False, format=constants.EVENT_DATE_FORMAT)
+    start_time = fields.DateTime(required=False, format=constants.EVENT_TIME_FORMAT)
+    end_time = fields.DateTime(required=False, format=constants.EVENT_TIME_FORMAT)
+    # is_recurring = fields.Bool(required=False)
+    # recurrence_details = fields.Nested(RecurrenceDetails, required=False)
 
     class Meta:
         strict = True

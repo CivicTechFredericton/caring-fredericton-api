@@ -45,5 +45,5 @@ def list_events(org_id, **kwargs):
 def get_organization_event(org_id, event_id, **kwargs):
     event = get_event_from_db(event_id, org_id)
     occurrence = get_event_occurrence(event, kwargs.get('occurrence_num'))
-    return jsonify(event_occurrence_details_schema.dump(occurrence).data)
+    return jsonify(event_occurrence_details_schema.dump(occurrence))
 
