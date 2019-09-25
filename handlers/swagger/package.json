@@ -1,0 +1,12 @@
+{
+  "scripts": {
+    "deploy": "serverless deploy",
+    "invoke": "serverless invoke",
+    "remove": "serverless remove",
+    "rollback": "serverless rollback"
+  },
+  "dependencies": {
+    "serverless": "1.50.0"
+  },
+  "license": "ISC"
+}
