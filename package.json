@@ -3,7 +3,6 @@
     "create_domain": "serverless create_domain",
     "delete_domain": "serverless delete_domain",
     "deploy": "serverless deploy",
-    "invoke": "serverless invoke local",
     "local": "serverless wsgi serve",
     "remove": "serverless remove",
     "rollback": "serverless rollback"
