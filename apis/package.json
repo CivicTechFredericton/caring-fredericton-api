@@ -1,0 +1,16 @@
+{
+  "version": "1.0.0",
+  "scripts": {
+    "deploy": "serverless deploy",
+    "invoke": "serverless invoke",
+    "local": "serverless wsgi serve",
+    "remove": "serverless remove",
+    "rollback": "serverless rollback"
+  },
+  "dependencies": {
+    "serverless": "1.52.2",
+    "serverless-python-requirements": "5.0.0",
+    "serverless-wsgi": "1.7.3"
+  },
+  "license": "ISC"
+}

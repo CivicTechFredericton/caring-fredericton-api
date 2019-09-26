@@ -1,0 +1,16 @@
+{
+  "scripts": {
+    "create_domain": "serverless create_domain",
+    "delete_domain": "serverless delete_domain",
+    "deploy": "serverless deploy",
+    "remove": "serverless remove",
+    "rollback": "serverless rollback"
+  },
+  "dependencies": {
+    "serverless": "1.52.2",
+    "serverless-deployment-bucket": "1.1.0",
+    "serverless-domain-manager": "3.3.0",
+    "serverless-plugin-scripts": "1.0.2"
+  },
+  "license": "ISC"
+}
