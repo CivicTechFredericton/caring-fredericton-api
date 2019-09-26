@@ -10,13 +10,6 @@ provider:
   environment:
     SERVICE_NAME: ${self:service}
     STAGE: ${self:provider.stage}
-    UI_DOMAIN_NAME: ${self:custom.web_domain_name}
-    COGNITO_USER_POOL_USERS_ID:
-      Ref: CognitoUserPoolUsers
-    COGNITO_USER_POOL_USERS_ARN:
-      Fn::GetAtt: [CognitoUserPoolUsers, Arn]
-    COGNITO_USER_POOL_CLIENT_USERS_ID:
-      Ref: CognitoUserPoolClientUsers
 
   # IAM role permissions given to the Lambda function.  Update as
   # needed.  More information about IAM permissions can be found here:
@@ -39,14 +32,11 @@ provider:
               - Ref: 'AWS::Region'
               - Ref: 'AWS::AccountId'
               - 'log-group:/aws/lambda/*:*:*'
-
     - Effect: Allow
       Action:
         - cognito-idp:AdminInitiateAuth
-        - cognito-idp:SignUp
       Resource:
         Fn::GetAtt: [CognitoUserPoolUsers, Arn]
-
     - Effect: Allow
       Action:
         - ses:SendEmail
@@ -58,7 +48,6 @@ provider:
               - 'us-east-1' # Ref: 'AWS::Region'
               - Ref: 'AWS::AccountId'
               - 'identity/*'
-
     - Effect: Allow
       Action:
         - dynamodb:DescribeTable
@@ -81,22 +70,13 @@ provider:
   memorySize: 128
   name: aws
   region: ca-central-1
-  runtime: python3.7
   stage: ${opt:stage}
+  runtime: python3.7
   # The default is 6 seconds. Note: API Gateway current maximum is 30 seconds
   timeout: 6
   # Allow for cf "AWS::" variables
   # See https://goo.gl/atHr7z
   variableSyntax: "\\${(?!AWS::)([ :a-zA-Z0-9._,\\-\\/\\(\\)]+?)}"
-
-package:
-  exclude:
-    - node_modules/**
-    - npm-debug.log
-    - package.json
-    - package-lock.json
-    - requirements.txt
-    - venv/**
 
 plugins:
   - serverless-domain-manager
@@ -121,10 +101,24 @@ custom:
   wsgi:
     app: api.app
 
+package:
+  exclude:
+    - node_modules/**
+    - npm-debug.log
+    - package.json
+    - package-lock.json
+    - requirements.txt
+    - venv/**
+
 functions:
   login:
     name: ${self:service}-${self:provider.stage}-api-login
     handler: handlers/login.handler
+    environment:
+      COGNITO_USER_POOL_USERS_ID:
+        Ref: CognitoUserPoolUsers
+      COGNITO_USER_POOL_CLIENT_USERS_ID:
+        Ref: CognitoUserPoolClientUsers
     events:
       - http:
           method: POST
@@ -137,9 +131,6 @@ functions:
     events:
       - http:
           method: GET
-          path: /
-      - http:
-          method: GET
           path: /index.html
       - http:
           method: GET
@@ -148,6 +139,8 @@ functions:
   api:
     name: ${self:service}-${self:provider.stage}-api
     handler: wsgi_handler.handler
+    environment:
+      UI_DOMAIN_NAME: ${self:custom.web_domain_name}
     events:
       - http:
           method: POST
