@@ -2,16 +2,16 @@ import json
 
 from datetime import datetime
 from core.auth import get_current_user_id
-from core.configuration import get_region_name
+from core.configuration import get_region_name, get_current_stage, get_service_name
 from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, UTCDateTimeAttribute
 
 import logging
+
+from core.errors import ResourceNotFoundError
+from core.utils import get_time_now
+
 logger = logging.getLogger(__name__)
-
-
-def get_time_now():
-    return datetime.utcnow()
 
 
 class ModelEncoder(json.JSONEncoder):
@@ -27,13 +27,31 @@ class BaseModel(Model):
     class Meta:
         abstract = True
         region = get_region_name()
+        table_name = None
+        index_name = None
+
+        def __init_subclass__(cls, **kwargs):
+            cls.table_name = cls.get_table_name(cls)
+            super().__init_subclass__(**kwargs)
+
+        def get_table_name(self):
+            if not self.index_name:
+                service_name = get_service_name()
+                stage_name = get_current_stage()
+                simple_name = getattr(self, 'simple_name')
+
+                self.index_name = self.table_name = '{}-{}-{}'.format(
+                    service_name, stage_name, simple_name)
+
+                logger.info("Init model '{}'".format(self.index_name))
+            return self.index_name
 
     created_at = UTCDateTimeAttribute()
     created_by = UnicodeAttribute()
     updated_at = UTCDateTimeAttribute()
     updated_by = UnicodeAttribute()
 
-    def save(self, conditional_operator=None, **expected_values):
+    def save(self, conditional_operator=None):
         timestamp = get_time_now()
         current_user = get_current_user_id()
 
@@ -49,14 +67,21 @@ class BaseModel(Model):
         self.updated_at = timestamp
         self.updated_by = current_user
 
-        return Model.save(self, conditional_operator, **expected_values)
+        return Model.save(self, conditional_operator)
 
-    def update(self, attributes=None, actions=None, condition=None, conditional_operator=None, **expected_values):
-        # Set the updated_at and updated_by values
+    def update(self, actions, condition=None):
         self.updated_at = get_time_now()
         self.updated_by = get_current_user_id()
 
-        return Model.update(self, attributes, actions, condition, conditional_operator, **expected_values)
+        return Model.update(self, actions, condition)
+
+    @classmethod
+    def fetch(cls, *args, **kwargs):
+        try:
+            model = cls.get(*args, **kwargs)
+            return model
+        except cls.DoesNotExist:
+            raise ResourceNotFoundError
 
     def to_dict(self):
         return json.loads(json.dumps(self, cls=ModelEncoder))
