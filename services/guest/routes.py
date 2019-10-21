@@ -23,7 +23,7 @@ blueprint = Blueprint('guest', __name__)
 @blueprint.route('/guests/organizations', methods=["GET"])
 def list_verified_organizations():
     organizations = OrganizationModel.scan(OrganizationModel.is_verified == True)
-    response = [organization_list_schema.dump(org).data for org in organizations]
+    response = [organization_list_schema.dump(org) for org in organizations]
 
     return jsonify(response)
 

@@ -3,7 +3,7 @@ import importlib
 import flask
 import flask_cors
 
-from core import configuration, db
+from core import configuration
 
 import logging
 from logging import config as logging_config
@@ -13,11 +13,10 @@ logging.getLogger(__name__).setLevel(logging.INFO)
 
 SETTINGS = 'settings'
 LOGGING = 'logging'
-MODELS = 'models'
 APP = 'app'
 
 # Full init sequence. Order matters.
-FULL_STAGES_LIST = (SETTINGS, APP, LOGGING, MODELS)
+FULL_STAGES_LIST = (SETTINGS, APP, LOGGING)
 
 # Set the list of service names which expose API endpoints
 SERVICE_NAMES = ['error', 'events', 'guest', 'organizations', 'root', 'users']
@@ -32,13 +31,6 @@ def init_logging():
     root_logger.handlers = []
     logging_config.dictConfig(configuration.get_setting('logging'))
     logger.info('Configured logging')
-
-
-def init_models():
-    service_name = configuration.get_setting('SERVICE_NAME')
-    stage = configuration.get_setting('STAGE')
-
-    db.init_models(service_name, stage)
 
 
 def init_app():
@@ -56,7 +48,6 @@ def init_app():
 INIT_STAGES = {
     SETTINGS: configuration.init_settings,
     LOGGING: init_logging,
-    MODELS: init_models,
     APP: init_app,
 }
 

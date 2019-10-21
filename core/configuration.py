@@ -38,5 +38,13 @@ def set_setting(name, value):
     settings[name] = value
 
 
+def get_current_stage():
+    return os.environ['STAGE']
+
+
+def get_service_name():
+    return os.environ['SERVICE_NAME']
+
+
 def get_region_name():
     return os.environ['AWS_REGION']
