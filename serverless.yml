@@ -19,6 +19,9 @@ provider:
   region: ca-central-1
   stage: ${opt:stage}
   runtime: python3.7
+  deploymentBucket:
+    name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
+
   # The default is 6 seconds. Note: API Gateway current maximum is 30 seconds
   timeout: 6
   # Allow for cf "AWS::" variables
@@ -29,6 +32,11 @@ provider:
   environment:
     SERVICE_NAME: ${self:service}
     STAGE: ${self:provider.stage}
+
+  # Reference external API Gateway definition
+  apiGateway:
+    restApiId: ${cf:${self:service}-apig-${self:provider.stage}.ApiGateway}
+    restApiRootResourceId: ${cf:${self:service}-apig-${self:provider.stage}.ApiGatewayRootResourceId}
 
   # IAM role permissions given to the Lambda function.  Update as
   # needed.  More information about IAM permissions can be found here:
@@ -79,25 +87,25 @@ provider:
       Resource: arn:aws:dynamodb:*:*:table/${self:service}-${self:provider.stage}*
 
 plugins:
-  - serverless-domain-manager
-  - serverless-plugin-bind-deployment-id
-  - serverless-plugin-scripts
+  # - serverless-domain-manager
+  # - serverless-plugin-bind-deployment-id
+  # - serverless-plugin-scripts
   - serverless-wsgi
 
 custom:
   env: ${file(configs/${self:provider.stage}.yaml)}
   default_domain_name: caringfredericton.com
-  default_api_domain_name: ${self:provider.stage}-api.${self:custom.default_domain_name}
+  # default_api_domain_name: ${self:provider.stage}-api.${self:custom.default_domain_name}
   default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
   web_domain_name: ${self:custom.env.ui_domain_name, self:custom.default_ui_domain_name}
   default_deletion_policy: Delete
-  customDomain:
-    domainName: ${self:custom.env.api_domain_name, self:custom.default_api_domain_name}
-    stage: ${opt:stage}
-  scripts:
-    hooks:
-      'after:package:finalize': npm run create_domain -- --stage ${self:provider.stage}
-      'before:remove:remove': npm run delete_domain -- --stage ${self:provider.stage}
+#  customDomain:
+#    domainName: ${self:custom.env.api_domain_name, self:custom.default_api_domain_name}
+#    stage: ${opt:stage}
+#  scripts:
+#    hooks:
+#      'after:package:finalize': npm run create_domain -- --stage ${self:provider.stage}
+#      'before:remove:remove': npm run delete_domain -- --stage ${self:provider.stage}
   wsgi:
     app: api.app
 
@@ -164,15 +172,15 @@ resources:
     #===================================================================
     # API Gateway
     #===================================================================
-    Stage:
-      Type: AWS::ApiGateway::Stage
-      Properties:
-        DeploymentId:
-          Ref: __deployment__
-
-        RestApiId:
-          Ref: ApiGatewayRestApi
-        StageName: ${self:provider.stage}
+#    Stage:
+#      Type: AWS::ApiGateway::Stage
+#      Properties:
+#        DeploymentId:
+#          Ref: __deployment__
+#
+#        RestApiId:
+#          Ref: ApiGatewayRestApi
+#        StageName: ${self:provider.stage}
 
     #===================================================================
     # Cognito
@@ -232,69 +240,69 @@ resources:
     #===================================================================
     # DynamoDB
     #===================================================================
-    TableUser:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
-      Properties:
-        TableName: ${self:service}-${self:provider.stage}-user
-        AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: email
-          AttributeType: S
-        KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-        GlobalSecondaryIndexes:
-        - IndexName: user-email-index
-          KeySchema:
-          - AttributeName: email
-            KeyType: HASH
-          Projection:
-            ProjectionType: KEYS_ONLY
-        SSESpecification:
-          SSEEnabled: True
-        BillingMode: PAY_PER_REQUEST
-
-    TableOrganizations:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
-      Properties:
-        TableName: ${self:service}-${self:provider.stage}-organization
-        AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: search_name
-          AttributeType: S
-        KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-        GlobalSecondaryIndexes:
-        - IndexName: search_name-index
-          KeySchema:
-          - AttributeName: search_name
-            KeyType: HASH
-          Projection:
-            ProjectionType: KEYS_ONLY
-        SSESpecification:
-          SSEEnabled: True
-        BillingMode: PAY_PER_REQUEST
-
-    TableEvents:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
-      Properties:
-        TableName: ${self:service}-${self:provider.stage}-event
-        AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: owner
-          AttributeType: S
-        KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-        - AttributeName: owner
-          KeyType: RANGE
-        SSESpecification:
-          SSEEnabled: True
-        BillingMode: PAY_PER_REQUEST
+#    TableUser:
+#      Type: AWS::DynamoDB::Table
+#      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+#      Properties:
+#        TableName: ${self:service}-${self:provider.stage}-user
+#        AttributeDefinitions:
+#        - AttributeName: id
+#          AttributeType: S
+#        - AttributeName: email
+#          AttributeType: S
+#        KeySchema:
+#        - AttributeName: id
+#          KeyType: HASH
+#        GlobalSecondaryIndexes:
+#        - IndexName: user-email-index
+#          KeySchema:
+#          - AttributeName: email
+#            KeyType: HASH
+#          Projection:
+#            ProjectionType: KEYS_ONLY
+#        SSESpecification:
+#          SSEEnabled: True
+#        BillingMode: PAY_PER_REQUEST
+#
+#    TableOrganizations:
+#      Type: AWS::DynamoDB::Table
+#      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+#      Properties:
+#        TableName: ${self:service}-${self:provider.stage}-organization
+#        AttributeDefinitions:
+#        - AttributeName: id
+#          AttributeType: S
+#        - AttributeName: search_name
+#          AttributeType: S
+#        KeySchema:
+#        - AttributeName: id
+#          KeyType: HASH
+#        GlobalSecondaryIndexes:
+#        - IndexName: search_name-index
+#          KeySchema:
+#          - AttributeName: search_name
+#            KeyType: HASH
+#          Projection:
+#            ProjectionType: KEYS_ONLY
+#        SSESpecification:
+#          SSEEnabled: True
+#        BillingMode: PAY_PER_REQUEST
+#
+#    TableEvents:
+#      Type: AWS::DynamoDB::Table
+#      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+#      Properties:
+#        TableName: ${self:service}-${self:provider.stage}-event
+#        AttributeDefinitions:
+#        - AttributeName: id
+#          AttributeType: S
+#        - AttributeName: owner
+#          AttributeType: S
+#        KeySchema:
+#        - AttributeName: id
+#          KeyType: HASH
+#        - AttributeName: owner
+#          KeyType: RANGE
+#        SSESpecification:
+#          SSEEnabled: True
+#        BillingMode: PAY_PER_REQUEST

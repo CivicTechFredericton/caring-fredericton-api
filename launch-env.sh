@@ -8,7 +8,7 @@ echo "------------------------------"
 echo "Installing NPM Dependencies"
 echo "------------------------------"
 echo
-npm ci
+npm install
 
 echo "------------------------------"
 echo "Installing Python Dependencies"
@@ -23,7 +23,7 @@ echo "---------------------"
 echo
 pushd api_gateway
 ln -sf ../node_modules
-npm run deploy -- --region $region --stage $env
+npm run deploy -- --stage $env
 popd
 
 echo
@@ -33,7 +33,7 @@ echo "-----------------------"
 echo
 pushd dynamo_tables
 ln -sf ../node_modules
-npm run deploy -- --region $region --stage $env
+npm run deploy -- --stage $env
 popd
 
 echo
@@ -41,6 +41,4 @@ echo "-------------------------"
 echo "Deploying API Application"
 echo "-------------------------"
 echo
-npm run deploy -- --region $region --stage $env
-
-pip install -r requirements.txt
+npm run deploy -- --stage $env

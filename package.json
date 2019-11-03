@@ -8,9 +8,8 @@
     "rollback": "serverless rollback"
   },
   "dependencies": {
-    "serverless": "1.54.0",
+    "serverless": "1.56.1",
     "serverless-domain-manager": "3.3.0",
-    "serverless-plugin-bind-deployment-id": "1.1.0",
     "serverless-plugin-scripts": "1.0.2",
     "serverless-wsgi": "1.7.3"
   },
