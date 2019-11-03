@@ -4,7 +4,7 @@ provider:
   account_id: ${self:custom.env.account_id}
   # The role referenced by cfnRole is created by CloudFormation in
   # advance as; account is used to execute deployments.
-  cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
+  # cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
 
   # Add additional environment variables if necessary
   environment:
@@ -86,7 +86,7 @@ plugins:
 
 custom:
   env: ${file(configs/${self:provider.stage}.yaml)}
-  default_domain_name: caringfredericton.com
+  default_domain_name: t.caringfredericton.com
   default_api_domain_name: ${self:provider.stage}-api.${self:custom.default_domain_name}
   default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
   web_domain_name: ${self:custom.env.ui_domain_name, self:custom.default_ui_domain_name}
