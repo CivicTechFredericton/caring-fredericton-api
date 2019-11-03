@@ -6,6 +6,25 @@ provider:
   # advance as; account is used to execute deployments.
   cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
 
+  # How much memory to grant to the Lambda function.  Allocated memory
+  # drives compute capabilities.  The lowest value is 128 MB.  Unless
+  # large amounts of memory are required, you should work with the
+  # lowest value.  If you require more resources consider if you are
+  # building your application correctly with efficient code.
+  #
+  # More information about memory/compute can be found here:
+  # https://goo.gl/g8YjqY
+  memorySize: 128
+  name: aws
+  region: ca-central-1
+  stage: ${opt:stage}
+  runtime: python3.7
+  # The default is 6 seconds. Note: API Gateway current maximum is 30 seconds
+  timeout: 6
+  # Allow for cf "AWS::" variables
+  # See https://goo.gl/atHr7z
+  variableSyntax: "\\${(?!AWS::)([ :a-zA-Z0-9._,\\-\\/\\(\\)]+?)}"
+
   # Add additional environment variables if necessary
   environment:
     SERVICE_NAME: ${self:service}
@@ -58,25 +77,6 @@ provider:
         - dynamodb:Scan
         - dynamodb:UpdateItem
       Resource: arn:aws:dynamodb:*:*:table/${self:service}-${self:provider.stage}*
-
-  # How much memory to grant to the Lambda function.  Allocated memory
-  # drives compute capabilities.  The lowest value is 128 MB.  Unless
-  # large amounts of memory are required, you should work with the
-  # lowest value.  If you require more resources consider if you are
-  # building your application correctly with efficient code.
-  #
-  # More information about memory/compute can be found here:
-  # https://goo.gl/g8YjqY
-  memorySize: 128
-  name: aws
-  region: ca-central-1
-  stage: ${opt:stage}
-  runtime: python3.7
-  # The default is 6 seconds. Note: API Gateway current maximum is 30 seconds
-  timeout: 6
-  # Allow for cf "AWS::" variables
-  # See https://goo.gl/atHr7z
-  variableSyntax: "\\${(?!AWS::)([ :a-zA-Z0-9._,\\-\\/\\(\\)]+?)}"
 
 plugins:
   - serverless-domain-manager
