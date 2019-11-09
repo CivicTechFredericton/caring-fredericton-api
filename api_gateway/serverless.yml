@@ -5,7 +5,7 @@ provider:
   # account_id: ${env:AWS_ACCOUNT_ID, self:custom.env.account_id}
   # The role referenced by cfnRole is created by IAM CloudFormation in
   # advance via the aws-iam-management repository.
-  cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
+  # cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
 
   name: aws
   stage: ${opt:stage, 'dev'}
@@ -34,9 +34,6 @@ custom:
     hooks:
       'after:package:finalize': npm run create_domain -- --stage ${self:provider.stage}
       'before:remove:remove': npm run delete_domain -- --stage ${self:provider.stage}
-
-  # default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
-  # web_domain_name: ${self:custom.env.ui_domain_name, self:custom.default_ui_domain_name}
 
 resources:
   Resources:

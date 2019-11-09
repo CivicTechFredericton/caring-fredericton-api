@@ -5,6 +5,7 @@ provider:
   # The role referenced by cfnRole is created by IAM CloudFormation in
   # advance via the aws-iam-management repository.
   # cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
+
   name: aws
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'ca-central-1'}
