@@ -1,0 +1,91 @@
+service: caring-fred
+
+provider:
+  # account_id: ${env:AWS_ACCOUNT_ID, self:custom.env.account_id}
+  # The role referenced by cfnRole is created by IAM CloudFormation in
+  # advance via the aws-iam-management repository.
+  # cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
+
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'ca-central-1'}
+  stackName: ${self:service}-dynamo-${self:provider.stage}
+  deploymentBucket:
+    name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
+
+  # Allow for cf "AWS::" variables
+  # See https://serverless.com/framework/docs/providers/aws/guide/variables/#using-custom-variable-syntax
+  variableSyntax: "\\${((?!AWS)[ ~:a-zA-Z0-9._'\",\\-\\/\\(\\)]+?)}"
+
+custom:
+  env: ${file(../configs/${self:provider.stage}.yaml)}
+  default_deletion_policy: Delete
+
+resources:
+  Resources:
+    TableUser:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-user
+        AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: email
+          AttributeType: S
+        KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        GlobalSecondaryIndexes:
+        - IndexName: user-email-index
+          KeySchema:
+          - AttributeName: email
+            KeyType: HASH
+          Projection:
+            ProjectionType: KEYS_ONLY
+        SSESpecification:
+          SSEEnabled: True
+        BillingMode: PAY_PER_REQUEST
+
+    TableOrganizations:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-organization
+        AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: search_name
+          AttributeType: S
+        KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        GlobalSecondaryIndexes:
+        - IndexName: search_name-index
+          KeySchema:
+          - AttributeName: search_name
+            KeyType: HASH
+          Projection:
+            ProjectionType: KEYS_ONLY
+        SSESpecification:
+          SSEEnabled: True
+        BillingMode: PAY_PER_REQUEST
+
+    TableEvents:
+      Type: AWS::DynamoDB::Table
+      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+      Properties:
+        TableName: ${self:service}-${self:provider.stage}-event
+        AttributeDefinitions:
+        - AttributeName: id
+          AttributeType: S
+        - AttributeName: owner
+          AttributeType: S
+        KeySchema:
+        - AttributeName: id
+          KeyType: HASH
+        - AttributeName: owner
+          KeyType: RANGE
+        SSESpecification:
+          SSEEnabled: True
+        BillingMode: PAY_PER_REQUEST
