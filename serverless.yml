@@ -91,7 +91,7 @@ plugins:
 
 custom:
   env: ${file(configs/${self:provider.stage}.yaml)}
-  default_domain_name: caringfredericton.com
+  default_domain_name: t.caringfredericton.com
   default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
   web_domain_name: ${self:custom.env.ui_domain_name, self:custom.default_ui_domain_name}
   default_deletion_policy: Delete

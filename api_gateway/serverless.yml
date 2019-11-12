@@ -25,7 +25,7 @@ plugins:
 
 custom:
   env: ${file(../configs/${self:provider.stage}.yaml)}
-  default_domain_name: caringfredericton.com
+  default_domain_name: t.caringfredericton.com
   default_api_domain_name: ${self:provider.stage}-api.${self:custom.default_domain_name}
   customDomain:
     domainName: ${self:custom.env.api_domain_name, self:custom.default_api_domain_name}
