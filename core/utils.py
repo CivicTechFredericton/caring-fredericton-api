@@ -1,3 +1,6 @@
+from datetime import datetime
+
+
 def deep_merge(source, destination):
     """
     https://stackoverflow.com/questions/20656135/python-deep-merge-dictionary-data
@@ -18,3 +21,6 @@ def deep_merge(source, destination):
 
     return destination
 
+
+def get_time_now():
+    return datetime.utcnow()
