@@ -15,8 +15,8 @@ parser.add_argument('login', type=str, help='User login')
 parser.add_argument('password', type=str, help='User password')
 parser.add_argument('first_name', type=str, help='User first name')
 parser.add_argument('last_name', type=str, help='User last name')
-parser.add_argument('-r', '--region', required=True,
-                    help='AWS CLI region to use')
+parser.add_argument('-r', '--region', required=False,
+                    default='ca-central-1', help='AWS CLI region to use')
 parser.add_argument('-s', '--stage',
                     help='Stage name or environment such as dev, stage, uat, etc.', required=True)
 args = parser.parse_args()
