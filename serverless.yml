@@ -1,7 +1,7 @@
 service: caring-fred
 
 provider:
-  account_id: ${self:custom.env.account_id}
+  account_id: ${ssm:account-id}
   # The role referenced by cfnRole is created by CloudFormation in
   # advance as; account is used to execute deployments.
   # cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
@@ -17,7 +17,7 @@ provider:
   memorySize: 128
   name: aws
   stage: ${opt:stage}
-  region: ca-central-1
+  region: ${opt:region}
   runtime: python3.7
   deploymentBucket:
     name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
@@ -91,7 +91,7 @@ plugins:
 
 custom:
   env: ${file(configs/${self:provider.stage}.yaml)}
-  default_domain_name: t.caringfredericton.com
+  default_domain_name: ${ssm:default-domain-name}
   default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
   web_domain_name: ${self:custom.env.ui_domain_name, self:custom.default_ui_domain_name}
   default_deletion_policy: Delete
@@ -100,12 +100,14 @@ custom:
 
 package:
   exclude:
-    - node_modules/**
-    - npm-debug.log
-    - package.json
-    - package-lock.json
-    - requirements.txt
-    - venv/**
+    - ./**
+  include:
+    - api.py
+    - apidocs/**
+    - configs/${self:provider.stage}.yaml
+    - core/**
+    - handlers/**
+    - services/**
 
 functions:
   login:

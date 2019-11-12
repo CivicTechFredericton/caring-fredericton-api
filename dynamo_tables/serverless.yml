@@ -1,7 +1,7 @@
 service: caring-fred
 
 provider:
-  # account_id: ${env:AWS_ACCOUNT_ID, self:custom.env.account_id}
+  account_id: ${ssm:account-id}
   # The role referenced by cfnRole is created by IAM CloudFormation in
   # advance via the aws-iam-management repository.
   # cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation

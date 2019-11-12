@@ -1,7 +1,7 @@
 service: caring-fred
 
 provider:
-  account_id: ${self:custom.env.account_id}
+  account_id: ${ssm:account-id}
   # account_id: ${env:AWS_ACCOUNT_ID, self:custom.env.account_id}
   # The role referenced by cfnRole is created by IAM CloudFormation in
   # advance via the aws-iam-management repository.
@@ -25,7 +25,7 @@ plugins:
 
 custom:
   env: ${file(../configs/${self:provider.stage}.yaml)}
-  default_domain_name: t.caringfredericton.com
+  default_domain_name: ${ssm:default-domain-name}
   default_api_domain_name: ${self:provider.stage}-api.${self:custom.default_domain_name}
   customDomain:
     domainName: ${self:custom.env.api_domain_name, self:custom.default_api_domain_name}
