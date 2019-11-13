@@ -1,12 +1,12 @@
 #!/bin/bash
 cd $(dirname $0)
 
-if [ -z $AWS_DEFAULT_REGION ] ; then
-  echo 'Please set the environment variable AWS_DEFAULT_REGION before running this script'
+if [ -z $AWS_REGION ] ; then
+  echo 'Please set the environment variable AWS_REGION before running this script'
   exit 1
 fi
 
-region=$AWS_DEFAULT_REGION
+region=$AWS_REGION
 env=$1
 
 echo
