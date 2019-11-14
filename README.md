@@ -82,7 +82,7 @@ The project can be run locally using the following command:
 ```
 export AWS_PROFILE=test
 export AWS_REGION=ca-central-1
-npm run local -- --stage <stage name>
+npm run local -- --stage <stage name> --region ca-central-1
 ```
 
 **NOTES**:

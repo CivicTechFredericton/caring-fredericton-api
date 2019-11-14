@@ -1,15 +1,42 @@
 service: caring-fred
 
 provider:
-  account_id: ${self:custom.env.account_id}
+  account_id: ${ssm:account-id}
   # The role referenced by cfnRole is created by CloudFormation in
   # advance as; account is used to execute deployments.
-  cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
+  # cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
+
+  # How much memory to grant to the Lambda function.  Allocated memory
+  # drives compute capabilities.  The lowest value is 128 MB.  Unless
+  # large amounts of memory are required, you should work with the
+  # lowest value.  If you require more resources consider if you are
+  # building your application correctly with efficient code.
+  #
+  # More information about memory/compute can be found here:
+  # https://goo.gl/g8YjqY
+  memorySize: 128
+  name: aws
+  stage: ${opt:stage}
+  region: ${opt:region}
+  runtime: python3.7
+  deploymentBucket:
+    name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
+
+  # The default is 6 seconds. Note: API Gateway current maximum is 30 seconds
+  timeout: 6
+  # Allow for cf "AWS::" variables
+  # See https://goo.gl/atHr7z
+  variableSyntax: "\\${(?!AWS::)([ :a-zA-Z0-9._,\\-\\/\\(\\)]+?)}"
 
   # Add additional environment variables if necessary
   environment:
     SERVICE_NAME: ${self:service}
     STAGE: ${self:provider.stage}
+
+  # Reference external API Gateway definition
+  apiGateway:
+    restApiId: ${cf:${self:service}-apig-${self:provider.stage}.ApiGateway}
+    restApiRootResourceId: ${cf:${self:service}-apig-${self:provider.stage}.ApiGatewayRootResourceId}
 
   # IAM role permissions given to the Lambda function.  Update as
   # needed.  More information about IAM permissions can be found here:
@@ -59,56 +86,28 @@ provider:
         - dynamodb:UpdateItem
       Resource: arn:aws:dynamodb:*:*:table/${self:service}-${self:provider.stage}*
 
-  # How much memory to grant to the Lambda function.  Allocated memory
-  # drives compute capabilities.  The lowest value is 128 MB.  Unless
-  # large amounts of memory are required, you should work with the
-  # lowest value.  If you require more resources consider if you are
-  # building your application correctly with efficient code.
-  #
-  # More information about memory/compute can be found here:
-  # https://goo.gl/g8YjqY
-  memorySize: 128
-  name: aws
-  region: ca-central-1
-  stage: ${opt:stage}
-  runtime: python3.7
-  # The default is 6 seconds. Note: API Gateway current maximum is 30 seconds
-  timeout: 6
-  # Allow for cf "AWS::" variables
-  # See https://goo.gl/atHr7z
-  variableSyntax: "\\${(?!AWS::)([ :a-zA-Z0-9._,\\-\\/\\(\\)]+?)}"
-
 plugins:
-  - serverless-domain-manager
-  - serverless-plugin-bind-deployment-id
-  - serverless-plugin-scripts
   - serverless-wsgi
 
 custom:
   env: ${file(configs/${self:provider.stage}.yaml)}
-  default_domain_name: caringfredericton.com
-  default_api_domain_name: ${self:provider.stage}-api.${self:custom.default_domain_name}
+  default_domain_name: ${ssm:default-domain-name}
   default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
   web_domain_name: ${self:custom.env.ui_domain_name, self:custom.default_ui_domain_name}
   default_deletion_policy: Delete
-  customDomain:
-    domainName: ${self:custom.env.api_domain_name, self:custom.default_api_domain_name}
-    stage: ${opt:stage}
-  scripts:
-    hooks:
-      'after:package:finalize': npm run create_domain -- --stage ${self:provider.stage}
-      'before:remove:remove': npm run delete_domain -- --stage ${self:provider.stage}
   wsgi:
     app: api.app
 
 package:
   exclude:
-    - node_modules/**
-    - npm-debug.log
-    - package.json
-    - package-lock.json
-    - requirements.txt
-    - venv/**
+    - ./**
+  include:
+    - api.py
+    - apidocs/**
+    - configs/${self:provider.stage}.yaml
+    - core/**
+    - handlers/**
+    - services/**
 
 functions:
   login:
@@ -162,19 +161,6 @@ functions:
 resources:
   Resources:
     #===================================================================
-    # API Gateway
-    #===================================================================
-    Stage:
-      Type: AWS::ApiGateway::Stage
-      Properties:
-        DeploymentId:
-          Ref: __deployment__
-
-        RestApiId:
-          Ref: ApiGatewayRestApi
-        StageName: ${self:provider.stage}
-
-    #===================================================================
     # Cognito
     #===================================================================
     CognitoUserPoolUsers:
@@ -223,78 +209,7 @@ resources:
       Properties:
         IdentitySource: method.request.header.Authorization
         Name: ${self:service}-${self:provider.stage}-users-authorizer
-        RestApiId:
-          Ref: ApiGatewayRestApi
+        RestApiId: ${self:provider.apiGateway.restApiId}
         Type: COGNITO_USER_POOLS
         ProviderARNs:
           - Fn::GetAtt: [CognitoUserPoolUsers, Arn]
-
-    #===================================================================
-    # DynamoDB
-    #===================================================================
-    TableUser:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
-      Properties:
-        TableName: ${self:service}-${self:provider.stage}-user
-        AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: email
-          AttributeType: S
-        KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-        GlobalSecondaryIndexes:
-        - IndexName: user-email-index
-          KeySchema:
-          - AttributeName: email
-            KeyType: HASH
-          Projection:
-            ProjectionType: KEYS_ONLY
-        SSESpecification:
-          SSEEnabled: True
-        BillingMode: PAY_PER_REQUEST
-
-    TableOrganizations:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
-      Properties:
-        TableName: ${self:service}-${self:provider.stage}-organization
-        AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: search_name
-          AttributeType: S
-        KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-        GlobalSecondaryIndexes:
-        - IndexName: search_name-index
-          KeySchema:
-          - AttributeName: search_name
-            KeyType: HASH
-          Projection:
-            ProjectionType: KEYS_ONLY
-        SSESpecification:
-          SSEEnabled: True
-        BillingMode: PAY_PER_REQUEST
-
-    TableEvents:
-      Type: AWS::DynamoDB::Table
-      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
-      Properties:
-        TableName: ${self:service}-${self:provider.stage}-event
-        AttributeDefinitions:
-        - AttributeName: id
-          AttributeType: S
-        - AttributeName: owner
-          AttributeType: S
-        KeySchema:
-        - AttributeName: id
-          KeyType: HASH
-        - AttributeName: owner
-          KeyType: RANGE
-        SSESpecification:
-          SSEEnabled: True
-        BillingMode: PAY_PER_REQUEST
