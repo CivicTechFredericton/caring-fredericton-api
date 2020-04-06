@@ -1,8 +1,7 @@
-account_id: 260286112360
 deletion_policy: Delete
 
 # SES Settings
-hosted_zone_name: caringfredericton.com.
+hosted_zone_name: t.caringfredericton.com.
 verification_email_recipient: howard.powell@bluespurs.com
 
 logging:
