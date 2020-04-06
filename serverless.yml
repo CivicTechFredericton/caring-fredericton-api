@@ -87,6 +87,8 @@ provider:
       Resource: arn:aws:dynamodb:*:*:table/${self:service}-${self:provider.stage}*
 
 plugins:
+  - serverless-prune-plugin
+  - serverless-python-requirements
   - serverless-wsgi
 
 custom:
@@ -95,6 +97,11 @@ custom:
   default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
   web_domain_name: ${self:custom.env.ui_domain_name, self:custom.default_ui_domain_name}
   default_deletion_policy: Delete
+  prune:
+    automatic: true
+    number: 5
+  pythonRequirements:
+    dockerizePip: non-linux
   wsgi:
     app: api.app
 
