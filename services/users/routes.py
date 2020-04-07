@@ -15,7 +15,7 @@ blueprint = Blueprint('users', __name__)
 
 
 @blueprint.route('/users/signup', methods=["POST"])
-@use_kwargs(user_registration_schema, locations=('json',))
+@use_kwargs(user_registration_schema, location='json')
 def create_new_user(**kwargs):
     user = UserModel(id=kwargs.get('user_sub'),
                      email=kwargs.get('email'),
@@ -38,7 +38,7 @@ def get_user(user_id):
 
 
 # @blueprint.route('/users/<user_id>/join/<org_id>', methods=["POST"])
-# @use_kwargs(user_join_org_schema, locations=('json',))
+# @use_kwargs(user_join_org_schema, location='json')
 # def join_org(user_id, org_id):
 #     # Check user existence
 #     user = get_user_by_id(user_id)
