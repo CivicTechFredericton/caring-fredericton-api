@@ -5,7 +5,7 @@ from webargs.flaskparser import use_kwargs
 
 from core.db.organizations import check_for_duplicate_name, get_organization_from_db
 from core.db.organizations.model import OrganizationModel
-from core.db.users import get_user_by_email, get_user_by_id
+from core.db.users import get_user_by_id
 
 from services.organizations import build_scan_condition, build_update_actions, build_user_organization_actions, \
     build_verify_organization_actions
@@ -22,7 +22,7 @@ blueprint = Blueprint('organizations', __name__)
 # Organization Registration Routes
 # ----------------------------------
 @blueprint.route('/organizations/register', methods=["POST"])
-@use_kwargs(organization_details_schema, locations=('json',))
+@use_kwargs(organization_details_schema, location='json')
 def register_organization(**kwargs):
     name = kwargs['name']
     check_for_duplicate_name(name)
@@ -56,7 +56,7 @@ def register_organization(**kwargs):
 
 
 @blueprint.route('/organizations/<org_id>/verify', methods=["POST"])
-@use_kwargs(organization_verification_schema, locations=('json',))
+@use_kwargs(organization_verification_schema, location='json')
 def verify_organization(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
     is_verified = kwargs['is_verified']
@@ -94,7 +94,7 @@ def verify_organization(org_id, **kwargs):
 # Organization Management Routes
 # ----------------------------------
 @blueprint.route('/organizations', methods=["GET"])
-@use_kwargs(organization_list_filters_schema, locations=('query',))
+@use_kwargs(organization_list_filters_schema, location='query')
 def list_organizations(**kwargs):
     scan_condition = build_scan_condition(**kwargs)
     organizations = OrganizationModel.scan(scan_condition)
@@ -116,7 +116,7 @@ def retrieve_organization(org_id):
 
 
 @blueprint.route('/organizations/<org_id>', methods=["PUT"])
-@use_kwargs(organization_update_schema, locations=('json',))
+@use_kwargs(organization_update_schema, location='json')
 def update_organization(org_id, **kwargs):
     organization = get_organization_from_db(org_id)
     actions = build_update_actions(organization, **kwargs)

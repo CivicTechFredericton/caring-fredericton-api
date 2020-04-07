@@ -17,7 +17,7 @@ blueprint = Blueprint('events', __name__)
 
 @blueprint.route('/events', defaults={'org_id': None}, methods=["GET"])
 @blueprint.route('/organizations/<org_id>/events', methods=["GET"])
-@use_kwargs(event_filters_schema, locations=('query',))
+@use_kwargs(event_filters_schema, location='query')
 def list_events(org_id, **kwargs):
     scan_condition = build_list_events_scan_condition(org_id)
     events_list = EventModel.scan(scan_condition)
@@ -25,7 +25,7 @@ def list_events(org_id, **kwargs):
 
 
 @blueprint.route('/organizations/<org_id>/events', methods=["POST"])
-@use_kwargs(event_details_schema, locations=('json',))
+@use_kwargs(event_details_schema, location='json')
 def create_organization_event(org_id, **kwargs):
     event_args = {k: v for k, v in kwargs.items() if v is not None}
 
@@ -41,7 +41,7 @@ def create_organization_event(org_id, **kwargs):
 
 
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["GET"])
-@use_kwargs(event_details_filter_schema, locations=('query',))
+@use_kwargs(event_details_filter_schema, location='query')
 def get_organization_event(org_id, event_id, **kwargs):
     event = get_event_from_db(event_id, org_id)
     occurrence = get_event_occurrence(event, kwargs.get('occurrence_num'))
@@ -56,7 +56,7 @@ def get_event_occurrence_details(org_id, event_id):
 
 
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["PUT"])
-@use_kwargs(event_update_schema, locations=('json',))
+@use_kwargs(event_update_schema, location='json')
 def update_organization_event(org_id, event_id, **kwargs):
     # event_args = {k: v for k, v in kwargs.items() if v is not None}
 
@@ -75,7 +75,7 @@ def cancel_organization_event(org_id, event_id):
 
 
 # @blueprint.route('/organizations/<org_id>/events/<event_id>/change-occurrence', methods=["PUT"])
-# @use_kwargs(event_occurrence_update_schema, locations=('json',))
+# @use_kwargs(event_occurrence_update_schema, location='json')
 # def update_organization_event_occurrences(org_id, event_id, **kwargs):
 #     event_args = {k: v for k, v in kwargs.items() if v is not None}
 #

@@ -33,7 +33,7 @@ def list_verified_organizations():
 # -------------------------
 @blueprint.route('/guests/events', defaults={'org_id': None}, methods=["GET"])
 @blueprint.route('/guests/organizations/<org_id>/events', methods=["GET"])
-@use_kwargs(event_filters_schema, locations=('query',))
+@use_kwargs(event_filters_schema, location='query')
 def list_events(org_id, **kwargs):
     scan_condition = build_list_events_scan_condition(org_id)
     events_list = EventModel.scan(scan_condition)
@@ -41,7 +41,7 @@ def list_events(org_id, **kwargs):
 
 
 @blueprint.route('/guests/organizations/<org_id>/events/<event_id>', methods=["GET"])
-@use_kwargs(event_details_filter_schema, locations=('query',))
+@use_kwargs(event_details_filter_schema, location='query')
 def get_organization_event(org_id, event_id, **kwargs):
     event = get_event_from_db(event_id, org_id)
     occurrence = get_event_occurrence(event, kwargs.get('occurrence_num'))
