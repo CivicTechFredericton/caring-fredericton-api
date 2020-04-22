@@ -16,7 +16,6 @@ class UserRegistrationSchema(BasicUserSchema):
         strict = True
 
     user_sub = fields.Str(required=True)
-    password = fields.Str(load_only=True)
 
 
 class UserDisplaySchema(BasicUserSchema):

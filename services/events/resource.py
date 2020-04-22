@@ -62,7 +62,7 @@ class EventListSchema(EventSchema):
 class EventDetailsSchema(EventSchema):
     is_recurring = fields.Bool(missing=False)
     recurrence_details = fields.Nested(RecurrenceDetails, required=False)
-    # timezone = fields.Str(dump_only=True)
+    timezone = fields.Str(required=False)
 
     class Meta:
         strict = True
