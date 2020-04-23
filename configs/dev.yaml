@@ -2,7 +2,7 @@ deletion_policy: Delete
 
 # SES Settings
 hosted_zone_name: t.caringfredericton.com.
-verification_email_recipient: howard.powell@bluespurs.com
+verification_email_recipient: <<EMAIL>>
 
 logging:
   version: 1
