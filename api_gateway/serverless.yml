@@ -2,11 +2,6 @@ service: caring-fred
 
 provider:
   account_id: ${ssm:account-id}
-  # account_id: ${env:AWS_ACCOUNT_ID, self:custom.env.account_id}
-  # The role referenced by cfnRole is created by IAM CloudFormation in
-  # advance via the aws-iam-management repository.
-  # cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
-
   name: aws
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'ca-central-1'}
@@ -24,11 +19,11 @@ plugins:
   - serverless-plugin-scripts
 
 custom:
-  env: ${file(../configs/${self:provider.stage}.yaml)}
   default_domain_name: ${ssm:default-domain-name}
+  # TODO: Add default API domain name in Parameter Store
   default_api_domain_name: ${self:provider.stage}-api.${self:custom.default_domain_name}
   customDomain:
-    domainName: ${self:custom.env.api_domain_name, self:custom.default_api_domain_name}
+    domainName: ${ssm:${self:service}-${self:provider.stage}-api-domain-name, self:custom.default_api_domain_name}
     stage: ${opt:stage}
   scripts:
     hooks:

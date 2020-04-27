@@ -12,7 +12,12 @@ If you want to change defaults then set the value in ssm and redeploy.
 | :--- | :--- | :--- |
 | account-id | REQUIRED! the aws account id (cannot get via serverless) | None |
 | default-domain-name | REQUIRED! The default domain name for use in the deployed environments | None |
-
+| default-email-sender | REQUIRED! The default email address where emails come from | None |
+| default-org-verification-email-recipient | REQUIRED! The default email address used to verify new organization requests | None |
+| caring-fred-{{stage}}-api-domain-name | OPTIONAL Custom API domain name used for the environment | None |
+| caring-fred-{{stage}}-ui_domain_name | OPTIONAL Custom web site URL | None |
+| caring-fred-{{stage}}-email-sender | OPTIONAL Overridden value for who should emails come from | None |
+| caring-fred-{{stage}}-org-verification-email-recipient | OPTIONAL Overridden value for the email address used to verfiy new organization requests | None |
 ## Functionality: ##
 
 * Organization Management (Registration, Verification, Updates)
@@ -39,14 +44,13 @@ npm install
 
 Ensure the prerequisites are installed
 ```
-- Python3.7
+- Python3.8
 - pip (tool for installing Python packages)
-    - curl https://bootstrap.pypa.io/get-pip.py | python3.7
 ```
 
-Create virtual env for python3.7 inside project directory:
+Create virtual env for python3.8 inside project directory:
 ```
-python3.7 -m venv venv 
+python3.8 -m venv venv 
 ```
 
 Activate newly created environment
@@ -68,7 +72,7 @@ deactivate
 
 The application can be deployed by issuing the following commands:
 ```
-export AWS_PROFILE=test
+export AWS_PROFILE=civic-tech
 export AWS_REGION=ca-central-1
 ./launch-env.sh <stage_name>
 ```
@@ -91,7 +95,7 @@ cd scripts
 
 The project can be run locally using the following command:
 ```
-export AWS_PROFILE=test
+export AWS_PROFILE=civic-tech
 export AWS_REGION=ca-central-1
 npm run local -- --stage <stage name> --region ca-central-1
 ```

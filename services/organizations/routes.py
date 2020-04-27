@@ -1,5 +1,5 @@
 from core import configuration, db, errors
-from core.aws.ses import SES
+from core.aws.ses import send_email
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 
@@ -35,16 +35,13 @@ def register_organization(**kwargs):
     db.save_with_unique_id(organization)
 
     # Send an email to the administrator for verification
-    recipients = [configuration.get_setting('verification_email_recipient')]
+    recipients = [configuration.get_setting('ORG_VERIFICATION_EMAIL_RECIPIENT')]
     try:
-        ses = SES()
         verification_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}/validation/{organization.id}"
-        ses.send_email(recipients=recipients,
-                       subject='New Organization Request',
-                       body='New Caring Calendar organization request for {}.  Please go to {} to verify the request.'.format(
-                           name,
-                           verification_url
-                       ))
+        send_email(recipients=recipients,
+                   subject='New Organization Request',
+                   text_body='New Caring Calendar organization request for {}.  '
+                             'Please go to {} to verify the request.'.format(name, verification_url))
     except errors.SESError:
         # TODO: In addition to logging message include in response message indicating that the email failed to send
         logger.warning('Organization {} created; error sending email to {}.'.format(name, recipients))
@@ -71,16 +68,15 @@ def verify_organization(org_id, **kwargs):
         user_actions = build_user_organization_actions(organization)
         db.update_item(org_user, user_actions)
 
-        # TODO: Send the user an email indicating the organization has been verified
-        recipient = org_user.email
 
         try:
-            ses = SES()
+            # Send the user an email indicating the organization has been verified
+            recipient = org_user.email
             signin_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}/login"
-            ses.send_email(recipients=[recipient],
-                           subject='Organization Request Approved',
-                           body='The organization {} has been approved for use in the Caring Calendar.  '
-                                'Please go to {} to start entering events.'.format(
+            send_email(recipients=[recipient],
+                       subject='Organization Request Approved',
+                       text_body='The organization {} has been approved for use in the Caring Calendar.  '
+                                 'Please go to {} to start entering events.'.format(
                                organization.name,
                                signin_url
                            ))
