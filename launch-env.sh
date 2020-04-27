@@ -48,3 +48,4 @@ echo "Deploying API Application"
 echo "-------------------------"
 echo
 npm run deploy -- --region $region --stage $env
+popd
