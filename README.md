@@ -74,7 +74,7 @@ The application can be deployed by issuing the following commands:
 ```
 export AWS_PROFILE=civic-tech
 export AWS_REGION=ca-central-1
-./launch-env.sh <stage_name>
+./deploy-env.sh <stage_name>
 ```
 
 ** NOTES: **
@@ -82,8 +82,9 @@ export AWS_REGION=ca-central-1
 * Replace **test** with your assume role profile name
 * Please include your name to stage name if you want to create custom AWS stack for testing purposes.  For example:
 > ```
-> ./launch-env.sh dev
+> ./deploy-env.sh dev
 > ```
+
 
 First Time Deployment: Create a test user account
 ```
@@ -103,5 +104,5 @@ npm run local -- --stage <stage name> --region ca-central-1
 **NOTES**:
 
 * This command must be run inside an activated virtual environment
-* Any environment (stage name) can be used, optionally you may want to use `config/local.yaml` configuration file
+* Any environment (stage name) can be used provided there is an existing deployment available
 * When running locally timeout, access, and file size restrictions do not behave the same as within an AWS service

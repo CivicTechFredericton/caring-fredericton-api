@@ -1,0 +1,113 @@
+service: caring-fred
+
+provider:
+  account_id: ${ssm:account-id}
+  role: ExecutionRole
+  name: aws
+  stage: ${opt:stage, 'dev'}
+  region: ${opt:region, 'ca-central-1'}
+  stackName: ${self:service}-triggers-${self:provider.stage}
+  runtime: python3.8
+  deploymentBucket:
+    name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
+
+  # Allow for cf "AWS::" variables
+  # See https://serverless.com/framework/docs/providers/aws/guide/variables/#using-custom-variable-syntax
+  variableSyntax: "\\${((?!AWS)[ ~:a-zA-Z0-9._'\",\\-\\/\\(\\)]+?)}"
+  environment:
+    SERVICE_NAME: ${self:service}
+    STAGE: ${self:provider.stage}
+
+  # Reference external Cognito details
+  cognito:
+    cognitoUserPoolName: ${cf:${self:service}-${self:provider.stage}.UserPoolName}
+
+plugins:
+  - serverless-prune-plugin
+
+custom:
+  default_domain_name: ${ssm:default-domain-name}
+  default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
+  web_domain_name: ${ssm:${self:service}-${self:provider.stage}-ui-domain-name, self:custom.default_ui_domain_name}
+  # dynamo_user_table: ${self:service}-${self:provider.stage}-user
+  prune:
+    automatic: true
+    number: 5
+
+package:
+  individually: true
+  exclude:
+    - ./**
+
+# Whenever we make changes to the Cognito pool these lambda numbers need to be incremented or else we loose
+# our triggers from the Cognito userpool.
+functions:
+#  create-user-record:
+#    name: ${self:service}-${self:provider.stage}-create-user-record
+#    handler: handlers/user_post_confirmation.handler
+#    environment:
+#      USER_TABLE: ${self:custom.dynamo_user_table}
+#    package:
+#      include:
+#        - handlers/create_user_record.py
+#    events:
+#      - cognitoUserPool:
+#          pool: ${self:provider.cognito.cognitoUserPoolName}
+#          trigger: PostConfirmation
+#          existing: true
+
+  custom_messages:
+    name: ${self:service}-${self:provider.stage}-custom-messages
+    handler: handlers/custom_messages.handler
+    environment:
+      UI_DOMAIN_NAME: ${self:custom.web_domain_name}
+    package:
+      include:
+         - handlers/custom_messages.py
+         - ../core/request.py
+    events:
+      - cognitoUserPool:
+          pool: ${self:provider.cognito.cognitoUserPoolName}
+          trigger: CustomMessage
+          existing: true
+
+resources:
+  Resources:
+    ExecutionRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /
+        RoleName: ${self:provider.stackName}-${self:provider.region}-lambdaRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: ${self:provider.stage}-${self:service}-triggers-lambda
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                    - xray:PutTelemetryRecords
+                    - xray:PutTraceSegments
+                  Resource:
+                    - Fn::Join:
+                        - ':'
+                        - - 'arn:aws:logs'
+                          - Ref: 'AWS::Region'
+                          - Ref: 'AWS::AccountId'
+                          - 'log-group:/aws/lambda/*:*:*'
+#                - Effect: Allow
+#                  Action:
+#                    - dynamodb:DescribeTable
+#                    - dynamodb:GetItem
+#                    - dynamodb:PutItem
+#                  Resource: arn:aws:dynamodb:*:*:table/${self:custom.dynamo_user_table}

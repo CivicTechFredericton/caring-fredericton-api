@@ -94,13 +94,10 @@ plugins:
 custom:
   default_domain_name: ${ssm:default-domain-name}
   user_pool_name: ${self:service}-${self:provider.stage}-users
-  # TODO: Add default UI domain name in Parameter Store
   default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
   web_domain_name: ${ssm:${self:service}-${self:provider.stage}-ui-domain-name, self:custom.default_ui_domain_name}
-  # Values for sending notifications
   notification_sender: ${ssm:${self:service}-${self:provider.stage}-email-sender, ssm:default-email-sender}
   org_verification_email: ${ssm:${self:service}-${self:provider.stage}-org-verification-email-recipient, ssm:default-org-verification-email-recipient}
-  default_deletion_policy: Delete
   prune:
     automatic: true
     number: 5

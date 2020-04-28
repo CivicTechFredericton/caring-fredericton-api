@@ -20,7 +20,6 @@ plugins:
 
 custom:
   default_domain_name: ${ssm:default-domain-name}
-  # TODO: Add default API domain name in Parameter Store
   default_api_domain_name: ${self:provider.stage}-api.${self:custom.default_domain_name}
   customDomain:
     domainName: ${ssm:${self:service}-${self:provider.stage}-api-domain-name, self:custom.default_api_domain_name}
