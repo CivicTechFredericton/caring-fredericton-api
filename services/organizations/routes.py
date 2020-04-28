@@ -39,7 +39,6 @@ def register_organization(**kwargs):
     recipients = [configuration.get_setting('ORG_VERIFICATION_EMAIL_RECIPIENT')]
     try:
         verification_url = generate_web_url(f"/validation/{organization.id}")
-        # verification_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}/validation/{organization.id}"
         send_email(recipients=recipients,
                    subject='New Organization Request',
                    text_body='New Caring Calendar organization request for {}.  '
@@ -74,7 +73,6 @@ def verify_organization(org_id, **kwargs):
             # Send the user an email indicating the organization has been verified
             recipient = org_user.email
             signin_url = generate_web_url("login")
-            # signin_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}/login"
             send_email(recipients=[recipient],
                        subject='Organization Request Approved',
                        text_body='The organization {} has been approved for use in the Caring Calendar.  '
