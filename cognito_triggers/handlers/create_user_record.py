@@ -13,18 +13,12 @@ def handler(event, context):
     :param context:
     :return:
     """
-    # print(event);
     user_attributes = event['request']['userAttributes']
     user_sub = user_attributes['sub']
 
     # Create a new DynamoDB record for the current user
-    # service_name = os.environ['SERVICE_NAME']
-    # stage_name = os.environ['STAGE']
-    # table_name = '{}-{}-user'.format(service_name, stage_name)
-    table_name = os.environ['USER_TABLE']
-
     dynamodb = boto3.resource('dynamodb')
-    table = dynamodb.Table(table_name)
+    table = dynamodb.Table(os.environ['USER_TABLE'])
     record = table.get_item(
         Key={'id': user_sub}
     )
@@ -50,6 +44,16 @@ def handler(event, context):
                 'updated_at': utc_timestamp,
                 'updated_by': create_user
             }
+        )
+
+        # Remove the temporary attributes
+        cognito_idp = boto3.client('cognito-idp')
+        cognito_idp.admin_delete_user_attributes(
+            UserPoolId=os.environ['COGNITO_USER_POOL_USERS_ID'],
+            Username=user_sub,
+            UserAttributeNames=[
+                'family_name', 'given_name'
+            ]
         )
 
     # Return flow back to Amazon Cognito
