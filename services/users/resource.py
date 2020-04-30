@@ -9,13 +9,6 @@ class BasicUserSchema(ma.Schema):
     email = fields.Email(required=True)
     first_name = fields.Str(required=True)
     last_name = fields.Str(required=True)
-    
-
-class UserRegistrationSchema(BasicUserSchema):
-    class Meta:
-        strict = True
-
-    user_sub = fields.Str(required=True)
 
 
 class UserDisplaySchema(BasicUserSchema):
@@ -28,13 +21,4 @@ class UserDisplaySchema(BasicUserSchema):
     active = fields.Bool(dump_only=True)
 
 
-# class UserJoinOrgSchema(ma.Schema):
-#     class Meta:
-#         strict = True
-#
-#     reason = fields.Str(required=False)
-
-
-user_registration_schema = UserRegistrationSchema()
 user_display_schema = UserDisplaySchema()
-# user_join_org_schema = UserJoinOrgSchema()

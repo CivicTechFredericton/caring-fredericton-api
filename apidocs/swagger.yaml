@@ -1,4 +1,4 @@
-openapi: 3.0.2
+openapi: 3.0.3
 info:
   title: Caring Calendar API
   description: >
@@ -10,24 +10,6 @@ info:
 servers:
   - url: 'https://api.caringfredericton.com/'
 paths:
-  /api/login:
-    post:
-      tags:
-        - Authentication
-      summary: Retrieve user token
-      responses:
-        '200':
-          description: Auth token for the API user
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuthResponse'
-        '401':
-          description: Invalid username and password combination
-        '422':
-          description: Missing required parameters
-      requestBody:
-        $ref: '#/components/requestBodies/AuthDetails'
   /guests/organizations:
     get:
       tags:
@@ -546,31 +528,6 @@ paths:
           Organization registration request details
         required: true
 
-  /users/signup:
-    post:
-      tags:
-        - Users
-      summary: Registers a new user 
-      responses:
-        '201':
-          description: The new user was created
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/UserDetailsResponse'
-        '409':
-          description: Email already in use
-        '422':
-          description: Missing required parameters
-      requestBody:
-        content:
-          application/json:
-            schema:
-              $ref: '#/components/schemas/UserRegistrationDetails'
-        description: |
-          User registration request details
-        required: true
-
   /users/<user_id>:
     get:
       tags:
@@ -646,13 +603,6 @@ paths:
 
 components:
   requestBodies:
-    AuthDetails:
-      content:
-        application/json:
-          schema:
-            $ref: '#/components/schemas/AuthRequest'
-      description: User authentication request details
-      required: true
     VerificationDetails:
       content:
         application/json:
@@ -670,28 +620,6 @@ components:
         Event request details
       required: true
   schemas:
-    AuthRequest:
-      description: |
-        Request object that includes user details for authentication
-      type: object
-      required:
-        - username
-        - password
-      properties:
-        username:
-          type: string
-          description: Username of the system user
-        password:
-          type: string
-          description: Password of the system user
-    AuthResponse:
-      description: |
-        Response object that includes an auth token for the API user
-      type: object
-      properties:
-        authToken:
-          type: string
-          readOnly: true
     AuthError:
       description: >
         Response received when an authorization error has occured. This can be
@@ -1128,39 +1056,6 @@ components:
         organization_name:
           type: string
           description: The name of the organization the user belongs to
-    UserRegistrationDetails:
-      description: >
-        Registration details for a user. 
-      type:
-        object
-      required:
-      - user_sub
-      - email
-      - first_name
-      - last_name
-      properties:
-        user_sub:
-          type: string
-          description: The Cognito sub value
-        email:
-          type: string
-          description: The user email/username
-        first_name:
-          type: string
-          description: The users's first name 
-        last_name:
-          type: string
-          description: The users's last name
-#    UserJoinDetails:
-#      description: >
-#      type:
-#        object
-#      required:
-#      - reason
-#      properties:
-#        reason:
-#          type: string
-#          description: The reason the user is joining this organization.
     RecurrenceDetails:
       description: |
         Details pertaining to the event's recurrence information

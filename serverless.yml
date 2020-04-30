@@ -154,10 +154,6 @@ functions:
       ORG_VERIFICATION_EMAIL_RECIPIENT: ${self:custom.org_verification_email}
     events:
       - http:
-          method: POST
-          path: /users/signup
-          cors: true
-      - http:
           method: any
           path: /guests/{proxy+}
           cors: true
