@@ -20,19 +20,19 @@ blueprint = Blueprint('guest', __name__)
 # -------------------------
 # Organization End Points
 # -------------------------
-@blueprint.route('/guests/organizations', methods=["GET"])
-def list_verified_organizations():
-    organizations = OrganizationModel.scan(OrganizationModel.is_verified == True)
-    response = [organization_list_schema.dump(org) for org in organizations]
-
-    return jsonify(response)
+# @blueprint.route('/guests/organizations', methods=["GET"])
+# def list_verified_organizations():
+#     organizations = OrganizationModel.scan(OrganizationModel.is_verified == True)
+#     response = [organization_list_schema.dump(org) for org in organizations]
+#
+#     return jsonify(response)
 
 
 # -------------------------
 # Events End Points
 # -------------------------
 @blueprint.route('/guests/events', defaults={'org_id': None}, methods=["GET"])
-@blueprint.route('/guests/organizations/<org_id>/events', methods=["GET"])
+# @blueprint.route('/guests/organizations/<org_id>/events', methods=["GET"])
 @use_kwargs(event_filters_schema, location='query')
 def list_events(org_id, **kwargs):
     scan_condition = build_list_events_scan_condition(org_id)

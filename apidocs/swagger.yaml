@@ -10,24 +10,24 @@ info:
 servers:
   - url: 'https://api.caringfredericton.com/'
 paths:
-  /guests/organizations:
-    get:
-      tags:
-        - Guest View
-      summary: Returns a list of all registered and verified organizations
-      responses:
-        '200':
-          description: Paged object of organizations
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/PagedGuestOrganization'
-        '401':
-          description: Authentication error
-          content:
-            application/json:
-              schema:
-                $ref: '#/components/schemas/AuthError'
+#  /guests/organizations:
+#    get:
+#      tags:
+#        - Guest View
+#      summary: Returns a list of all registered and verified organizations
+#      responses:
+#        '200':
+#          description: Paged object of organizations
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/PagedGuestOrganization'
+#        '401':
+#          description: Authentication error
+#          content:
+#            application/json:
+#              schema:
+#                $ref: '#/components/schemas/AuthError'
   /guests/events:
     get:
       tags:
@@ -704,18 +704,18 @@ components:
         address:
           allOf:
             - $ref: '#/components/schemas/Address'
-    OrganizationGuestResponse:
-      description: >
-        Response object that is used for the guest view of the organizations
-      type: object
-      properties:
-        id:
-          type: string
-          description: ID of the organization as a UUID
-          readOnly: true
-        name:
-          type: string
-          description: Name of the organization
+#    OrganizationGuestResponse:
+#      description: >
+#        Response object that is used for the guest view of the organizations
+#      type: object
+#      properties:
+#        id:
+#          type: string
+#          description: ID of the organization as a UUID
+#          readOnly: true
+#        name:
+#          type: string
+#          description: Name of the organization
     OrganizationResponse:
       description: >
         Response object that includes basic details of the organization; used in
@@ -765,16 +765,16 @@ components:
         is_verified:
           type: boolean
           readOnly: true
-    PagedGuestOrganization:
-      description: |
-        Page of organization resources for guest view
-      type: object
-      properties:
-        objects:
-          type: array
-          description: Organizations array for page
-          items:
-            $ref: '#/components/schemas/OrganizationGuestResponse'
+#    PagedGuestOrganization:
+#      description: |
+#        Page of organization resources for guest view
+#      type: object
+#      properties:
+#        objects:
+#          type: array
+#          description: Organizations array for page
+#          items:
+#            $ref: '#/components/schemas/OrganizationGuestResponse'
         page:
           type: integer
           description: Current page

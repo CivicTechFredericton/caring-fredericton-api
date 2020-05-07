@@ -22,6 +22,16 @@ blueprint = Blueprint('organizations', __name__)
 # ----------------------------------
 # Organization Registration Routes
 # ----------------------------------
+# @blueprint.route('/guests/organizations', methods=["GET"])
+# def list_verified_organizations():
+#     organizations = OrganizationModel.scan(OrganizationModel.is_verified == True)
+#     response = [organization_list_schema.dump(org) for org in organizations]
+#
+#     return jsonify(response)
+
+# ----------------------------------
+# Organization Registration Routes
+# ----------------------------------
 @blueprint.route('/organizations/register', methods=["POST"])
 @use_kwargs(organization_details_schema, location='json')
 def register_organization(**kwargs):
