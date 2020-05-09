@@ -32,9 +32,9 @@ blueprint = Blueprint('organizations', __name__)
 # ----------------------------------
 # Organization Registration Routes
 # ----------------------------------
-@blueprint.route('/organizations/register', methods=["POST"])
+@blueprint.route('/organizations', methods=["POST"])
 @use_kwargs(organization_details_schema, location='json')
-def register_organization(**kwargs):
+def create_organization(**kwargs):
     name = kwargs['name']
     check_for_duplicate_name(name)
 
