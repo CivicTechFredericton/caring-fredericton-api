@@ -38,7 +38,6 @@ echo "Deploying Base Infrastructure"
 echo "-----------------------------"
 echo
 npm run deploy -- --region $region --stage $env
-popd
 
 echo
 echo "--------------------------"
@@ -46,6 +45,7 @@ echo "Deploying Cognito Triggers"
 echo "--------------------------"
 echo
 pushd cognito_triggers
+ln -sf ../node_modules
 npm run deploy -- --region $region --stage $env
 popd
 
