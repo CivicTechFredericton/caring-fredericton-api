@@ -41,10 +41,10 @@ def send_email_without_attachment(source_email, recipients, subject, text_body, 
         },
         Message={
             'Body': {
-                'Html': {
-                    'Charset': 'UTF-8',
-                    'Data': html_body,
-                },
+                # 'Html': {
+                #     'Charset': 'UTF-8',
+                #     'Data': html_body,
+                # },
                 'Text': {
                     'Charset': 'UTF-8',
                     'Data': text_body,

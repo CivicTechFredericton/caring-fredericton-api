@@ -82,7 +82,7 @@ def verify_organization(org_id, **kwargs):
         try:
             # Send the user an email indicating the organization has been verified
             recipient = org_user.email
-            signin_url = generate_web_url("login")
+            signin_url = generate_web_url("/signin")
             send_email(recipients=[recipient],
                        subject='Organization Request Approved',
                        text_body='The organization {} has been approved for use in the Caring Calendar.  '
