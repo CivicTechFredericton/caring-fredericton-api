@@ -44,13 +44,13 @@ def build_update_actions(event, event_args):
     # if end_date and end_date != event.end_date:
     #     actions.append(EventModel.end_date.set(end_date))
 
-    start_time = event_args.get('start_time')
-    if start_time and start_time != event.start_time:
-        actions.append(EventModel.start_time.set(start_time))
-
-    end_time = event_args.get('end_time')
-    if end_time and end_time != event.end_time:
-        actions.append(EventModel.end_time.set(end_time))
+    # start_time = event_args.get('start_time')
+    # if start_time and start_time != event.start_time:
+    #     actions.append(EventModel.start_time.set(start_time))
+    #
+    # end_time = event_args.get('end_time')
+    # if end_time and end_time != event.end_time:
+    #     actions.append(EventModel.end_time.set(end_time))
 
     # Check for changes in the recurrences
     # reset_occurrences, is_recurring_changed = check_recurrence_details_changed(event, event_args)

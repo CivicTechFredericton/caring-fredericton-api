@@ -48,11 +48,11 @@ def get_organization_event(org_id, event_id, **kwargs):
     return jsonify(event_occurrence_details_schema.dump(occurrence))
 
 
-@blueprint.route('/organizations/<org_id>/events/<event_id>/occurrences', methods=["GET"])
-def get_event_occurrence_details(org_id, event_id):
-    event = get_event_from_db(event_id, org_id)
-    occurrences = get_all_occ_from_event_response(event)
-    return occurrences
+# @blueprint.route('/organizations/<org_id>/events/<event_id>/occurrences', methods=["GET"])
+# def get_event_occurrence_details(org_id, event_id):
+#     event = get_event_from_db(event_id, org_id)
+#     occurrences = get_all_occ_from_event_response(event)
+#     return occurrences
 
 
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["PUT"])
@@ -103,10 +103,10 @@ def get_events_response(events_list, **kwargs):
     return jsonify(response)
 
 
-def get_all_occ_from_event_response(event):
-    response = [event_list_schema.dump(occurrence) for occurrence in event.occurrences]
-
-    # for occurrence in event.occurrences:
-    #     response.append(event_list_schema.dump(occurrence))
-
-    return jsonify(response)
+# def get_all_occ_from_event_response(event):
+#     response = [event_list_schema.dump(occurrence) for occurrence in event.occurrences]
+#
+#     # for occurrence in event.occurrences:
+#     #     response.append(event_list_schema.dump(occurrence))
+#
+#     return jsonify(response)

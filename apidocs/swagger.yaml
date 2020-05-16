@@ -337,7 +337,7 @@ paths:
         '404':
           description: Event for the organization does not exist in the system
       requestBody:
-        $ref: '#/components/requestBodies/EventRequest'
+        $ref: '#/components/requestBodies/EventUpdateRequest'
     delete:
       tags:
         - Event Management
@@ -358,7 +358,7 @@ paths:
           schema:
             type: string
       responses:
-          '200':
+          '204':
             description: Event cancelled
           '401':
             description: Authentication error
@@ -600,6 +600,14 @@ components:
       description: |
         Event request details
       required: true
+    EventUpdateRequest:
+      content:
+        application/json:
+          schema:
+            $ref: '#/components/schemas/EventUpdateRequest'
+    description: |
+      Event request details
+    required: true
   schemas:
     AuthError:
       description: >
@@ -803,6 +811,7 @@ components:
       required:
         - name
         - contact_email
+        - location
         - start_date
         - end_date
         - start_time
@@ -814,6 +823,9 @@ components:
         owner:
           type: string
           description: Owner identifier for the event
+        location:
+          type: string
+          description: Location of the event
         description:
           type: string
           description: Description of the event
@@ -845,6 +857,22 @@ components:
         recurrence_details:
           allOf:
             - $ref: '#/components/schemas/RecurrenceDetails'
+   EventUpdateRequest:
+      description: |
+        Request object that includes update details for an event
+      type: object
+      properties:
+        name:
+          type: string
+          description: Name of the event
+        description:
+          type: string
+          description: Description of the event
+        categories:
+          type: array
+          items:
+            type: string
+          description: List of category tag names associated with the event
     EventResponse:
       description: |
         Response object containing the base event information

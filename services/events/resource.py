@@ -83,8 +83,8 @@ class EventUpdateSchema(ma.Schema):
     location = fields.Str(required=False)
     # start_date = fields.DateTime(required=False, format=constants.EVENT_DATE_FORMAT)
     # end_date = fields.DateTime(required=False, format=constants.EVENT_DATE_FORMAT)
-    start_time = fields.DateTime(required=False, format=constants.EVENT_TIME_FORMAT)
-    end_time = fields.DateTime(required=False, format=constants.EVENT_TIME_FORMAT)
+    # start_time = fields.DateTime(required=False, format=constants.EVENT_TIME_FORMAT)
+    # end_time = fields.DateTime(required=False, format=constants.EVENT_TIME_FORMAT)
     # is_recurring = fields.Bool(required=False)
     # recurrence_details = fields.Nested(RecurrenceDetails, required=False)
 
