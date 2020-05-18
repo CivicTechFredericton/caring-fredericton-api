@@ -31,25 +31,40 @@ stage = args.stage
 
 
 # Remove the data from the tables
-def delete_table_data(table_name):
+def delete_table_data(identifier):
+    table_name = '{}-{}-{}'.format(PREFIX, stage, identifier)
     db_table = dynamodb.Table(table_name)
     scan = None
+
+    is_event_table = identifier == 'event'
+    if is_event_table:
+        scan_params = {
+            'ExpressionAttributeNames': {'#o': 'owner'},
+            'ProjectionExpression': 'id, #o'
+        }
+    else:
+        scan_params = {
+            'ProjectionExpression': 'id'
+        }
 
     with db_table.batch_writer() as batch:
         count = 0
         while scan is None or 'LastEvaluatedKey' in scan:
             if scan is not None and 'LastEvaluatedKey' in scan:
                 scan = db_table.scan(
-                    ProjectionExpression='id',
+                    **scan_params,
                     ExclusiveStartKey=scan['LastEvaluatedKey'],
                 )
             else:
-                scan = db_table.scan(ProjectionExpression='id')
+                scan = db_table.scan(**scan_params)
 
             for item in scan['Items']:
                 if count % 5000 == 0:
                     print(count)
-                batch.delete_item(Key={'id': item['id']})
+                if is_event_table:
+                    batch.delete_item(Key={'id': item['id'], 'owner': item['owner']})
+                else:
+                    batch.delete_item(Key={'id': item['id']})
                 count = count + 1
 
 
@@ -62,9 +77,18 @@ def boto3_paginate(method_to_paginate, **params_to_pass):
         yield boto_response
 
 
-delete_table_data('{}-{}-user'.format(PREFIX, stage))
-delete_table_data('{}-{}-organization'.format(PREFIX, stage))
-delete_table_data('{}-{}-event'.format(PREFIX, stage))
+print()
+print("Removing event table entries")
+print()
+delete_table_data('event')
+print()
+print("Removing organization table entries")
+print()
+delete_table_data('organization')
+print()
+print("Removing user table entries")
+print()
+delete_table_data('user')
 
 # Remove the data from the Cognito user pool
 user_pool_name = '{}-{}-users'.format(PREFIX, stage)
@@ -79,18 +103,16 @@ for user_pool in response['UserPools']:
         user_pool_id = user_pool['Id']
         break
 
-# response = cognito_idp_client.list_users(
-#     UserPoolId=user_pool_id,
-# )
-
 users = []
 
 # if `Limit` is not provided - the api will return 60 items, which is maximum
 for page in boto3_paginate(cognito_idp_client.list_users, UserPoolId=user_pool_id):
     users += page['Users']
 
+print()
+print("Removing Cognito users")
+print()
 for user in users:
-    # print(user['Username'])
     cognito_idp_client.admin_delete_user(
         UserPoolId=user_pool_id,
         Username=user['Username']
