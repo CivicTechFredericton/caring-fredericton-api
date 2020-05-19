@@ -100,6 +100,10 @@ def get_events_response(events_list, **kwargs):
         for occurrence in occurrences:
             response.append(event_list_schema.dump(occurrence))
 
+    # Sort the results based on start date
+    # TODO: Update the data model to include the sort details and use the DB query to sort
+    response.sort(key=lambda x: (x['start_date'], x['start_time']))
+
     return jsonify(response)
 
 
