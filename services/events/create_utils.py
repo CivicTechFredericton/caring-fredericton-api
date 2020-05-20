@@ -65,7 +65,7 @@ def validate_date_ranges(event_args):
 
     if end < start:
         message = 'End date must be after the start date'
-        raise errors.ResourceValidationError(messages={'dates': [message]})
+        raise errors.ResourceValidationError(messages={'date_range': [message]})
 
 
 def set_default_recurrence_details():
