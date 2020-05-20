@@ -32,7 +32,6 @@ blueprint = Blueprint('guest', __name__)
 # Events End Points
 # -------------------------
 @blueprint.route('/guests/events', defaults={'org_id': None}, methods=["GET"])
-# @blueprint.route('/guests/organizations/<org_id>/events', methods=["GET"])
 @use_kwargs(event_filters_schema, location='query')
 def list_events(org_id, **kwargs):
     scan_condition = build_list_events_scan_condition(org_id)
