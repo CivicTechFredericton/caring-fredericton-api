@@ -1,3 +1,4 @@
+from datetime import datetime
 from dateutil.relativedelta import relativedelta, MO, TU, WE, TH, FR, SA, SU
 
 from core import errors
@@ -12,6 +13,9 @@ from services.events import constants
 
 
 def create_event(**event_args):
+    # Verify that the dates entered for the original event are valid
+    validate_date_ranges(event_args)
+
     # Set the number of occurrences
     set_occurrences(event_args)
 
@@ -26,6 +30,15 @@ def create_event(**event_args):
 # Set occurrences on save
 # -------------------------
 def set_occurrences(event_args):
+    """
+    Create the list of occurrences using the original event date details
+    For example:
+        DAILY recurrence 10 times will set values for the next 10 days
+        including the date specified in the request.  The start and end times for
+        them will be the same
+    :param event_args:
+    :return:
+    """
     # Check to see if the recurrence details is set
     if event_args['is_recurring']:
         recurrence_details = event_args.get('recurrence_details')
@@ -45,6 +58,16 @@ def set_occurrences(event_args):
     event_args['occurrences'] = occurrences
 
 
+def validate_date_ranges(event_args):
+    # Check that the end dates and times come after the start
+    start = datetime.combine(event_args['start_date'], event_args['start_time'].time())
+    end = datetime.combine(event_args['end_date'], event_args['end_time'].time())
+
+    if end < start:
+        message = 'End date must be after the start date'
+        raise errors.ResourceValidationError(messages={'dates': [message]})
+
+
 def set_default_recurrence_details():
     return {
         'recurrence': constants.RecurrenceType.DAILY.value,
@@ -54,6 +77,13 @@ def set_default_recurrence_details():
 
 
 def populate_occurrences(start_date, end_date, recurrence_details):
+    # Check that a daily recurrence type does not span more than a day
+    recurrence = recurrence_details['recurrence']
+    date_delta = end_date - start_date
+    if recurrence == constants.RecurrenceType.DAILY.value and date_delta.days > 0:
+        message = 'Daily recurrence events cannot be longer than a day'
+        raise errors.ResourceValidationError(messages={'daily_event_too_long': [message]})
+
     occurrence_type = recurrence_details['occurrence_type']
 
     if occurrence_type == constants.OccurrenceType.NEVER.value:
