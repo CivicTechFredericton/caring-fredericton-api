@@ -262,10 +262,10 @@ def set_next_relative_date(start_date, day_of_week, week_of_month, separation_co
         arg = SU(week_of_month)
 
     if week_of_month == -1:
-        return start_date + relativedelta(days=31,
+        return start_date + relativedelta(day=31,
                                           months=+separation_count,
                                           weekday=arg)
 
-    return start_date + relativedelta(days=1,
+    return start_date + relativedelta(day=1,
                                       months=+separation_count,
                                       weekday=arg)
