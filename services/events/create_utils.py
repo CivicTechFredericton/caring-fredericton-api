@@ -211,11 +211,11 @@ def set_absolute_occurrence_date(start_date, end_date, day_separation, week_sepa
     :param month_separation:  The number of months between events
     :return:
     """
-    new_start_date = start_date + relativedelta(day=+day_separation,
+    new_start_date = start_date + relativedelta(days=+day_separation,
                                                 weeks=+week_separation,
                                                 months=+month_separation)
 
-    new_end_date = end_date + relativedelta(day=+day_separation,
+    new_end_date = end_date + relativedelta(days=+day_separation,
                                             weeks=+week_separation,
                                             months=+month_separation)
 
@@ -262,10 +262,10 @@ def set_next_relative_date(start_date, day_of_week, week_of_month, separation_co
         arg = SU(week_of_month)
 
     if week_of_month == -1:
-        return start_date + relativedelta(day=31,
+        return start_date + relativedelta(days=31,
                                           months=+separation_count,
                                           weekday=arg)
 
-    return start_date + relativedelta(day=1,
+    return start_date + relativedelta(days=1,
                                       months=+separation_count,
                                       weekday=arg)
