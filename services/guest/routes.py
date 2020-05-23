@@ -7,25 +7,13 @@ from webargs.flaskparser import use_kwargs
 
 from core.db.events import get_event_from_db
 from core.db.events.model import EventModel
-from core.db.organizations.model import OrganizationModel
 from services.events import get_event_occurrence
 from services.events.resource import event_filters_schema, event_occurrence_details_schema
 from services.events.routes import get_events_response
 from services.guest import build_list_events_scan_condition
-from services.guest.resource import event_details_filter_schema, organization_list_schema
+from services.guest.resource import event_details_filter_schema
 
 blueprint = Blueprint('guest', __name__)
-
-
-# -------------------------
-# Organization End Points
-# -------------------------
-# @blueprint.route('/guests/organizations', methods=["GET"])
-# def list_verified_organizations():
-#     organizations = OrganizationModel.scan(OrganizationModel.is_verified == True)
-#     response = [organization_list_schema.dump(org) for org in organizations]
-#
-#     return jsonify(response)
 
 
 # -------------------------
