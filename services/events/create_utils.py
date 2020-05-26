@@ -39,19 +39,29 @@ def set_occurrences(event_args):
     :param event_args:
     :return:
     """
+    start_date = event_args['start_date']
+    end_date = event_args['end_date']
+
     # Check to see if the recurrence details is set
     if event_args['is_recurring']:
         recurrence_details = event_args.get('recurrence_details')
         if recurrence_details is None:
             message = 'Missing data for required field when is_recurring is true'
             raise errors.ResourceValidationError(messages={'recurrence_details': [message]})
+
+        # Check that a daily recurrence type does not span more than a day
+        recurrence = recurrence_details['recurrence']
+        date_delta = end_date - start_date
+        if recurrence == constants.RecurrenceType.DAILY.value and date_delta.days > 0:
+            message = 'Daily recurrence events cannot be longer than a day'
+            raise errors.ResourceValidationError(messages={'daily_event_too_long': [message]})
     else:
         event_args['recurrence_details'] = None
         recurrence_details = set_default_recurrence_details()
 
     # Populate the occurrences list and last end date
-    last_end_date, occurrences = populate_occurrences(event_args['start_date'],
-                                                      event_args['end_date'],
+    last_end_date, occurrences = populate_occurrences(start_date,
+                                                      end_date,
                                                       recurrence_details)
 
     event_args['end_date'] = last_end_date
@@ -77,13 +87,6 @@ def set_default_recurrence_details():
 
 
 def populate_occurrences(start_date, end_date, recurrence_details):
-    # Check that a daily recurrence type does not span more than a day
-    recurrence = recurrence_details['recurrence']
-    date_delta = end_date - start_date
-    if recurrence == constants.RecurrenceType.DAILY.value and date_delta.days > 0:
-        message = 'Daily recurrence events cannot be longer than a day'
-        raise errors.ResourceValidationError(messages={'daily_event_too_long': [message]})
-
     occurrence_type = recurrence_details['occurrence_type']
 
     if occurrence_type == constants.OccurrenceType.NEVER.value:
