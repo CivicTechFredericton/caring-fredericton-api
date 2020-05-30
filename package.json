@@ -8,11 +8,11 @@
     "rollback": "serverless rollback"
   },
   "dependencies": {
-    "serverless": "1.70.0",
+    "serverless": "1.71.3",
     "serverless-deployment-bucket": "1.1.2",
-    "serverless-domain-manager": "4.0.0",
+    "serverless-domain-manager": "4.1.1",
     "serverless-plugin-scripts": "1.0.2",
-    "serverless-prune-plugin": "1.4.2",
+    "serverless-prune-plugin": "1.4.3",
     "serverless-python-requirements": "5.1.0",
     "serverless-wsgi": "1.7.4"
   },
