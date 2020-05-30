@@ -2,10 +2,6 @@ service: caring-fred
 
 provider:
   account_id: ${ssm:account-id}
-  # The role referenced by cfnRole is created by IAM CloudFormation in
-  # advance via the aws-iam-management repository.
-  # cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
-
   name: aws
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'ca-central-1'}
@@ -17,15 +13,11 @@ provider:
   # See https://serverless.com/framework/docs/providers/aws/guide/variables/#using-custom-variable-syntax
   variableSyntax: "\\${((?!AWS)[ ~:a-zA-Z0-9._'\",\\-\\/\\(\\)]+?)}"
 
-custom:
-  env: ${file(../configs/${self:provider.stage}.yaml)}
-  default_deletion_policy: Delete
-
 resources:
   Resources:
     TableUser:
       Type: AWS::DynamoDB::Table
-      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+      DeletionPolicy: Delete
       Properties:
         TableName: ${self:service}-${self:provider.stage}-user
         AttributeDefinitions:
@@ -49,7 +41,7 @@ resources:
 
     TableOrganizations:
       Type: AWS::DynamoDB::Table
-      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+      DeletionPolicy: Delete
       Properties:
         TableName: ${self:service}-${self:provider.stage}-organization
         AttributeDefinitions:
@@ -73,7 +65,7 @@ resources:
 
     TableEvents:
       Type: AWS::DynamoDB::Table
-      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+      DeletionPolicy: Delete
       Properties:
         TableName: ${self:service}-${self:provider.stage}-event
         AttributeDefinitions:

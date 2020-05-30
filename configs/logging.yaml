@@ -1,11 +1,3 @@
-api_domain_name: api.caringfredericton.com
-ui_domain_name: https://www.caringfredericton.com
-deletion_policy: Retain
-
-# SES Settings
-hosted_zone_name: caringfredericton.com.
-verification_email_recipient: info@socialinnovationfredericton.com
-
 logging:
   version: 1
   formatters:
@@ -20,9 +12,9 @@ logging:
 
   loggers:
     core:
-      level: INFO
+      level: DEBUG
     services:
-      level: INFO
+      level: DEBUG
 
   root:
     level: INFO

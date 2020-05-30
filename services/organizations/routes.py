@@ -1,11 +1,12 @@
 from core import configuration, db, errors
-from core.aws.ses import SES
+from core.aws.ses import send_email
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 
 from core.db.organizations import check_for_duplicate_name, get_organization_from_db
 from core.db.organizations.model import OrganizationModel
 from core.db.users import get_user_by_id
+from core.request import generate_web_url
 
 from services.organizations import build_scan_condition, build_update_actions, build_user_organization_actions, \
     build_verify_organization_actions
@@ -21,9 +22,19 @@ blueprint = Blueprint('organizations', __name__)
 # ----------------------------------
 # Organization Registration Routes
 # ----------------------------------
-@blueprint.route('/organizations/register', methods=["POST"])
+# @blueprint.route('/guests/organizations', methods=["GET"])
+# def list_verified_organizations():
+#     organizations = OrganizationModel.scan(OrganizationModel.is_verified == True)
+#     response = [organization_list_schema.dump(org) for org in organizations]
+#
+#     return jsonify(response)
+
+# ----------------------------------
+# Organization Registration Routes
+# ----------------------------------
+@blueprint.route('/organizations', methods=["POST"])
 @use_kwargs(organization_details_schema, location='json')
-def register_organization(**kwargs):
+def create_organization(**kwargs):
     name = kwargs['name']
     check_for_duplicate_name(name)
 
@@ -35,16 +46,13 @@ def register_organization(**kwargs):
     db.save_with_unique_id(organization)
 
     # Send an email to the administrator for verification
-    recipients = [configuration.get_setting('verification_email_recipient')]
+    recipients = [configuration.get_setting('ORG_VERIFICATION_EMAIL_RECIPIENT')]
     try:
-        ses = SES()
-        verification_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}/validation/{organization.id}"
-        ses.send_email(recipients=recipients,
-                       subject='New Organization Request',
-                       body='New Caring Calendar organization request for {}.  Please go to {} to verify the request.'.format(
-                           name,
-                           verification_url
-                       ))
+        verification_url = generate_web_url(f"/validation/{organization.id}")
+        send_email(recipients=recipients,
+                   subject='New Organization Request',
+                   text_body='New Caring Calendar organization request for {}.  '
+                             'Please go to {} to verify the request.'.format(name, verification_url))
     except errors.SESError:
         # TODO: In addition to logging message include in response message indicating that the email failed to send
         logger.warning('Organization {} created; error sending email to {}.'.format(name, recipients))
@@ -71,16 +79,14 @@ def verify_organization(org_id, **kwargs):
         user_actions = build_user_organization_actions(organization)
         db.update_item(org_user, user_actions)
 
-        # TODO: Send the user an email indicating the organization has been verified
-        recipient = org_user.email
-
         try:
-            ses = SES()
-            signin_url = f"{configuration.get_setting('UI_DOMAIN_NAME')}/login"
-            ses.send_email(recipients=[recipient],
-                           subject='Organization Request Approved',
-                           body='The organization {} has been approved for use in the Caring Calendar.  '
-                                'Please go to {} to start entering events.'.format(
+            # Send the user an email indicating the organization has been verified
+            recipient = org_user.email
+            signin_url = generate_web_url("/signin")
+            send_email(recipients=[recipient],
+                       subject='Organization Request Approved',
+                       text_body='The organization {} has been approved for use in the Caring Calendar.  '
+                                 'Please go to {} to start entering events.'.format(
                                organization.name,
                                signin_url
                            ))

@@ -18,7 +18,7 @@ provider:
   name: aws
   stage: ${opt:stage}
   region: ${opt:region}
-  runtime: python3.7
+  runtime: python3.8
   deploymentBucket:
     name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
 
@@ -92,11 +92,12 @@ plugins:
   - serverless-wsgi
 
 custom:
-  env: ${file(configs/${self:provider.stage}.yaml)}
   default_domain_name: ${ssm:default-domain-name}
+  user_pool_name: ${self:service}-${self:provider.stage}-users
   default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
-  web_domain_name: ${self:custom.env.ui_domain_name, self:custom.default_ui_domain_name}
-  default_deletion_policy: Delete
+  web_domain_name: ${ssm:${self:service}-${self:provider.stage}-ui-domain-name, self:custom.default_ui_domain_name}
+  notification_sender: ${ssm:${self:service}-${self:provider.stage}-email-sender, ssm:default-email-sender}
+  org_verification_email: ${ssm:${self:service}-${self:provider.stage}-org-verification-email-recipient, ssm:default-org-verification-email-recipient}
   prune:
     automatic: true
     number: 5
@@ -111,7 +112,7 @@ package:
   include:
     - api.py
     - apidocs/**
-    - configs/${self:provider.stage}.yaml
+    - configs/logging.yaml
     - core/**
     - handlers/**
     - services/**
@@ -147,11 +148,11 @@ functions:
     handler: wsgi_handler.handler
     environment:
       UI_DOMAIN_NAME: ${self:custom.web_domain_name}
+
+      # SES Settings
+      NOTIFICATION_SENDER: ${self:custom.notification_sender}
+      ORG_VERIFICATION_EMAIL_RECIPIENT: ${self:custom.org_verification_email}
     events:
-      - http:
-          method: POST
-          path: /users/signup
-          cors: true
       - http:
           method: any
           path: /guests/{proxy+}
@@ -172,7 +173,7 @@ resources:
     #===================================================================
     CognitoUserPoolUsers:
       Type: AWS::Cognito::UserPool
-      DeletionPolicy: ${self:custom.env.deletion_policy, self:custom.default_deletion_policy}
+      DeletionPolicy: Delete
       Properties:
         AdminCreateUserConfig:
           AllowAdminCreateUserOnly: False
@@ -180,7 +181,6 @@ resources:
             EmailSubject: Your temporary password
             EmailMessage: |
               Your username is {username} and temporary password is {####}.
-              Please go to ${self:custom.web_domain_name}/login to update your password.
         AutoVerifiedAttributes:
           - email
         EmailVerificationMessage: |
@@ -196,7 +196,7 @@ resources:
             MinimumLength: 8
         UsernameAttributes:
           - email
-        UserPoolName: ${self:service}-${self:provider.stage}-users
+        UserPoolName: ${self:custom.user_pool_name}
         UserPoolTags:
             CLIENT: Civic Tech Fredericton
             PROJECT: Caring Calendar
@@ -220,3 +220,37 @@ resources:
         Type: COGNITO_USER_POOLS
         ProviderARNs:
           - Fn::GetAtt: [CognitoUserPoolUsers, Arn]
+
+  #===================================================================
+  # Stack Outputs
+  #===================================================================
+  Outputs:
+    UserPoolAuthorizer:
+      Value:
+        Ref: CognitoAuthorizer
+      Export:
+        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-authorizer
+
+    UserPoolName:
+      Value:
+        Fn::Join:
+          - ''
+          - - ${self:custom.user_pool_name}
+
+    UserPoolId:
+      Value:
+        Ref: CognitoUserPoolUsers
+      Export:
+        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-id
+
+    UserPoolClientId:
+      Value:
+        Ref: CognitoUserPoolClientUsers
+      Export:
+        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-client-id
+
+    UserPoolArn:
+      Value:
+        Fn::GetAtt: [CognitoUserPoolUsers, Arn]
+      Export:
+        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-arn

@@ -10,13 +10,6 @@ region=$AWS_REGION
 env=$1
 
 echo
-echo "----------------------------"
-echo "Removing Base Infrastructure"
-echo "----------------------------"
-echo
-npm run remove -- --region $region --stage $env
-
-echo
 echo "-----------------------"
 echo "Removing Dynamo Tables"
 echo "-----------------------"
@@ -24,6 +17,22 @@ echo
 pushd dynamo_tables
 npm run remove -- --region $region --stage $env
 popd
+
+echo
+echo "-----------------------"
+echo "Removing Cognito Triggers"
+echo "-----------------------"
+echo
+pushd cognito_triggers
+npm run remove -- --region $region --stage $env
+popd
+
+echo
+echo "----------------------------"
+echo "Removing Base Infrastructure"
+echo "----------------------------"
+echo
+npm run remove -- --region $region --stage $env
 
 echo
 echo "-----------------------"
