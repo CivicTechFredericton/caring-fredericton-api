@@ -1,3 +1,4 @@
+from datetime import datetime
 from dateutil.relativedelta import relativedelta, MO, TU, WE, TH, FR, SA, SU
 
 from core import errors
@@ -12,6 +13,9 @@ from services.events import constants
 
 
 def create_event(**event_args):
+    # Verify that the dates entered for the original event are valid
+    validate_date_ranges(event_args)
+
     # Set the number of occurrences
     set_occurrences(event_args)
 
@@ -26,23 +30,52 @@ def create_event(**event_args):
 # Set occurrences on save
 # -------------------------
 def set_occurrences(event_args):
+    """
+    Create the list of occurrences using the original event date details
+    For example:
+        DAILY recurrence 10 times will set values for the next 10 days
+        including the date specified in the request.  The start and end times for
+        them will be the same
+    :param event_args:
+    :return:
+    """
+    start_date = event_args['start_date']
+    end_date = event_args['end_date']
+
     # Check to see if the recurrence details is set
     if event_args['is_recurring']:
         recurrence_details = event_args.get('recurrence_details')
         if recurrence_details is None:
             message = 'Missing data for required field when is_recurring is true'
             raise errors.ResourceValidationError(messages={'recurrence_details': [message]})
+
+        # Check that a daily recurrence type does not span more than a day
+        recurrence = recurrence_details['recurrence']
+        date_delta = end_date - start_date
+        if recurrence == constants.RecurrenceType.DAILY.value and date_delta.days > 0:
+            message = 'Daily recurrence events cannot be longer than a day'
+            raise errors.ResourceValidationError(messages={'daily_event_too_long': [message]})
     else:
         event_args['recurrence_details'] = None
         recurrence_details = set_default_recurrence_details()
 
     # Populate the occurrences list and last end date
-    last_end_date, occurrences = populate_occurrences(event_args['start_date'],
-                                                      event_args['end_date'],
+    last_end_date, occurrences = populate_occurrences(start_date,
+                                                      end_date,
                                                       recurrence_details)
 
     event_args['end_date'] = last_end_date
     event_args['occurrences'] = occurrences
+
+
+def validate_date_ranges(event_args):
+    # Check that the end dates and times come after the start
+    start = datetime.combine(event_args['start_date'], event_args['start_time'].time())
+    end = datetime.combine(event_args['end_date'], event_args['end_time'].time())
+
+    if end < start:
+        message = 'End date must be after the start date'
+        raise errors.ResourceValidationError(messages={'date_range': [message]})
 
 
 def set_default_recurrence_details():
@@ -211,11 +244,11 @@ def set_absolute_occurrence_date(start_date, end_date, day_separation, week_sepa
     :param month_separation:  The number of months between events
     :return:
     """
-    new_start_date = start_date + relativedelta(day=+day_separation,
+    new_start_date = start_date + relativedelta(days=+day_separation,
                                                 weeks=+week_separation,
                                                 months=+month_separation)
 
-    new_end_date = end_date + relativedelta(day=+day_separation,
+    new_end_date = end_date + relativedelta(days=+day_separation,
                                             weeks=+week_separation,
                                             months=+month_separation)
 

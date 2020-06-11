@@ -48,11 +48,11 @@ def get_organization_event(org_id, event_id, **kwargs):
     return jsonify(event_occurrence_details_schema.dump(occurrence))
 
 
-@blueprint.route('/organizations/<org_id>/events/<event_id>/occurrences', methods=["GET"])
-def get_event_occurrence_details(org_id, event_id):
-    event = get_event_from_db(event_id, org_id)
-    occurrences = get_all_occ_from_event_response(event)
-    return occurrences
+# @blueprint.route('/organizations/<org_id>/events/<event_id>/occurrences', methods=["GET"])
+# def get_event_occurrence_details(org_id, event_id):
+#     event = get_event_from_db(event_id, org_id)
+#     occurrences = get_all_occ_from_event_response(event)
+#     return occurrences
 
 
 @blueprint.route('/organizations/<org_id>/events/<event_id>', methods=["PUT"])
@@ -100,13 +100,17 @@ def get_events_response(events_list, **kwargs):
         for occurrence in occurrences:
             response.append(event_list_schema.dump(occurrence))
 
-    return jsonify(response)
-
-
-def get_all_occ_from_event_response(event):
-    response = [event_list_schema.dump(occurrence) for occurrence in event.occurrences]
-
-    # for occurrence in event.occurrences:
-    #     response.append(event_list_schema.dump(occurrence))
+    # Sort the results based on start date
+    # TODO: Update the data model to include the sort details and use the DB query to sort
+    response.sort(key=lambda x: (x['start_date'], x['start_time']))
 
     return jsonify(response)
+
+
+# def get_all_occ_from_event_response(event):
+#     response = [event_list_schema.dump(occurrence) for occurrence in event.occurrences]
+#
+#     # for occurrence in event.occurrences:
+#     #     response.append(event_list_schema.dump(occurrence))
+#
+#     return jsonify(response)

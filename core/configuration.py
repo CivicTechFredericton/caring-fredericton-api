@@ -7,6 +7,7 @@ import yaml
 # Local imports
 from core import utils
 
+# settings = utils.deep_merge(os.environ, {})
 settings = {}
 
 
@@ -15,7 +16,7 @@ def init_settings():
     * Read the environment config
     * Merge environment variables in (overwriting environment config)
     """
-    config_file = 'configs/%s.yaml' % os.environ['STAGE']
+    config_file = 'configs/logging.yaml'
 
     if os.path.exists(config_file):
         with open(config_file) as f:
