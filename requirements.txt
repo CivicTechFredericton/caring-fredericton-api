@@ -1,11 +1,10 @@
-boto3==1.13.19
+boto3==1.14.48
 Flask==1.1.2
 Flask-Cors==3.0.8
-flask-marshmallow==0.12.0
-marshmallow==3.6.0
-pynamodb==4.3.2
+flask-marshmallow==0.13.0
+marshmallow==3.7.1
+pynamodb==4.3.3
 python-dateutil==2.8.1
 python-json-logger==0.1.11
 PyYAML==5.3.1
-requests==2.23.0
 webargs==6.1.0
