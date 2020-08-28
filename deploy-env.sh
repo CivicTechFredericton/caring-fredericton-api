@@ -7,6 +7,12 @@ if [ -z $AWS_REGION ] ; then
   exit 1
 fi
 
+if [ -z "$1" ]
+  then
+    echo 'Please supply an environment stage name'
+    exit 1
+fi
+
 region=$AWS_REGION
 env=$1
 
