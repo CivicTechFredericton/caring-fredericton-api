@@ -32,6 +32,7 @@ custom:
   default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
   web_domain_name: ${ssm:${self:service}-${self:provider.stage}-ui-domain-name, self:custom.default_ui_domain_name}
   dynamo_user_table: ${self:service}-${self:provider.stage}-user
+
   prune:
     automatic: true
     number: 5
