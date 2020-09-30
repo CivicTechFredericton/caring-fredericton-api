@@ -8,9 +8,9 @@
     "rollback": "serverless rollback"
   },
   "dependencies": {
-    "serverless": "2.1.1",
+    "serverless": "2.3.0",
     "serverless-deployment-bucket": "1.1.2",
-    "serverless-domain-manager": "4.2.3",
+    "serverless-domain-manager": "5.0.0",
     "serverless-plugin-scripts": "1.0.2",
     "serverless-prune-plugin": "1.4.3",
     "serverless-python-requirements": "5.1.0",
