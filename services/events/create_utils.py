@@ -73,7 +73,7 @@ def validate_date_ranges(event_args):
     start = datetime.combine(event_args['start_date'], event_args['start_time'].time())
     end = datetime.combine(event_args['end_date'], event_args['end_time'].time())
 
-    if end < start:
+    if end <= start:
         message = 'End date must be after the start date'
         raise errors.ResourceValidationError(messages={'date_range': [message]})
 

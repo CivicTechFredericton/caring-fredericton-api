@@ -1,7 +1,6 @@
 service: caring-fred
 
 provider:
-  account_id: ${ssm:account-id}
   # The role referenced by cfnRole is created by CloudFormation in
   # advance as; account is used to execute deployments.
   # cfnRole: arn:aws:iam::${self:provider.account_id}:role/serverless_cloudformation
@@ -19,6 +18,7 @@ provider:
   stage: ${opt:stage}
   region: ${opt:region}
   runtime: python3.8
+  lambdaHashingVersion: 20201221
   deploymentBucket:
     name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
 
