@@ -1,11 +1,11 @@
 service: caring-fred
 
 provider:
-  account_id: ${ssm:account-id}
   name: aws
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'ca-central-1'}
   stackName: ${self:service}-apig-${self:provider.stage}
+  lambdaHashingVersion: 20201221
   deploymentBucket:
     name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
 

@@ -1,13 +1,13 @@
 service: caring-fred
 
 provider:
-  account_id: ${ssm:account-id}
   role: ExecutionRole
   name: aws
   stage: ${opt:stage, 'dev'}
   region: ${opt:region, 'ca-central-1'}
   stackName: ${self:service}-triggers-${self:provider.stage}
   runtime: python3.8
+  lambdaHashingVersion: 20201221
   deploymentBucket:
     name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
 
@@ -18,16 +18,16 @@ provider:
     SERVICE_NAME: ${self:service}
     STAGE: ${self:provider.stage}
 
+plugins:
+  - serverless-prune-plugin
+
+custom:
   # Reference external Cognito details
   cognito:
     cognitoUserPoolId: ${cf:${self:service}-${self:provider.stage}.UserPoolId}
     cognitoUserPoolName: ${cf:${self:service}-${self:provider.stage}.UserPoolName}
     cognitoUserPoolArn: ${cf:${self:service}-${self:provider.stage}.UserPoolArn}
 
-plugins:
-  - serverless-prune-plugin
-
-custom:
   default_domain_name: ${ssm:default-domain-name}
   default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
   web_domain_name: ${ssm:${self:service}-${self:provider.stage}-ui-domain-name, self:custom.default_ui_domain_name}
@@ -49,14 +49,14 @@ functions:
     name: ${self:service}-${self:provider.stage}-create-user-record
     handler: handlers/create_user_record.handler
     environment:
-      COGNITO_USER_POOL_USERS_ID: ${self:provider.cognito.cognitoUserPoolId}
+      COGNITO_USER_POOL_USERS_ID: ${self:custom.cognito.cognitoUserPoolId}
       USER_TABLE: ${self:custom.dynamo_user_table}
     package:
       include:
         - handlers/create_user_record.py
     events:
       - cognitoUserPool:
-          pool: ${self:provider.cognito.cognitoUserPoolName}
+          pool: ${self:custom.cognito.cognitoUserPoolName}
           trigger: PostConfirmation
           existing: true
 
@@ -71,7 +71,7 @@ functions:
          - ../core/request.py
     events:
       - cognitoUserPool:
-          pool: ${self:provider.cognito.cognitoUserPoolName}
+          pool: ${self:custom.cognito.cognitoUserPoolName}
           trigger: CustomMessage
           existing: true
 
@@ -121,4 +121,4 @@ resources:
                   Resource:
                     - Fn::Join:
                         - ""
-                        - - ${self:provider.cognito.cognitoUserPoolArn}
+                        - - ${self:custom.cognito.cognitoUserPoolArn}
