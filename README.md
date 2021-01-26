@@ -10,7 +10,6 @@ If you want to change defaults then set the value in ssm and redeploy.
 
 | Key | Description | Default |
 | :--- | :--- | :--- |
-| account-id | REQUIRED! the aws account id (cannot get via serverless) | None |
 | default-domain-name | REQUIRED! The default domain name for use in the deployed environments | None |
 | default-email-sender | REQUIRED! The default email address where emails come from | None |
 | default-org-verification-email-recipient | REQUIRED! The default email address used to verify new organization requests | None |
