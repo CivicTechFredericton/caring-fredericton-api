@@ -30,7 +30,7 @@ NPM is used to install the serverless tools whereas pip is used to install runti
 
 Ensure the prerequisites are installed
 ```
-- Node LTS 10.x (for working with serverless)
+- Node LTS 12.x (for working with serverless)
     - nvm (Node Version Manager) is highly recommended 
 ```
 
