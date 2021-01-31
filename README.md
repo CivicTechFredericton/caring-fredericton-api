@@ -67,37 +67,34 @@ OPTIONAL: Exit the virtual environment using the following command
 deactivate
 ```
 
-## Serverless Deployment ##
+## Project Deployment ##
 
 The application can be deployed by issuing the following commands:
 ```
-export AWS_PROFILE=civic-tech
+export AWS_PROFILE=test
 export AWS_REGION=ca-central-1
 ./deploy-env.sh <stage_name>
 ```
 
-** NOTES: **
-
-* Replace **test** with your assume role profile name
-* Please include your name to stage name if you want to create custom AWS stack for testing purposes.  For example:
-> ```
-> ./deploy-env.sh dev
-> ```
-
-
-First Time Deployment: Create a test user account
+Once the application has been deplolyed create a user account to be used for working with the APIs
 ```
 cd scripts
 ./user_sign_up.py <username> <password> -p <profile name> - s <stage_name>
 ```
 
+** NOTES: **
+
+* Replace **test** with your assume role profile name
+* Please include your name to stage name if you want to create a custom AWS stack for testing purposes
+* This command must be run inside an activated virtual environment
+
 ## Running project locally ##
 
 The project can be run locally using the following command:
 ```
-export AWS_PROFILE=civic-tech
+export AWS_PROFILE=tech
 export AWS_REGION=ca-central-1
-npm run local -- --stage <stage name> --region ca-central-1
+./run-local.sh <stage_name>
 ```
 
 **NOTES**:
@@ -105,3 +102,19 @@ npm run local -- --stage <stage name> --region ca-central-1
 * This command must be run inside an activated virtual environment
 * Any environment (stage name) can be used provided there is an existing deployment available
 * When running locally timeout, access, and file size restrictions do not behave the same as within an AWS service
+* This command must be run inside an activated virtual environment
+
+## Remove Application ##
+
+The application can be removed by issuing the following commands:
+```
+export AWS_PROFILE=test
+export AWS_REGION=ca-central-1
+./remove-env.sh <stage_name>
+```
+
+** NOTES: **
+
+* Replace **test** with your assume role profile name
+* Any environment (stage name) can be used provided there is an existing deployment available
+* This command must be run inside an activated virtual environment
