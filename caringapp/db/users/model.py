@@ -1,6 +1,7 @@
-from core.db.model import BaseModel
 from pynamodb.attributes import BooleanAttribute, UnicodeAttribute
 from pynamodb.indexes import GlobalSecondaryIndex, KeysOnlyProjection
+
+from caringapp.db.model import BaseModel
 
 
 class UserEmail(GlobalSecondaryIndex):

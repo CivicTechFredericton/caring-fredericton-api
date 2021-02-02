@@ -3,7 +3,7 @@ import email.utils
 
 from email.mime.multipart import MIMEMultipart
 
-from core import configuration, errors
+from caringapp.core import configuration, errors
 
 import logging
 logger = logging.getLogger(__name__)

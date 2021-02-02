@@ -47,6 +47,16 @@ npm run deploy -- --region $region --stage $env
 
 echo
 echo "--------------------------"
+echo "Deploying Helper Functions"
+echo "--------------------------"
+echo
+pushd functions
+ln -sf ../node_modules
+npm run deploy -- --region $region --stage $env
+popd
+
+echo
+echo "--------------------------"
 echo "Deploying Cognito Triggers"
 echo "--------------------------"
 echo

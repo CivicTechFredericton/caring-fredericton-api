@@ -68,8 +68,3 @@ class ResourceValidationError(HttpError):
 class SESError(HttpError):
     code = 'error.ses.error'
     message = 'SES error'
-
-
-class S3Error(HttpError):
-    code = 'error.s3.error'
-    message = 'S3 error'

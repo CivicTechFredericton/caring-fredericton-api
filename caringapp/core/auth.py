@@ -2,7 +2,7 @@ import boto3
 import flask
 
 
-def get_current_user_id():
+def get_current_user_id() -> str:
     """
     Returns the Id of the currently executing user (if present)
 

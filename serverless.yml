@@ -15,28 +15,31 @@ provider:
   # https://goo.gl/g8YjqY
   memorySize: 128
   name: aws
-  stage: ${opt:stage}
-  region: ${opt:region}
+  region: ${{env:AWS_DEFAULT_REGION, 'ca-central-1'}}
+  stage: ${{opt:stage}}
   runtime: python3.8
   lambdaHashingVersion: 20201221
   deploymentBucket:
-    name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
+    name: ${{self:service}}-${{self:provider.stage}}-serverlessdeploymentbucket
+    serverSideEncryption: AES256
 
   # The default is 6 seconds. Note: API Gateway current maximum is 30 seconds
   timeout: 6
-  # Allow for cf "AWS::" variables
-  # See https://goo.gl/atHr7z
-  variableSyntax: "\\${(?!AWS::)([ :a-zA-Z0-9._,\\-\\/\\(\\)]+?)}"
+
+  # Force serverless variables to be double braced - ${{ }} - so as to
+  # not interfere with Fn::Sub
+  # See https://serverless.com/framework/docs/providers/aws/guide/variables/#using-custom-variable-syntax
+  variableSyntax: "\\${{([ ~:a-zA-Z0-9._@\\'\",\\-\\/\\(\\)]+?)}}"
 
   # Add additional environment variables if necessary
   environment:
-    SERVICE_NAME: ${self:service}
-    STAGE: ${self:provider.stage}
+    SERVICE_NAME: ${{self:service}}
+    STAGE: ${{self:provider.stage}}
 
   # Reference external API Gateway definition
   apiGateway:
-    restApiId: ${cf:${self:service}-apig-${self:provider.stage}.ApiGateway}
-    restApiRootResourceId: ${cf:${self:service}-apig-${self:provider.stage}.ApiGatewayRootResourceId}
+    restApiId: ${{cf:${{self:service}}-apig-${{self:provider.stage}}.ApiGateway}}
+    restApiRootResourceId: ${{cf:${{self:service}}-apig-${{self:provider.stage}}.ApiGatewayRootResourceId}}
 
   # IAM role permissions given to the Lambda function.  Update as
   # needed.  More information about IAM permissions can be found here:
@@ -59,11 +62,11 @@ provider:
               - Ref: 'AWS::Region'
               - Ref: 'AWS::AccountId'
               - 'log-group:/aws/lambda/*:*:*'
-    - Effect: Allow
-      Action:
-        - cognito-idp:AdminInitiateAuth
-      Resource:
-        Fn::GetAtt: [CognitoUserPoolUsers, Arn]
+#    - Effect: Allow
+#      Action:
+#        - cognito-idp:AdminInitiateAuth
+#      Resource:
+#        Fn::GetAtt: [CognitoUserPoolUsers, Arn]
     - Effect: Allow
       Action:
         - ses:SendEmail
@@ -84,7 +87,7 @@ provider:
         - dynamodb:Query
         - dynamodb:Scan
         - dynamodb:UpdateItem
-      Resource: arn:aws:dynamodb:*:*:table/${self:service}-${self:provider.stage}*
+      Resource: arn:aws:dynamodb:*:*:table/${{self:service}}-${{self:provider.stage}}*
 
 plugins:
   - serverless-prune-plugin
@@ -92,12 +95,12 @@ plugins:
   - serverless-wsgi
 
 custom:
-  default_domain_name: ${ssm:default-domain-name}
-  user_pool_name: ${self:service}-${self:provider.stage}-users
-  default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
-  web_domain_name: ${ssm:${self:service}-${self:provider.stage}-ui-domain-name, self:custom.default_ui_domain_name}
-  notification_sender: ${ssm:${self:service}-${self:provider.stage}-email-sender, ssm:default-email-sender}
-  org_verification_email: ${ssm:${self:service}-${self:provider.stage}-org-verification-email-recipient, ssm:default-org-verification-email-recipient}
+  default_domain_name: ${{ssm:default-domain-name}}
+  user_pool_name: ${{self:service}}-${{self:provider.stage}}-users
+  default_ui_domain_name: https://${{self:provider.stage}}-www.${{self:custom.default_domain_name}}
+  web_domain_name: ${{ssm:${{self:service}}-${{self:provider.stage}}-ui-domain-name, self:custom.default_ui_domain_name}}
+  notification_sender: ${{ssm:${{self:service}}-${{self:provider.stage}}-email-sender, ssm:default-email-sender}}
+  org_verification_email: ${{ssm:${{self:service}}-${{self:provider.stage}}-org-verification-email-recipient, ssm:default-org-verification-email-recipient}}
   prune:
     automatic: true
     number: 5
@@ -110,48 +113,52 @@ package:
   exclude:
     - ./**
   include:
-    - api.py
-    - apidocs/**
-    - configs/logging.yaml
-    - core/**
-    - handlers/**
-    - services/**
+    - - app.py
+    - caringapp/**
+    # - app.py
+    # - apidocs/**
+    # - configs/logging.yaml
+    # - core/**
+    # - handlers/**
+    # - services/**
 
 functions:
-  login:
-    name: ${self:service}-${self:provider.stage}-api-login
-    handler: handlers/login.handler
-    environment:
-      COGNITO_USER_POOL_USERS_ID:
-        Ref: CognitoUserPoolUsers
-      COGNITO_USER_POOL_CLIENT_USERS_ID:
-        Ref: CognitoUserPoolClientUsers
-    events:
-      - http:
-          method: POST
-          path: /api/login
-          cors: true
+#  login:
+#    name: ${self:service}-${self:provider.stage}-api-login
+#    handler: handlers/login.handler
+#    environment:
+#      COGNITO_USER_POOL_USERS_ID:
+#        Ref: CognitoUserPoolUsers
+#      COGNITO_USER_POOL_CLIENT_USERS_ID:
+#        Ref: CognitoUserPoolClientUsers
+#    events:
+#      - http:
+#          method: POST
+#          path: /api/login
+#          cors: true
 
-  swagger:
-    name: ${self:service}-${self:provider.stage}-swagger
-    handler: handlers/swagger.handler
-    events:
-      - http:
-          method: GET
-          path: /index.html
-      - http:
-          method: GET
-          path: /swagger.yaml
+#  swagger:
+#    name: ${self:service}-${self:provider.stage}-swagger
+#    handler: handlers/swagger.handler
+#    events:
+#      - http:
+#          method: GET
+#          path: /index.html
+#      - http:
+#          method: GET
+#          path: /swagger.yaml
 
-  api:
-    name: ${self:service}-${self:provider.stage}-api
+  app:
+    name: ${{self:service}}-${{self:provider.stage}}-api
     handler: wsgi_handler.handler
+    # name: ${self:service}-${self:provider.stage}-api
+    # handler: wsgi_handler.handler
     environment:
-      UI_DOMAIN_NAME: ${self:custom.web_domain_name}
+      UI_DOMAIN_NAME: ${{self:custom.web_domain_name}}
 
       # SES Settings
-      NOTIFICATION_SENDER: ${self:custom.notification_sender}
-      ORG_VERIFICATION_EMAIL_RECIPIENT: ${self:custom.org_verification_email}
+      NOTIFICATION_SENDER: ${{self:custom.notification_sender}}
+      ORG_VERIFICATION_EMAIL_RECIPIENT: ${{self:custom.org_verification_email}}
     events:
       - http:
           method: any
@@ -175,6 +182,11 @@ resources:
       Type: AWS::Cognito::UserPool
       DeletionPolicy: Delete
       Properties:
+        EmailConfiguration:
+          EmailSendingAccount: COGNITO_DEFAULT
+          # EmailSendingAccount: DEVELOPER
+          # ReplyToEmailAddress: # email address
+          # SourceArn: # sourceARN to verified email address in SES
         AdminCreateUserConfig:
           AllowAdminCreateUserOnly: False
           InviteMessageTemplate:
@@ -196,13 +208,14 @@ resources:
             MinimumLength: 8
         UsernameAttributes:
           - email
-        UserPoolName: ${self:custom.user_pool_name}
+        UserPoolName: ${{self:custom.user_pool_name}}
         UserPoolTags:
             CLIENT: Civic Tech Fredericton
             PROJECT: Caring Calendar
 
     CognitoUserPoolClientUsers:
       Type: AWS::Cognito::UserPoolClient
+      DeletionPolicy: Retain
       Properties:
         ClientName: users
         ExplicitAuthFlows:
@@ -215,8 +228,8 @@ resources:
       Type: AWS::ApiGateway::Authorizer
       Properties:
         IdentitySource: method.request.header.Authorization
-        Name: ${self:service}-${self:provider.stage}-users-authorizer
-        RestApiId: ${self:provider.apiGateway.restApiId}
+        Name: ${{self:service}}-${{self:provider.stage}}-users-authorizer
+        RestApiId: ${{self:provider.apiGateway.restApiId}}
         Type: COGNITO_USER_POOLS
         ProviderARNs:
           - Fn::GetAtt: [CognitoUserPoolUsers, Arn]
@@ -229,28 +242,28 @@ resources:
       Value:
         Ref: CognitoAuthorizer
       Export:
-        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-authorizer
+        Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-authorizer
 
     UserPoolName:
       Value:
         Fn::Join:
           - ''
-          - - ${self:custom.user_pool_name}
+          - - ${{self:custom.user_pool_name}}
 
     UserPoolId:
       Value:
         Ref: CognitoUserPoolUsers
       Export:
-        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-id
+        Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-id
 
     UserPoolClientId:
       Value:
         Ref: CognitoUserPoolClientUsers
       Export:
-        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-client-id
+        Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-client-id
 
     UserPoolArn:
       Value:
-        Fn::GetAtt: [CognitoUserPoolUsers, Arn]
+        Fn::GetAtt: [ CognitoUserPoolUsers, Arn ]
       Export:
-        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-arn
+        Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-arn

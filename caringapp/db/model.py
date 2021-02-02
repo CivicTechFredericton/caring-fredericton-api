@@ -1,15 +1,15 @@
 import json
 
 from datetime import datetime
-from core.auth import get_current_user_id
-from core.configuration import get_region_name, get_current_stage, get_service_name
 from pynamodb.models import Model
 from pynamodb.attributes import UnicodeAttribute, UTCDateTimeAttribute
 
 import logging
 
-from core.errors import ResourceNotFoundError
-from core.utils import get_time_now
+from caringapp.core.auth import get_current_user_id
+from caringapp.core.configuration import get_region_name, get_service_name, get_current_stage
+from caringapp.core.errors import ResourceNotFoundError
+from caringapp.core.utils import get_time_now
 
 logger = logging.getLogger(__name__)
 

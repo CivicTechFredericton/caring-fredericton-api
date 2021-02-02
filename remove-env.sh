@@ -34,6 +34,15 @@ npm run remove -- --region $region --stage $env
 popd
 
 echo
+echo "-------------------------"
+echo "Removing Helper Functions"
+echo "-------------------------"
+echo
+pushd functions
+npm run remove -- --region $region --stage $env
+popd
+
+echo
 echo "----------------------------"
 echo "Removing Base Infrastructure"
 echo "----------------------------"

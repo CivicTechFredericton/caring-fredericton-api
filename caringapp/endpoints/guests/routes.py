@@ -5,8 +5,8 @@ This class holds end points which are used for guests access
 from flask import Blueprint, jsonify
 from webargs.flaskparser import use_kwargs
 
-from core.db.events import get_event_from_db
-from core.db.events.model import EventModel
+from caringapp.db.events import get_event_from_db
+from caringapp.db.events.model import EventModel
 from services.events import get_event_occurrence
 from services.events.resource import event_filters_schema, event_occurrence_details_schema
 from services.events.routes import get_events_response

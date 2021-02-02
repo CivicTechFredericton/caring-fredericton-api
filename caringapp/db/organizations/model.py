@@ -1,6 +1,7 @@
-from core.db.model import BaseModel
 from pynamodb.attributes import BooleanAttribute, JSONAttribute, MapAttribute, UnicodeAttribute
 from pynamodb.indexes import GlobalSecondaryIndex, IncludeProjection, KeysOnlyProjection
+
+from caringapp.db.model import BaseModel
 
 
 class SearchNameIndex(GlobalSecondaryIndex):

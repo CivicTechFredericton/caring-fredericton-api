@@ -1,8 +1,9 @@
 from dateutil import parser
 
-from core.db.model import BaseModel
 from pynamodb.attributes import BooleanAttribute, ListAttribute, MapAttribute, NumberAttribute, UnicodeAttribute
 from pynamodb.constants import STRING
+
+from caringapp.db.model import BaseModel
 from services.events import constants
 
 
