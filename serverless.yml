@@ -178,7 +178,7 @@ resources:
     #===================================================================
     # Cognito
     #===================================================================
-    CognitoUserPoolUsers:
+    CognitoUserPool:
       Type: AWS::Cognito::UserPool
       DeletionPolicy: Delete
       Properties:
@@ -213,7 +213,7 @@ resources:
             CLIENT: Civic Tech Fredericton
             PROJECT: Caring Calendar
 
-    CognitoUserPoolClientUsers:
+    CognitoUserPoolClient:
       Type: AWS::Cognito::UserPoolClient
       DeletionPolicy: Retain
       Properties:
@@ -222,7 +222,7 @@ resources:
           - ADMIN_NO_SRP_AUTH
         RefreshTokenValidity: 30
         UserPoolId:
-          Ref: CognitoUserPoolUsers
+          Ref: CognitoUserPool
 
     CognitoAuthorizer:
       Type: AWS::ApiGateway::Authorizer
@@ -232,7 +232,7 @@ resources:
         RestApiId: ${{self:provider.apiGateway.restApiId}}
         Type: COGNITO_USER_POOLS
         ProviderARNs:
-          - Fn::GetAtt: [CognitoUserPoolUsers, Arn]
+          - Fn::GetAtt: [CognitoUserPool, Arn]
 
   #===================================================================
   # Stack Outputs
@@ -252,18 +252,18 @@ resources:
 
     UserPoolId:
       Value:
-        Ref: CognitoUserPoolUsers
+        Ref: CognitoUserPool
       Export:
         Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-id
 
     UserPoolClientId:
       Value:
-        Ref: CognitoUserPoolClientUsers
+        Ref: CognitoUserPoolClient
       Export:
         Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-client-id
 
     UserPoolArn:
       Value:
-        Fn::GetAtt: [ CognitoUserPoolUsers, Arn ]
+        Fn::GetAtt: [ CognitoUserPool, Arn ]
       Export:
         Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-arn
