@@ -63,11 +63,6 @@ provider:
               - Ref: 'AWS::Region'
               - Ref: 'AWS::AccountId'
               - 'log-group:/aws/lambda/*:*:*'
-#    - Effect: Allow
-#      Action:
-#        - cognito-idp:AdminInitiateAuth
-#      Resource:
-#        Fn::GetAtt: [CognitoUserPoolUsers, Arn]
     - Effect: Allow
       Action:
         - ses:SendEmail
@@ -108,36 +103,16 @@ custom:
   pythonRequirements:
     dockerizePip: non-linux
   wsgi:
-    app: api.app
+    app: app.app
 
 package:
   exclude:
     - ./**
   include:
-    - - app.py
+    - app.py
     - caringapp/**
-    # - app.py
-    # - apidocs/**
-    # - configs/logging.yaml
-    # - core/**
-    # - handlers/**
-    # - services/**
 
 functions:
-#  login:
-#    name: ${self:service}-${self:provider.stage}-api-login
-#    handler: handlers/login.handler
-#    environment:
-#      COGNITO_USER_POOL_USERS_ID:
-#        Ref: CognitoUserPoolUsers
-#      COGNITO_USER_POOL_CLIENT_USERS_ID:
-#        Ref: CognitoUserPoolClientUsers
-#    events:
-#      - http:
-#          method: POST
-#          path: /api/login
-#          cors: true
-
 #  swagger:
 #    name: ${self:service}-${self:provider.stage}-swagger
 #    handler: handlers/swagger.handler
@@ -152,8 +127,6 @@ functions:
   app:
     name: ${{self:service}}-${{self:provider.stage}}-api
     handler: wsgi_handler.handler
-    # name: ${self:service}-${self:provider.stage}-api
-    # handler: wsgi_handler.handler
     environment:
       UI_DOMAIN_NAME: ${{self:custom.web_domain_name}}
 
