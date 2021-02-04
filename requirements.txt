@@ -1,4 +1,4 @@
-boto3==1.16.63
+boto3==1.17.1
 Flask==1.1.2
 Flask-Cors==3.0.10
 marshmallow==3.10.0
