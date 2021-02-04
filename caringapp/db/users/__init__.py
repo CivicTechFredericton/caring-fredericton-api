@@ -1,5 +1,5 @@
-from core.db.users.model import UserModel
-from core.errors import ResourceConflictError, ResourceNotFoundError
+from caringapp.core.errors import ResourceNotFoundError, ResourceConflictError
+from caringapp.db.users.model import UserModel
 
 
 def get_user_by_id(user_id):

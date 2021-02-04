@@ -5,12 +5,12 @@ from caringapp import db
 from caringapp.db.events import get_event_from_db, remove_event_from_db
 from caringapp.db.events.model import EventModel
 from caringapp.db.organizations import get_verified_organization_from_db
-from services.events import build_list_events_scan_condition, \
-    get_event_occurrence, get_recurring_events_list, set_dates_filter, set_category_filter
-from services.events.create_utils import create_event
-from services.events.resource import event_details_schema, event_details_filter_schema, event_filters_schema, \
-    event_list_schema, event_occurrence_details_schema, event_update_schema
-from services.events.update_utils import build_update_actions
+from caringapp.endpoints.events import build_list_events_scan_condition, get_event_occurrence, set_dates_filter, \
+    get_recurring_events_list, set_category_filter
+from caringapp.endpoints.events.create_utils import create_event
+from caringapp.endpoints.events.schemas import event_filters_schema, event_details_schema, event_details_filter_schema, \
+    event_occurrence_details_schema, event_update_schema, event_list_schema
+from caringapp.endpoints.events.update_utils import build_update_actions
 
 blueprint = Blueprint('events', __name__)
 

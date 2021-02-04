@@ -8,10 +8,11 @@ from caringapp.core.request import generate_web_url
 from caringapp.db.organizations import check_for_duplicate_name, get_organization_from_db
 from caringapp.db.organizations.model import OrganizationModel
 from caringapp.db.users import get_user_by_id
-from services.organizations import build_scan_condition, build_update_actions, build_user_organization_actions, \
-    build_verify_organization_actions
-from services.organizations.resource import organization_details_schema, organization_list_filters_schema,\
-    organization_schema, organization_update_schema, organization_verification_schema
+
+from caringapp.endpoints.organizations import build_verify_organization_actions, build_user_organization_actions, \
+    build_scan_condition, build_update_actions
+from caringapp.endpoints.organizations.schemas import organization_details_schema, organization_verification_schema, \
+    organization_list_filters_schema, organization_schema, organization_update_schema
 
 import logging
 logger = logging.getLogger(__name__)

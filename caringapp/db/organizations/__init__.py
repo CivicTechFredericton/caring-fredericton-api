@@ -1,5 +1,5 @@
-from core.db.organizations.model import OrganizationModel
-from core.errors import ResourceConflictError, ResourceNotFoundError, ResourceValidationError
+from caringapp.core.errors import ResourceConflictError, ResourceValidationError, ResourceNotFoundError
+from caringapp.db.organizations.model import OrganizationModel
 
 
 def check_for_duplicate_name(name):

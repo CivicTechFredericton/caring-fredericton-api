@@ -1,8 +1,7 @@
 from flask import Blueprint, jsonify
 
 from caringapp.db.users import get_user_by_id
-from services.users.resource import user_display_schema
-
+from caringapp.endpoints.users.schemas import user_display_schema
 
 import logging
 logger = logging.getLogger(__name__)

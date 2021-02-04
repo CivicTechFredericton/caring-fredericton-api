@@ -7,11 +7,11 @@ from webargs.flaskparser import use_kwargs
 
 from caringapp.db.events import get_event_from_db
 from caringapp.db.events.model import EventModel
-from services.events import get_event_occurrence
-from services.events.resource import event_filters_schema, event_occurrence_details_schema
-from services.events.routes import get_events_response
-from services.guest import build_list_events_scan_condition
-from services.guest.resource import event_details_filter_schema
+from caringapp.endpoints.events import get_event_occurrence
+from caringapp.endpoints.events.routes import get_events_response
+from caringapp.endpoints.events.schemas import event_filters_schema, event_occurrence_details_schema
+from caringapp.endpoints.guests import build_list_events_scan_condition
+from caringapp.endpoints.guests.schemas import event_details_filter_schema
 
 blueprint = Blueprint('guests', __name__)
 

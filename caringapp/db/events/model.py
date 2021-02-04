@@ -4,7 +4,7 @@ from pynamodb.attributes import BooleanAttribute, ListAttribute, MapAttribute, N
 from pynamodb.constants import STRING
 
 from caringapp.db.model import BaseModel
-from services.events import constants
+from caringapp.endpoints.events import constants
 
 
 class RecurrenceTypeEnumUnicodeAttribute(UnicodeAttribute):

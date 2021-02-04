@@ -1,5 +1,5 @@
-from core import errors
-from core.db.events.model import EventModel
+from caringapp.core import errors
+from caringapp.db.events.model import EventModel
 
 
 def get_event_from_db(event_id, owner):

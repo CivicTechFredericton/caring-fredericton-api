@@ -1,5 +1,5 @@
 from marshmallow import fields, ValidationError, Schema
-from services.events import constants
+from caringapp.endpoints.events import constants
 
 
 def validate_recurrence(val):
