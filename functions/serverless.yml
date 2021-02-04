@@ -1,10 +1,10 @@
-service: caring-fred-api
+service: caring-fred
 
 provider:
   name: aws
   region: ${{env:AWS_DEFAULT_REGION, 'ca-central-1'}}
   stage: ${{opt:stage}}
-  stackName: ${{self:service}}-${{self:provider.stage}}-functions
+  stackName: ${{self:service}}-functions-${{self:provider.stage}}
   lambdaHashingVersion: 20201221
   deploymentBucket:
     name: ${{self:service}}-${{self:provider.stage}}-serverlessdeploymentbucket
@@ -26,8 +26,8 @@ provider:
 
   # Reference external API Gateway definition
   apiGateway:
-    restApiId: ${{cf:${{self:service}}-${{self:provider.stage}}-apig.ApiGateway}}
-    restApiRootResourceId: ${{cf:${{self:service}}-${{self:provider.stage}}-apig.ApiGatewayRootResourceId}}
+    restApiId: ${{cf:${{self:service}}-apig-${{self:provider.stage}}.ApiGateway}}
+    restApiRootResourceId: ${{cf:${{self:service}}-apig-${{self:provider.stage}}.ApiGatewayRootResourceId}}
 
 #  httpApi:
 #    id: ${{cf:${{self:service}}-${{self:provider.stage}}-base.HttpApi}}

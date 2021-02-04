@@ -25,10 +25,10 @@ custom:
   # Reference external Cognito details
   cognito:
     # cognitoUserPoolId: ${{cf:${{self:service}}-${{self:provider.stage}}-users.UserPoolId}}
-    # cognitoUserPoolClientId: ${{cf:${{self:service}}-${{self:provider.stage}}-users.UserPoolClientId}}
+    # cognitoUserPoolName: ${{cf:${{self:service}}-${{self:provider.stage}}-users.UserPoolName}}
     # cognitoUserPoolArn: ${{cf:${{self:service}}-${{self:provider.stage}}-users.UserPoolArn}}
     cognitoUserPoolId: ${{cf:${{self:service}}-${{self:provider.stage}}.UserPoolId}}
-    cognitoUserPoolClientId: ${{cf:${{self:service}}-${{self:provider.stage}}.UserPoolClientId}}
+    cognitoUserPoolName: ${{cf:${{self:service}}-${{self:provider.stage}}.UserPoolName}}
     cognitoUserPoolArn: ${{cf:${{self:service}}-${{self:provider.stage}}.UserPoolArn}}
 
   default_domain_name: ${{ssm:default-domain-name}}

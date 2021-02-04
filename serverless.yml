@@ -17,6 +17,7 @@ provider:
   name: aws
   region: ${{env:AWS_DEFAULT_REGION, 'ca-central-1'}}
   stage: ${{opt:stage}}
+  # stackName: ${{self:service}}-${{self:provider.stage}}-app
   runtime: python3.8
   lambdaHashingVersion: 20201221
   deploymentBucket:
