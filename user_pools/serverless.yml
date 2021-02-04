@@ -4,7 +4,7 @@ provider:
   name: aws
   region: ${{env:AWS_DEFAULT_REGION, 'ca-central-1'}}
   stage: ${{opt:stage}}
-  stackName: ${{self:service}}-${{self:provider.stage}}-users
+  stackName: ${{self:service}}-users-${{self:provider.stage}}
   deploymentBucket:
     name: ${{self:service}}-${{self:provider.stage}}-serverlessdeploymentbucket
     serverSideEncryption: AES256
@@ -22,14 +22,11 @@ provider:
 
   # Reference external API Gateway definition
   apiGateway:
-    restApiId: ${{cf:${{self:service}}-${{self:provider.stage}}-apig.ApiGateway}}
-    restApiRootResourceId: ${{cf:${{self:service}}-${{self:provider.stage}}-apig.ApiGatewayRootResourceId}}
-
-#  httpApi:
-#    id: ${{cf:${{self:service}}-${{self:provider.stage}}-apig.HttpApi}}
+    restApiId: ${{cf:${{self:service}}-apig-${{self:provider.stage}}.ApiGateway}}
+    restApiRootResourceId: ${{cf:${{self:service}}-apig-${{self:provider.stage}}.ApiGatewayRootResourceId}}
 
 custom:
-  user_pool_name: ${{self:service}}-${{self:provider.stage}}-users
+  user_pool_name: ${{self:service}}-${{self:provider.stage}}-app-users
 
 resources:
   Resources:
@@ -53,10 +50,11 @@ resources:
               Your username is {username} and temporary password is {####}.
         AutoVerifiedAttributes:
           - email
-        EmailVerificationMessage: |
-          Your verification code is {####}.
-        EmailVerificationSubject: |
-          Your verification code
+          # - phone_number
+        VerificationMessageTemplate:
+          DefaultEmailOption: CONFIRM_WITH_CODE
+          # TODO: Send link as opposed to code?
+          # CONFIRM_WITH_LINK
         Policies:
           PasswordPolicy:
             RequireLowercase: true
@@ -68,9 +66,11 @@ resources:
           - email
           - phone_number
         UserPoolName: ${{self:custom.user_pool_name}}
+        UsernameConfiguration:
+          CaseSensitive: false
         UserPoolTags:
-            CLIENT: ServUs Health
-            PROJECT: Navigate User Portal
+          CLIENT: Civic Tech Fredericton
+          PROJECT: Caring Calendar
 
     CognitoUserPoolClient:
       Type: AWS::Cognito::UserPoolClient
@@ -86,7 +86,7 @@ resources:
       Type: AWS::ApiGateway::Authorizer
       Properties:
         IdentitySource: method.request.header.Authorization
-        Name: ${{self:service}}-${{self:provider.stage}}-users-authorizer
+        Name: ${{self:service}}-${{self:provider.stage}}-app-users-authorizer
         RestApiId: ${{self:provider.apiGateway.restApiId}}
         Type: COGNITO_USER_POOLS
         ProviderARNs:
@@ -100,7 +100,7 @@ resources:
       Value:
         Ref: CognitoAuthorizer
       Export:
-        Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-authorizer
+        Name: !Sub ${{self:service}}-${{self:provider.stage}}-users:user-pool-authorizer
 
     UserPoolName:
       Value:
@@ -112,15 +112,15 @@ resources:
       Value:
         Ref: CognitoUserPool
       Export:
-        Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-id
+        Name: !Sub ${{self:service}}-${{self:provider.stage}}-users:user-pool-id
 
     UserPoolClientId:
       Value:
         Ref: CognitoUserPoolClient
       Export:
-        Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-client-id
+        Name: !Sub ${{self:service}}-${{self:provider.stage}}-users:user-pool-client-id
 
     UserPoolArn:
       Value: !GetAtt CognitoUserPool.Arn
       Export:
-        Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-arn
+        Name: !Sub ${{self:service}}-${{self:provider.stage}}-users:user-pool-arn
