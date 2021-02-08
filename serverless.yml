@@ -229,7 +229,7 @@ resources:
       Value:
         Ref: CognitoAuthorizer
       Export:
-        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-authorizer
+        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-authorizer-old
 
     UserPoolName:
       Value:
@@ -241,16 +241,16 @@ resources:
       Value:
         Ref: CognitoUserPoolUsers
       Export:
-        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-id
+        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-id-old
 
     UserPoolClientId:
       Value:
         Ref: CognitoUserPoolClientUsers
       Export:
-        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-client-id
+        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-client-id-old
 
     UserPoolArn:
       Value:
         Fn::GetAtt: [CognitoUserPoolUsers, Arn]
       Export:
-        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-arn
+        Name: !Sub ${self:service}-${self:provider.stage}:user-pool-arn-old
