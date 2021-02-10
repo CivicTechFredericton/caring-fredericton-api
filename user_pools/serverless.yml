@@ -62,6 +62,12 @@ resources:
             RequireSymbols: false
             RequireUppercase: false
             MinimumLength: 8
+        AccountRecoverySetting:
+          RecoveryMechanisms:
+            - Name: verified_email
+              Priority: 1
+            - Name: verified_phone_number
+              Priority: 2
         UsernameAttributes:
           - email
           - phone_number
