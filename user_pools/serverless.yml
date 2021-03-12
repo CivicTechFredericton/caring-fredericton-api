@@ -23,6 +23,10 @@ provider:
 custom:
   user_pool_name: ${self:service}-${self:provider.stage}-users
 
+  default_domain_name: ${ssm:${self:service}-hosted-zone}
+  default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
+  web_domain_name: ${ssm:${self:service}-${self:provider.stage}-ui-domain-name, self:custom.default_ui_domain_name}
+
 resources:
   Resources:
     #===================================================================
@@ -40,9 +44,10 @@ resources:
         AdminCreateUserConfig:
           AllowAdminCreateUserOnly: False
           InviteMessageTemplate:
-            EmailSubject: Your temporary password
+            EmailSubject: Caring Calendar - Your Temporary Password
             EmailMessage: |
-              Your username is {username} and temporary password is {####}.
+              Your username is {username} and temporary password is {####}.  Please sign in with your temporary
+              credentials at ${self:custom.web_domain_name}/signin to change your password.
         AutoVerifiedAttributes:
           - email
           # - phone_number
