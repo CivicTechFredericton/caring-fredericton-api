@@ -10,11 +10,12 @@ If you want to change defaults then set the value in ssm and redeploy.
 
 | Key | Description | Default |
 | :--- | :--- | :--- |
-| default-domain-name | REQUIRED! The default domain name for use in the deployed environments | None |
+| caring-fred-hosted-zone | REQUIRED! The default hosted zone used for the deployed environments | None |
+| caring-fred-certificate-arn | REQUIRED! The default ARN for the SSL certificate being used | None |
 | default-email-sender | REQUIRED! The default email address where emails come from | None |
 | default-org-verification-email-recipient | REQUIRED! The default email address used to verify new organization requests | None |
 | caring-fred-{{stage}}-api-domain-name | OPTIONAL Custom API domain name used for the environment | None |
-| caring-fred-{{stage}}-ui_domain_name | OPTIONAL Custom web site URL | None |
+| caring-fred-{{stage}}-ui-domain-name | OPTIONAL Custom web site URL | None |
 | caring-fred-{{stage}}-email-sender | OPTIONAL Overridden value for who should emails come from | None |
 | caring-fred-{{stage}}-org-verification-email-recipient | OPTIONAL Overridden value for the email address used to verfiy new organization requests | None |
 ## Functionality: ##

@@ -15,75 +15,29 @@ provider:
   # https://goo.gl/g8YjqY
   memorySize: 128
   name: aws
-  region: ${{env:AWS_DEFAULT_REGION, 'ca-central-1'}}
-  stage: ${{opt:stage}}
-  # stackName: ${{self:service}}-${{self:provider.stage}}-app
+  region: ${env:AWS_DEFAULT_REGION, 'ca-central-1'}
+  stage: ${opt:stage}
+  stackName: ${self:service}-app-${self:provider.stage}
   runtime: python3.8
   lambdaHashingVersion: 20201221
   deploymentBucket:
-    name: ${{self:service}}-${{self:provider.stage}}-serverlessdeploymentbucket
+    name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
     serverSideEncryption: AES256
 
   # The default is 6 seconds. Note: API Gateway current maximum is 30 seconds
   timeout: 6
 
-  # Force serverless variables to be double braced - ${{ }} - so as to
-  # not interfere with Fn::Sub
-  # See https://serverless.com/framework/docs/providers/aws/guide/variables/#using-custom-variable-syntax
-  variableSyntax: "\\${{([ ~:a-zA-Z0-9._@\\'\",\\-\\/\\(\\)]+?)}}"
+  iam:
+    role: ExecutionRole
 
-  # Add additional environment variables if necessary
   environment:
-    SERVICE_NAME: ${{self:service}}
-    STAGE: ${{self:provider.stage}}
+    SERVICE_NAME: ${self:service}
+    STAGE: ${self:provider.stage}
 
   # Reference external API Gateway definition
   apiGateway:
-    restApiId: ${{cf:${{self:service}}-apig-${{self:provider.stage}}.ApiGateway}}
-    restApiRootResourceId: ${{cf:${{self:service}}-apig-${{self:provider.stage}}.ApiGatewayRootResourceId}}
-
-  # IAM role permissions given to the Lambda function.  Update as
-  # needed.  More information about IAM permissions can be found here:
-  #
-  # https://goo.gl/6jZuHu
-  # https://goo.gl/EWuaSm
-  # https://goo.gl/ki8hXT
-  iamRoleStatements:
-    - Effect: Allow
-      Action:
-        - logs:CreateLogGroup
-        - logs:CreateLogStream
-        - logs:PutLogEvents
-        - xray:PutTelemetryRecords
-        - xray:PutTraceSegments
-      Resource:
-        - Fn::Join:
-            - ':'
-            - - 'arn:aws:logs'
-              - Ref: 'AWS::Region'
-              - Ref: 'AWS::AccountId'
-              - 'log-group:/aws/lambda/*:*:*'
-    - Effect: Allow
-      Action:
-        - ses:SendEmail
-        - ses:SendRawEmail
-      Resource:
-        - Fn::Join:
-            - ':'
-            - - 'arn:aws:ses'
-              - Ref: 'AWS::Region'
-              - Ref: 'AWS::AccountId'
-              - 'identity/*'
-    - Effect: Allow
-      Action:
-        - dynamodb:DescribeTable
-        - dynamodb:GetItem
-        - dynamodb:DeleteItem
-        - dynamodb:PutItem
-        - dynamodb:Query
-        - dynamodb:Scan
-        - dynamodb:UpdateItem
-      Resource: arn:aws:dynamodb:*:*:table/${{self:service}}-${{self:provider.stage}}*
+    restApiId: ${cf:${self:service}-apig-${self:provider.stage}.ApiGateway}
+    restApiRootResourceId: ${cf:${self:service}-apig-${self:provider.stage}.ApiGatewayRootResourceId}
 
 plugins:
   - serverless-prune-plugin
@@ -91,12 +45,15 @@ plugins:
   - serverless-wsgi
 
 custom:
-  default_domain_name: ${{ssm:default-domain-name}}
-  user_pool_name: ${{self:service}}-${{self:provider.stage}}-users
-  default_ui_domain_name: https://${{self:provider.stage}}-www.${{self:custom.default_domain_name}}
-  web_domain_name: ${{ssm:${{self:service}}-${{self:provider.stage}}-ui-domain-name, self:custom.default_ui_domain_name}}
-  notification_sender: ${{ssm:${{self:service}}-${{self:provider.stage}}-email-sender, ssm:default-email-sender}}
-  org_verification_email: ${{ssm:${{self:service}}-${{self:provider.stage}}-org-verification-email-recipient, ssm:default-org-verification-email-recipient}}
+  cognito:
+    cognitoAuthorizer: ${cf:${self:service}-users-${self:provider.stage}.UserPoolAuthorizer}
+
+  # TODO: Use the CloudFormation output from the frontend
+  default_domain_name: ${ssm:${self:service}-hosted-zone}
+  default_ui_domain_name: https://${self:provider.stage}-www.${self:custom.default_domain_name}
+  web_domain_name: ${ssm:${self:service}-${self:provider.stage}-ui-domain-name, self:custom.default_ui_domain_name}
+  notification_sender: ${ssm:${self:service}-${self:provider.stage}-email-sender, ssm:default-email-sender}
+  org_verification_email: ${ssm:${self:service}-${self:provider.stage}-org-verification-email-recipient, ssm:default-org-verification-email-recipient}
   prune:
     automatic: true
     number: 5
@@ -125,14 +82,14 @@ functions:
 #          path: /swagger.yaml
 
   app:
-    name: ${{self:service}}-${{self:provider.stage}}-api
+    name: ${self:service}-${self:provider.stage}-api
     handler: wsgi_handler.handler
     environment:
-      UI_DOMAIN_NAME: ${{self:custom.web_domain_name}}
+      UI_DOMAIN_NAME: ${self:custom.web_domain_name}
 
       # SES Settings
-      NOTIFICATION_SENDER: ${{self:custom.notification_sender}}
-      ORG_VERIFICATION_EMAIL_RECIPIENT: ${{self:custom.org_verification_email}}
+      NOTIFICATION_SENDER: ${self:custom.notification_sender}
+      ORG_VERIFICATION_EMAIL_RECIPIENT: ${self:custom.org_verification_email}
     events:
       - http:
           method: any
@@ -145,99 +102,57 @@ functions:
           authorizer:
             type: COGNITO_USER_POOLS
             authorizerId:
-              Ref: CognitoAuthorizer
+              ${self:custom.cognito.cognitoAuthorizer}
 
 resources:
   Resources:
-    #===================================================================
-    # Cognito
-    #===================================================================
-    CognitoUserPool:
-      Type: AWS::Cognito::UserPool
-      DeletionPolicy: Delete
+    ExecutionRole:
+      Type: AWS::IAM::Role
       Properties:
-        EmailConfiguration:
-          EmailSendingAccount: COGNITO_DEFAULT
-          # EmailSendingAccount: DEVELOPER
-          # ReplyToEmailAddress: # email address
-          # SourceArn: # sourceARN to verified email address in SES
-        AdminCreateUserConfig:
-          AllowAdminCreateUserOnly: False
-          InviteMessageTemplate:
-            EmailSubject: Your temporary password
-            EmailMessage: |
-              Your username is {username} and temporary password is {####}.
-        AutoVerifiedAttributes:
-          - email
-        EmailVerificationMessage: |
-          Your verification code is {####}.
-        EmailVerificationSubject: |
-          Your verification code
+        Path: /
+        RoleName: ${self:provider.stackName}-${self:provider.region}-lambdaRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        # These rights are needed to be able to communicate with resources within the vpc
+        ManagedPolicyArns:
+          - arn:aws:iam::aws:policy/service-role/AWSLambdaVPCAccessExecutionRole
         Policies:
-          PasswordPolicy:
-            RequireLowercase: true
-            RequireNumbers: true
-            RequireSymbols: false
-            RequireUppercase: false
-            MinimumLength: 8
-        UsernameAttributes:
-          - email
-        UserPoolName: ${{self:custom.user_pool_name}}
-        UserPoolTags:
-            CLIENT: Civic Tech Fredericton
-            PROJECT: Caring Calendar
-
-    CognitoUserPoolClient:
-      Type: AWS::Cognito::UserPoolClient
-      DeletionPolicy: Retain
-      Properties:
-        ClientName: users
-        ExplicitAuthFlows:
-          - ADMIN_NO_SRP_AUTH
-        RefreshTokenValidity: 30
-        UserPoolId:
-          Ref: CognitoUserPool
-
-    CognitoAuthorizer:
-      Type: AWS::ApiGateway::Authorizer
-      Properties:
-        IdentitySource: method.request.header.Authorization
-        Name: ${{self:service}}-${{self:provider.stage}}-users-authorizer
-        RestApiId: ${{self:provider.apiGateway.restApiId}}
-        Type: COGNITO_USER_POOLS
-        ProviderARNs:
-          - Fn::GetAtt: [CognitoUserPool, Arn]
-
-  #===================================================================
-  # Stack Outputs
-  #===================================================================
-  Outputs:
-    UserPoolAuthorizer:
-      Value:
-        Ref: CognitoAuthorizer
-      Export:
-        Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-authorizer-old
-
-    UserPoolName:
-      Value:
-        Fn::Join:
-          - ''
-          - - ${{self:custom.user_pool_name}}
-
-    UserPoolId:
-      Value:
-        Ref: CognitoUserPool
-      Export:
-        Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-id-old
-
-    UserPoolClientId:
-      Value:
-        Ref: CognitoUserPoolClient
-      Export:
-        Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-client-id-old
-
-    UserPoolArn:
-      Value:
-        Fn::GetAtt: [ CognitoUserPool, Arn ]
-      Export:
-        Name: !Sub ${{self:service}}-${{self:provider.stage}}:user-pool-arn-old
+          - PolicyName: ${self:provider.stage}-${self:service}-app-lambda
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                    - xray:PutTelemetryRecords
+                    - xray:PutTraceSegments
+                  Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:*:*
+                - Effect: Allow
+                  Action:
+                    - ses:SendEmail
+                    - ses:SendRawEmail
+                  Resource:
+                    - Fn::Join:
+                      - ':'
+                      - - 'arn:aws:ses'
+                        - Ref: 'AWS::Region'
+                        - Ref: 'AWS::AccountId'
+                        - 'identity/*'
+                - Effect: Allow
+                  Action:
+                    - dynamodb:DescribeTable
+                    - dynamodb:GetItem
+                    - dynamodb:DeleteItem
+                    - dynamodb:PutItem
+                    - dynamodb:Query
+                    - dynamodb:Scan
+                    - dynamodb:UpdateItem
+                  Resource: arn:aws:dynamodb:*:*:table/${self:service}-${self:provider.stage}*

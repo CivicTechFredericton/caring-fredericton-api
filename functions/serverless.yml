@@ -2,47 +2,38 @@ service: caring-fred
 
 provider:
   name: aws
-  region: ${{env:AWS_DEFAULT_REGION, 'ca-central-1'}}
-  stage: ${{opt:stage}}
-  stackName: ${{self:service}}-functions-${{self:provider.stage}}
+  region: ${env:AWS_DEFAULT_REGION, 'ca-central-1'}
+  stage: ${opt:stage}
+  stackName: ${self:service}-functions-${self:provider.stage}
   lambdaHashingVersion: 20201221
   deploymentBucket:
-    name: ${{self:service}}-${{self:provider.stage}}-serverlessdeploymentbucket
+    name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
     serverSideEncryption: AES256
-
-  # Force serverless variables to be double braced - ${{ }} - so as to
-  # not interfere with Fn::Sub
-  # See https://serverless.com/framework/docs/providers/aws/guide/variables/#using-custom-variable-syntax
-  variableSyntax: "\\${{([ ~:a-zA-Z0-9._@\\'\",\\-\\/\\(\\)]+?)}}"
 
   runtime: python3.8
   memorySize: 128
   timeout: 6
-  role: ExecutionRole
+
+  iam:
+    role: ExecutionRole
 
   environment:
-    SERVICE_NAME: ${{self:service}}
-    STAGE: ${{self:provider.stage}}
+    SERVICE_NAME: ${self:service}
+    STAGE: ${self:provider.stage}
 
   # Reference external API Gateway definition
   apiGateway:
-    restApiId: ${{cf:${{self:service}}-apig-${{self:provider.stage}}.ApiGateway}}
-    restApiRootResourceId: ${{cf:${{self:service}}-apig-${{self:provider.stage}}.ApiGatewayRootResourceId}}
-
-#  httpApi:
-#    id: ${{cf:${{self:service}}-${{self:provider.stage}}-base.HttpApi}}
+    restApiId: ${cf:${self:service}-apig-${self:provider.stage}.ApiGateway}
+    restApiRootResourceId: ${cf:${self:service}-apig-${self:provider.stage}.ApiGatewayRootResourceId}
 
 plugins:
   - serverless-prune-plugin
 
 custom:
   cognito:
-    # cognitoUserPoolId: ${{cf:${{self:service}}-${{self:provider.stage}}-users.UserPoolId}}
-    # cognitoUserPoolClientId: ${{cf:${{self:service}}-${{self:provider.stage}}-users.UserPoolClientId}}
-    # cognitoUserPoolArn: ${{cf:${{self:service}}-${{self:provider.stage}}-users.UserPoolArn}}
-    cognitoUserPoolId: ${{cf:${{self:service}}-${{self:provider.stage}}.UserPoolId}}
-    cognitoUserPoolClientId: ${{cf:${{self:service}}-${{self:provider.stage}}.UserPoolClientId}}
-    cognitoUserPoolArn: ${{cf:${{self:service}}-${{self:provider.stage}}.UserPoolArn}}
+    cognitoUserPoolId: ${cf:${self:service}-users-${self:provider.stage}.UserPoolId}
+    cognitoUserPoolClientId: ${cf:${self:service}-users-${self:provider.stage}.UserPoolClientId}
+    cognitoUserPoolArn: ${cf:${self:service}-users-${self:provider.stage}.UserPoolArn}
 
   prune:
     automatic: true
@@ -55,13 +46,13 @@ package:
 
 functions:
   login:
-    name: ${{self:service}}-${{self:provider.stage}}-api-login
+    name: ${self:service}-${self:provider.stage}-api-login
     handler: handlers/login.handler
     environment:
       COGNITO_USER_POOL_USERS_ID:
-        ${{self:custom.cognito.cognitoUserPoolId}}
+        ${self:custom.cognito.cognitoUserPoolId}
       COGNITO_USER_POOL_CLIENT_USERS_ID:
-        ${{self:custom.cognito.cognitoUserPoolClientId}}
+        ${self:custom.cognito.cognitoUserPoolClientId}
     package:
       include:
         - handlers/login.py
@@ -77,7 +68,7 @@ resources:
       Type: AWS::IAM::Role
       Properties:
         Path: /
-        RoleName: ${{self:provider.stackName}}-${{self:provider.region}}-lambdaRole
+        RoleName: ${self:provider.stackName}-${self:provider.region}-lambdaRole
         AssumeRolePolicyDocument:
           Version: '2012-10-17'
           Statement:
@@ -87,7 +78,7 @@ resources:
                   - lambda.amazonaws.com
               Action: sts:AssumeRole
         Policies:
-          - PolicyName: ${{self:provider.stage}}-${{self:service}}-functions-lambda
+          - PolicyName: ${self:provider.stage}-${self:service}-functions-lambda
             PolicyDocument:
               Version: '2012-10-17'
               Statement:
@@ -105,4 +96,4 @@ resources:
                   Resource:
                     - Fn::Join:
                         - ""
-                        - - ${{self:custom.cognito.cognitoUserPoolArn}}
+                        - - ${self:custom.cognito.cognitoUserPoolArn}

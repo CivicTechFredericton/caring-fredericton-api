@@ -39,18 +39,21 @@ npm run deploy -- --region $region --stage $env
 popd
 
 echo
-echo "-----------------------------"
-echo "Deploying Base Infrastructure"
-echo "-----------------------------"
+echo "-----------------------"
+echo "Deploying Dynamo Tables"
+echo "-----------------------"
 echo
+pushd dynamo_tables
+ln -sf ../node_modules
 npm run deploy -- --region $region --stage $env
+popd
 
 echo
-echo "--------------------------"
-echo "Deploying Helper Functions"
-echo "--------------------------"
+echo "--------------------"
+echo "Deploying User Pools"
+echo "--------------------"
 echo
-pushd functions
+pushd user_pools
 ln -sf ../node_modules
 npm run deploy -- --region $region --stage $env
 popd
@@ -66,11 +69,18 @@ npm run deploy -- --region $region --stage $env
 popd
 
 echo
-echo "-----------------------"
-echo "Deploying Dynamo Tables"
-echo "-----------------------"
+echo "--------------------------"
+echo "Deploying Helper Functions"
+echo "--------------------------"
 echo
-pushd dynamo_tables
+pushd functions
 ln -sf ../node_modules
 npm run deploy -- --region $region --stage $env
 popd
+
+echo
+echo "-------------"
+echo "Deploying App"
+echo "-------------"
+echo
+npm run deploy -- --region $region --stage $env

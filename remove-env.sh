@@ -16,6 +16,22 @@ region=$AWS_REGION
 env=$1
 
 echo
+echo "------------"
+echo "Removing App"
+echo "------------"
+echo
+npm run remove -- --region $region --stage $env
+
+echo
+echo "-------------------------"
+echo "Removing Helper Functions"
+echo "-------------------------"
+echo
+pushd functions
+npm run remove -- --region $region --stage $env
+popd
+
+echo
 echo "-----------------------"
 echo "Removing Dynamo Tables"
 echo "-----------------------"
@@ -34,20 +50,13 @@ npm run remove -- --region $region --stage $env
 popd
 
 echo
-echo "-------------------------"
-echo "Removing Helper Functions"
-echo "-------------------------"
+echo "-------------------"
+echo "Removing User Pools"
+echo "-------------------"
 echo
-pushd functions
+pushd user_pools
 npm run remove -- --region $region --stage $env
 popd
-
-echo
-echo "----------------------------"
-echo "Removing Base Infrastructure"
-echo "----------------------------"
-echo
-npm run remove -- --region $region --stage $env
 
 echo
 echo "-----------------------"
