@@ -21,6 +21,7 @@ provider:
     restApiRootResourceId: ${cf:${self:service}-apig-${self:provider.stage}.ApiGatewayRootResourceId}
 
 custom:
+  # TODO: Use the custom messages trigger to set the admin user created message
   user_pool_name: ${self:service}-${self:provider.stage}-users
 
   default_domain_name: ${ssm:${self:service}-hosted-zone}
