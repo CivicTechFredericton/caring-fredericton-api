@@ -2,15 +2,12 @@
 import argparse
 import boto3
 import csv
-# import datetime
-# import json
 import os
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 PREFIX = 'caring-fred'
 REQUIRED_ATTRIBUTES = ['Username', 'email', 'email_verified', 'given_name', 'family_name']
-CSV_FILE_NAME = 'cognito_users.csv'
 
 # =======================================================================
 # Read input parameters
@@ -67,35 +64,12 @@ users = []
 for page in boto3_paginate(cognito_idp_client.list_users, UserPoolId=user_pool_id):
     users += page['Users']
 
-
-# def datetimeconverter(o):
-#     if isinstance(o, datetime.datetime):
-#         return str(o)
-#
-#
-# json_formatted_str = json.dumps(users, indent=4, default=datetimeconverter)
-# print(json_formatted_str)
-
-
 csv_new_line = {REQUIRED_ATTRIBUTES[i]: '' for i in range(len(REQUIRED_ATTRIBUTES))}
-# TODO: Add error handling
-with open(CSV_FILE_NAME, 'w') as csv_file:
-    # csv_writer = csv.writer(csv_file, delimiter=',', quotechar='"', quoting=csv.QUOTE_MINIMAL)
-    # for user in users:
-    #     """ Fetch Required Attributes Provided """
-    #     csv_line = csv_new_line.copy()
-    #     for required_attr in REQUIRED_ATTRIBUTES:
-    #         csv_line[required_attr] = ''
-    #         if required_attr in user.keys():
-    #             csv_line[required_attr] = str(user[required_attr])
-    #             continue
-    #         for usr_attr in user['Attributes']:
-    #             if usr_attr['Name'] == required_attr:
-    #                 csv_line[required_attr] = str(usr_attr['Value'])
-    #
-    #     csv_writer.writerow(",".join(csv_line.values()))
-    # employee_writer.writerow(['Erica Meyers', 'IT', 'March'])
 
+# Write the user records into the CSV file
+# TODO: Add error handling
+csv_file_name = f'{PREFIX}-{stage}-cognito_users.csv'
+with open(csv_file_name, 'w') as csv_file:
     csv_file.write(",".join(csv_new_line.keys()) + '\n')
     csv_lines = []
     for user in users:
@@ -114,12 +88,3 @@ with open(CSV_FILE_NAME, 'w') as csv_file:
 
     csv_file.writelines(csv_lines)
     csv_file.close()
-
-# print()
-# print("Listing Cognito users")
-# print()
-# for user in users:
-#     username = user['Username']
-#     # print(f'Username: {username}')
-#     print(user)
-#

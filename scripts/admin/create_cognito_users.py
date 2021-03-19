@@ -8,7 +8,6 @@ os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 PREFIX = 'caring-fred'
 REQUIRED_ATTRIBUTES = ['Username', 'email', 'email_verified', 'given_name', 'family_name']
-CSV_FILE_NAME = 'cognito_users.csv'
 
 # =======================================================================
 # Read input parameters
@@ -54,7 +53,8 @@ user_table_name = '{}-{}-user'.format(PREFIX, stage)
 user_table = dynamodb.Table(user_table_name)
 
 # Read the lines in the CSV file
-with open(CSV_FILE_NAME, 'r') as csv_file:
+csv_file_name = f'{PREFIX}-{stage}-cognito_users.csv'
+with open(csv_file_name, 'r') as csv_file:
     # Read in the contents of the file
     csv_dict_reader = csv.DictReader(csv_file,
                                      fieldnames=REQUIRED_ATTRIBUTES)
