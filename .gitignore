@@ -18,4 +18,7 @@ npm-debug.log
 cloudformation/output/
 cloudformation/playbook.*
 
+# CSV files
+*.csv
+
 .requirements

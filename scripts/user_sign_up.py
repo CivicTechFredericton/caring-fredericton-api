@@ -1,7 +1,10 @@
 #!/usr/bin/env python
 import argparse
-import os
 import boto3
+import datetime
+import os
+
+from datetime import timezone
 
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
@@ -126,12 +129,23 @@ else:
 # Create the DynamoDB user record
 dynamodb = boto3.resource('dynamodb')
 table = dynamodb.Table(user_table_name)
+
+# Set the current date and time for the record
+dt = datetime.datetime.now()
+utc_time = dt.replace(tzinfo=timezone.utc)
+utc_timestamp = utc_time.isoformat()
+
 table.put_item(
     Item={
         'id': username_sub,
         'email': username,
         'first_name': first_name,
-        'last_name': last_name
+        'last_name': last_name,
+        'active': True,
+        'created_at': utc_timestamp,
+        'created_by': username_sub,
+        'updated_at': utc_timestamp,
+        'updated_by': username_sub
     }
 )
 

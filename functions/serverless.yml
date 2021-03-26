@@ -1,0 +1,99 @@
+service: caring-fred
+
+provider:
+  name: aws
+  region: ${env:AWS_DEFAULT_REGION, 'ca-central-1'}
+  stage: ${opt:stage}
+  stackName: ${self:service}-functions-${self:provider.stage}
+  lambdaHashingVersion: 20201221
+  deploymentBucket:
+    name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
+    serverSideEncryption: AES256
+
+  runtime: python3.8
+  memorySize: 128
+  timeout: 6
+
+  iam:
+    role: ExecutionRole
+
+  environment:
+    SERVICE_NAME: ${self:service}
+    STAGE: ${self:provider.stage}
+
+  # Reference external API Gateway definition
+  apiGateway:
+    restApiId: ${cf:${self:service}-apig-${self:provider.stage}.ApiGateway}
+    restApiRootResourceId: ${cf:${self:service}-apig-${self:provider.stage}.ApiGatewayRootResourceId}
+
+plugins:
+  - serverless-prune-plugin
+
+custom:
+  cognito:
+    cognitoUserPoolId: ${cf:${self:service}-users-${self:provider.stage}.UserPoolId}
+    cognitoUserPoolClientId: ${cf:${self:service}-users-${self:provider.stage}.UserPoolClientId}
+    cognitoUserPoolArn: ${cf:${self:service}-users-${self:provider.stage}.UserPoolArn}
+
+  prune:
+    automatic: true
+    number: 5
+
+package:
+  individually: true
+  exclude:
+    - ./**
+
+functions:
+  login:
+    name: ${self:service}-${self:provider.stage}-api-login
+    handler: handlers/login.handler
+    environment:
+      COGNITO_USER_POOL_USERS_ID:
+        ${self:custom.cognito.cognitoUserPoolId}
+      COGNITO_USER_POOL_CLIENT_USERS_ID:
+        ${self:custom.cognito.cognitoUserPoolClientId}
+    package:
+      include:
+        - handlers/login.py
+    events:
+      - http:
+          method: POST
+          path: /api/login
+          cors: true
+
+resources:
+  Resources:
+    ExecutionRole:
+      Type: AWS::IAM::Role
+      Properties:
+        Path: /
+        RoleName: ${self:provider.stackName}-${self:provider.region}-lambdaRole
+        AssumeRolePolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Principal:
+                Service:
+                  - lambda.amazonaws.com
+              Action: sts:AssumeRole
+        Policies:
+          - PolicyName: ${self:provider.stage}-${self:service}-functions-lambda
+            PolicyDocument:
+              Version: '2012-10-17'
+              Statement:
+                - Effect: Allow
+                  Action:
+                    - logs:CreateLogGroup
+                    - logs:CreateLogStream
+                    - logs:PutLogEvents
+                    - xray:PutTelemetryRecords
+                    - xray:PutTraceSegments
+                  Resource: !Sub arn:aws:logs:${AWS::Region}:${AWS::AccountId}:log-group:/aws/lambda/*:*:*
+                - Effect: Allow
+                  Action:
+                    - cognito-idp:AdminInitiateAuth
+                  Resource:
+                    - Fn::Join:
+                        - ""
+                        - - ${self:custom.cognito.cognitoUserPoolArn}

@@ -695,7 +695,7 @@ components:
             - $ref: '#/components/schemas/Address'
 #    OrganizationGuestResponse:
 #      description: >
-#        Response object that is used for the guest view of the organizations
+#        Response object that is used for the guests view of the organizations
 #      type: object
 #      properties:
 #        id:
@@ -756,7 +756,7 @@ components:
           readOnly: true
 #    PagedGuestOrganization:
 #      description: |
-#        Page of organization resources for guest view
+#        Page of organization resources for guests view
 #      type: object
 #      properties:
 #        objects:

@@ -2,32 +2,29 @@ service: caring-fred
 
 provider:
   name: aws
-  stage: ${opt:stage, 'dev'}
-  region: ${opt:region, 'ca-central-1'}
+  region: ${env:AWS_DEFAULT_REGION, 'ca-central-1'}
+  stage: ${opt:stage}
   stackName: ${self:service}-apig-${self:provider.stage}
   lambdaHashingVersion: 20201221
   deploymentBucket:
     name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
-
-  # Allow for cf "AWS::" variables
-  # See https://serverless.com/framework/docs/providers/aws/guide/variables/#using-custom-variable-syntax
-  variableSyntax: "\\${((?!AWS)[ ~:a-zA-Z0-9._'\",\\-\\/\\(\\)]+?)}"
+    serverSideEncryption: AES256
 
 plugins:
   - serverless-deployment-bucket
   - serverless-domain-manager
-  - serverless-plugin-scripts
 
 custom:
-  default_domain_name: ${ssm:default-domain-name}
-  default_api_domain_name: ${self:provider.stage}-api.${self:custom.default_domain_name}
+  hostedZone: ${ssm:${self:service}-hosted-zone}
   customDomain:
-    domainName: ${ssm:${self:service}-${self:provider.stage}-api-domain-name, self:custom.default_api_domain_name}
+    domainName: ${self:provider.stage}-api.${self:custom.hostedZone}
     stage: ${opt:stage}
-  scripts:
-    hooks:
-      'after:package:finalize': npm run create_domain -- --stage ${self:provider.stage}
-      'before:remove:remove': npm run delete_domain -- --stage ${self:provider.stage}
+    certificateArn: ${ssm:${self:service}-api-certificate-arn}
+    createRoute53Record: true
+    apiType: rest
+    endpointType: 'regional'
+    securityPolicy: tls_1_2
+    autoDomain: true
 
 resources:
   Resources:
@@ -81,7 +78,8 @@ resources:
 
     ApiGatewayDeployment:
       Type: AWS::ApiGateway::Deployment
-      DependsOn: ApiGatewayMockMethod
+      DependsOn:
+        - ApiGatewayMockMethod
       Properties:
         RestApiId:
           Ref: ApiGatewayRestApi
@@ -99,10 +97,3 @@ resources:
          Fn::GetAtt:
           - ApiGatewayRestApi
           - RootResourceId
-
-#    ApiDomainName:
-#      Value:
-#        Fn::Join:
-#          - ''
-#          - - 'https://'
-#            - ${self:custom.customDomain.domainName}
