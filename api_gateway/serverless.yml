@@ -22,7 +22,8 @@ custom:
     certificateArn: ${ssm:${self:service}-api-certificate-arn}
     createRoute53Record: true
     apiType: rest
-    endpointType: 'regional'
+    # TODO: Set to regional and use the Canadian region certificate ARN
+    endpointType: 'edge'
     securityPolicy: tls_1_2
     autoDomain: true
 
