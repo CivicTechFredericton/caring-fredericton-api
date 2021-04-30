@@ -8,12 +8,12 @@
     "rollback": "serverless rollback"
   },
   "dependencies": {
-    "serverless": "2.37.0",
+    "serverless": "2.38.0",
     "serverless-deployment-bucket": "1.4.3",
     "serverless-domain-manager": "5.1.0",
     "serverless-prune-plugin": "1.5.0",
     "serverless-python-requirements": "5.1.1",
-    "serverless-wsgi": "1.7.6"
+    "serverless-wsgi": "1.7.7"
   },
   "license": "ISC"
 }
