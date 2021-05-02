@@ -41,8 +41,8 @@ custom:
 
 package:
   individually: true
-  exclude:
-    - ./**
+#  exclude:
+#    - ./**
 
 functions:
   login:
@@ -54,7 +54,8 @@ functions:
       COGNITO_USER_POOL_CLIENT_USERS_ID:
         ${self:custom.cognito.cognitoUserPoolClientId}
     package:
-      include:
+      patterns:
+        - '!**'
         - handlers/login.py
     events:
       - http:

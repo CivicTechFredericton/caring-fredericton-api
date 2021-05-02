@@ -35,8 +35,6 @@ custom:
 
 package:
   individually: true
-  exclude:
-    - ./**
 
 # Whenever we make changes to the Cognito pool these lambda numbers need to be incremented or else we loose
 # our triggers from the Cognito userpool.
@@ -48,7 +46,8 @@ functions:
       COGNITO_USER_POOL_USERS_ID: ${self:custom.cognito.cognitoUserPoolId}
       USER_TABLE: ${self:custom.dynamo_user_table}
     package:
-      include:
+      patterns:
+        - '!**'
         - handlers/create_user_record.py
     events:
       - cognitoUserPool:
@@ -62,9 +61,9 @@ functions:
     environment:
       UI_DOMAIN_NAME: ${self:custom.web_domain_name}
     package:
-      include:
-         - handlers/custom_messages.py
-         - ../core/request.py
+      patterns:
+        - '!**'
+        - handlers/custom_messages.py
     events:
       - cognitoUserPool:
           pool: ${self:custom.cognito.cognitoUserPoolName}
