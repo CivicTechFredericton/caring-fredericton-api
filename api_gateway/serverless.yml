@@ -98,3 +98,11 @@ resources:
          Fn::GetAtt:
           - ApiGatewayRestApi
           - RootResourceId
+
+    ServerlessDeploymentBucketName:
+      Value:
+        Fn::Join:
+          - ''
+          - - ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
+      Export:
+        Name: !Sub sls-${self:service}-apig-${self:provider.stage}-ServerlessDeploymentBucketName

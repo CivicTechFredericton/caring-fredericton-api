@@ -83,3 +83,16 @@ resources:
         SSESpecification:
           SSEEnabled: True
         BillingMode: PAY_PER_REQUEST
+
+
+  #===================================================================
+  # Stack Outputs
+  #===================================================================
+  Outputs:
+    ServerlessDeploymentBucketName:
+      Value:
+        Fn::Join:
+          - ''
+          - - ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
+      Export:
+        Name: !Sub sls-${self:service}-dynamo-${self:provider.stage}-ServerlessDeploymentBucketName

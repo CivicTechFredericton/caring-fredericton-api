@@ -41,8 +41,6 @@ custom:
 
 package:
   individually: true
-#  exclude:
-#    - ./**
 
 functions:
   login:
@@ -98,3 +96,24 @@ resources:
                     - Fn::Join:
                         - ""
                         - - ${self:custom.cognito.cognitoUserPoolArn}
+
+  #===================================================================
+  # Stack Outputs
+  #===================================================================
+  Outputs:
+    ServerlessDeploymentBucketName:
+      Value:
+        Fn::Join:
+          - ''
+          - - ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
+      Export:
+        Name: !Sub sls-${self:service}-functions-${self:provider.stage}-ServerlessDeploymentBucketName
+
+    ServiceEndpoint:
+      Value:
+        Fn::Join:
+          - ''
+          - - ''
+      Description: URL of the service endpoint
+      Export:
+        Name: !Sub sls-${self:service}-functions-${self:provider.stage}-ServiceEndpoint

@@ -131,3 +131,11 @@ resources:
       Value: !GetAtt CognitoUserPool.Arn
       Export:
         Name: !Sub ${self:service}-${self:provider.stage}-users:user-pool-arn
+
+    ServerlessDeploymentBucketName:
+      Value:
+        Fn::Join:
+          - ''
+          - - ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
+      Export:
+        Name: !Sub sls-${self:service}-users-${self:provider.stage}-ServerlessDeploymentBucketName

@@ -156,3 +156,24 @@ resources:
                     - dynamodb:Scan
                     - dynamodb:UpdateItem
                   Resource: arn:aws:dynamodb:*:*:table/${self:service}-${self:provider.stage}*
+
+  #===================================================================
+  # Stack Outputs
+  #===================================================================
+  Outputs:
+    ServerlessDeploymentBucketName:
+      Value:
+        Fn::Join:
+          - ''
+          - - ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
+      Export:
+        Name: !Sub sls-${self:service}-app-${self:provider.stage}-ServerlessDeploymentBucketName
+
+    ServiceEndpoint:
+      Value:
+        Fn::Join:
+          - ''
+          - - ''
+      Description: URL of the service endpoint
+      Export:
+        Name: !Sub sls-${self:service}-app-${self:provider.stage}-ServiceEndpoint
