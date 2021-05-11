@@ -4,6 +4,12 @@ import boto3
 import datetime
 import os
 
+DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%f%z'
+
+
+def get_formatted_date(date_obj: datetime, date_format: str):
+    return date_obj.strftime(date_format)
+
 
 def handler(event, context):
     """
@@ -27,7 +33,7 @@ def handler(event, context):
         # Set the current date and time for the record
         dt = datetime.datetime.now()
         utc_time = dt.replace(tzinfo=timezone.utc)
-        utc_timestamp = utc_time.isoformat()
+        utc_timestamp = utc_time.strftime(DATE_FORMAT)
 
         # Set the create and update user for the record
         create_user = context.aws_request_id

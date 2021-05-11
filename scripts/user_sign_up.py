@@ -9,6 +9,7 @@ from datetime import timezone
 os.chdir(os.path.dirname(os.path.realpath(__file__)))
 
 PREFIX = 'caring-fred'
+DATE_FORMAT = '%Y-%m-%dT%H:%M:%S.%f%z'
 
 # =======================================================================
 # Read input parameters
@@ -133,7 +134,7 @@ table = dynamodb.Table(user_table_name)
 # Set the current date and time for the record
 dt = datetime.datetime.now()
 utc_time = dt.replace(tzinfo=timezone.utc)
-utc_timestamp = utc_time.isoformat()
+utc_timestamp = utc_time.strftime(DATE_FORMAT)
 
 table.put_item(
     Item={
