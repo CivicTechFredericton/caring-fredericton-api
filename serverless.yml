@@ -62,6 +62,12 @@ custom:
   wsgi:
     app: app.app
 
+#package:
+#  patterns:
+#    - '!./**'
+#    - 'app.py'
+#    - 'caringapp/**'
+
 package:
   exclude:
     - ./**
