@@ -13,12 +13,12 @@ provider:
   #
   # More information about memory/compute can be found here:
   # https://goo.gl/g8YjqY
-  memorySize: 128
+  memorySize: 256
   name: aws
   region: ${env:AWS_DEFAULT_REGION, 'ca-central-1'}
   stage: ${opt:stage}
   stackName: ${self:service}-app-${self:provider.stage}
-  runtime: python3.8
+  runtime: python3.9
   lambdaHashingVersion: 20201221
   deploymentBucket:
     name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket

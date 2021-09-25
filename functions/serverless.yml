@@ -10,7 +10,7 @@ provider:
     name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
     serverSideEncryption: AES256
 
-  runtime: python3.8
+  runtime: python3.9
   memorySize: 128
   timeout: 6
 

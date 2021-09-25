@@ -5,7 +5,7 @@ provider:
   region: ${env:AWS_DEFAULT_REGION, 'ca-central-1'}
   stage: ${opt:stage}
   stackName: ${self:service}-triggers-${self:provider.stage}
-  runtime: python3.8
+  runtime: python3.9
   lambdaHashingVersion: 20201221
   deploymentBucket:
     name: ${self:service}-${self:provider.stage}-serverlessdeploymentbucket
