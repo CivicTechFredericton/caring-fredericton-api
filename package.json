@@ -8,7 +8,7 @@
     "rollback": "serverless rollback"
   },
   "dependencies": {
-    "serverless": "2.60.0",
+    "serverless": "3.25.1",
     "serverless-deployment-bucket": "1.5.1",
     "serverless-domain-manager": "5.1.5",
     "serverless-prune-plugin": "1.6.0",
